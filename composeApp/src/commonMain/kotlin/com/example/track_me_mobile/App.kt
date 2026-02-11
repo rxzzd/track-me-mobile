@@ -32,7 +32,7 @@ fun App() {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Button(onClick = { showContent = !showContent }) {
-                Text("Click!")
+                Text("Clickпшогнпгрргрг!")
             }
             AnimatedVisibility(showContent) {
                 val greeting = remember { Greeting().greet() }
