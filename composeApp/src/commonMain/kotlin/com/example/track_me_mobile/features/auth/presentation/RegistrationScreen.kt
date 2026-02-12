@@ -1,6 +1,7 @@
 package com.example.track_me_mobile.features.auth.presentation
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -18,20 +19,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.painterResource
 
-// Импорт твоего Enum
 import com.example.track_me_mobile.core.domain.models.Role
-import com.example.track_me_mobile.generated.resources.Res
-import com.example.track_me_mobile.generated.resources.man
-import com.example.track_me_mobile.generated.resources.download
-import androidx.compose.ui.tooling.preview.Preview
-
+import com.example.track_me_mobile.core.ui.theme.MontserratFontFamily
 import com.example.track_me_mobile.core.ui.components.TrackMeTextField
 import com.example.track_me_mobile.core.ui.components.TrackMePasswordField
+import com.example.track_me_mobile.generated.resources.*
+
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
-import com.example.track_me_mobile.core.ui.theme.MontserratFontFamily
 
-// Маппинг для отображения ролей в UI
 fun Role.toRussian(): String = when (this) {
     Role.TRACKER -> "Трекер"
     Role.ADMIN -> "Администратор"
@@ -51,11 +48,8 @@ fun RegistrationScreen() {
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
 
-    // Теперь используем тип Role вместо String
     var selectedRole by remember { mutableStateOf<Role?>(null) }
     var isExpanded by remember { mutableStateOf(false) }
-
-    // Список доступных для выбора ролей (без Super Admin для регистрации)
     val availableRoles = listOf(Role.TRACKER, Role.ADMIN)
 
     Column(
@@ -83,70 +77,69 @@ fun RegistrationScreen() {
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Поле выбора роли, привязанное к Enum
-        Box(modifier = Modifier.fillMaxWidth()) {
-            OutlinedTextField(
-                value = selectedRole?.toRussian() ?: "",
-                onValueChange = {},
-                readOnly = true,
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(28.dp))
+                .background(Color.White)
+                .border(1.dp, Color(0xFF44069A), RoundedCornerShape(28.dp))
+                .clickable { isExpanded = !isExpanded }
+        ) {
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
-                placeholder = {
-                    Text("Роль", color = Color(0xFF44069A), fontFamily = montserrat)
-                },
-                trailingIcon = {
-                    Text(
-                        text = if (isExpanded) "▲" else "▼",
-                        color = Color(0xFF44069A),
-                        modifier = Modifier.padding(end = 8.dp)
-                    )
-                },
-                shape = RoundedCornerShape(28.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color(0xFF44069A),
-                    unfocusedBorderColor = Color(0xFF44069A),
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent
-                )
-            )
-
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .clickable { isExpanded = !isExpanded }
-            )
-
-            DropdownMenu(
-                expanded = isExpanded,
-                onDismissRequest = { isExpanded = false },
-                modifier = Modifier
-                    .fillMaxWidth(0.85f)
-                    .background(Color.White)
+                    .height(56.dp)
+                    .padding(horizontal = 20.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                availableRoles.forEach { role ->
-                    DropdownMenuItem(
-                        text = {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text("▶", color = Color(0xFF44069A), fontSize = 10.sp)
-                                Spacer(Modifier.width(8.dp))
-                                Text(
-                                    text = role.toRussian(),
-                                    color = Color(0xFF44069A),
-                                    fontFamily = montserrat
-                                )
-                            }
-                        },
-                        onClick = {
-                            selectedRole = role
-                            isExpanded = false
+                Text(
+                    text = selectedRole?.toRussian() ?: "Роль",
+                    color = Color(0xFF44069A),
+                    fontFamily = montserrat,
+                    fontSize = 14.sp
+                )
+                Text(
+                    text = if (isExpanded) "▲" else "▼",
+                    color = Color(0xFF44069A),
+                    fontSize = 12.sp
+                )
+            }
+
+            // Список ролей, который появляется внутри контейнера
+            if (isExpanded) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp)
+                ) {
+                    availableRoles.forEach { role ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    selectedRole = role
+                                    isExpanded = false
+                                }
+                                .padding(vertical = 10.dp, horizontal = 20.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("▶", color = Color(0xFF44069A), fontSize = 10.sp)
+                            Spacer(Modifier.width(12.dp))
+                            Text(
+                                text = role.toRussian(),
+                                color = Color(0xFF44069A),
+                                fontFamily = montserrat,
+                                fontSize = 14.sp
+                            )
                         }
-                    )
+                    }
                 }
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
+
 
         TrackMeTextField(
             value = fullName,
@@ -199,9 +192,7 @@ fun RegistrationScreen() {
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = {
-                // Здесь ты можешь собрать объект CurrentUser, используя selectedRole
-            },
+            onClick = { /* Логика сборки CurrentUser и отправки на сервер */ },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
@@ -228,7 +219,7 @@ fun AvatarUploadBlock() {
     Box(
         modifier = Modifier
             .size(140.dp)
-            .clickable { /* Логика выбора фото */ },
+            .clickable { /* Выбор фото */ },
         contentAlignment = Alignment.Center
     ) {
         Box(
@@ -237,14 +228,12 @@ fun AvatarUploadBlock() {
                 .clip(RoundedCornerShape(20.dp))
                 .background(Color(0xFFEADDFF))
         )
-
         Icon(
             painter = painterResource(Res.drawable.man),
             contentDescription = null,
             modifier = Modifier.size(90.dp),
             tint = Color(0xFF8338EB)
         )
-
         Box(
             modifier = Modifier
                 .align(Alignment.TopEnd)
@@ -252,7 +241,7 @@ fun AvatarUploadBlock() {
         ) {
             Icon(
                 painter = painterResource(Res.drawable.download),
-                contentDescription = "Загрузить",
+                contentDescription = null,
                 modifier = Modifier.size(17.dp),
                 tint = Color(0xFF8338EB)
             )
