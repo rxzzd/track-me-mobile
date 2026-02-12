@@ -5,17 +5,20 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import cafe.adriel.voyager.core.screen.Screen
 
 
 class LoginScreen : Screen{
 
+    @Preview
     @Composable
     override fun Content() {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
+
             Text("Экран Авторизации (Скоро тут будет форма)")
         }
     }

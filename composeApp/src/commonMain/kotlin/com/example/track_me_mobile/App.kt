@@ -11,8 +11,6 @@ import com.example.track_me_mobile.features.auth.presentation.LoginScreen
 @Preview
 fun App() {
     MaterialTheme {
-        Navigator(screen = LoginScreen()) { navigator ->
-            SlideTransition(navigator)
-        }
+
     }
 }

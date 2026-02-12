@@ -9,7 +9,7 @@ enum class Role {
 data class CurrentUser (
     val id: String,
     val username: String,
-    val role: Role,
+    val role: List<Role>,
     val fullname: String,
     val email: String,
     val phoneNumber: String,
