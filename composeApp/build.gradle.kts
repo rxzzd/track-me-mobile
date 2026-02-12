@@ -27,12 +27,20 @@ kotlin {
     
     sourceSets {
         androidMain.dependencies {
+            val voyagerVersion = "1.1.0-beta02"
+            // Android
+// Hilt integration
+            implementation("cafe.adriel.voyager:voyager-hilt:${voyagerVersion}")
+// LiveData integration
+            implementation("cafe.adriel.voyager:voyager-livedata:${voyagerVersion}")
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.activity.compose)
+            implementation(libs.koin.android)
         }
         commonMain.dependencies {
 
-
+            implementation(libs.koin.core)
+            implementation(libs.koin.compose)
             val voyagerVersion = "1.1.0-beta02"
             // Multiplatform
             // Navigator
@@ -48,11 +56,7 @@ kotlin {
             // Koin integration
             implementation("cafe.adriel.voyager:voyager-koin:$voyagerVersion")
 
-            // Android
-            // Hilt integration
-            implementation("cafe.adriel.voyager:voyager-hilt:$voyagerVersion")
-            // LiveData integration
-            implementation("cafe.adriel.voyager:voyager-livedata:$voyagerVersion")
+            //implementation(compose.materialIconsExtended)
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)
             implementation(libs.compose.material3)
@@ -98,5 +102,11 @@ android {
 
 dependencies {
     debugImplementation(libs.compose.uiTooling)
+}
+
+compose.resources {
+    publicResClass =  true
+    packageOfResClass = "com.example.track_me_mobile.generated.resources"
+    generateResClass = auto
 }
 
