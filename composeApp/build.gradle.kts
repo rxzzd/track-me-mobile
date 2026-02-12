@@ -32,7 +32,7 @@ kotlin {
         }
         commonMain.dependencies {
 
-
+            implementation("org.jetbrains.compose.material:material-icons-extended:1.6.11")
             val voyagerVersion = "1.1.0-beta02"
             // Multiplatform
             // Navigator
