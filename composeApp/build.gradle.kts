@@ -29,9 +29,11 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.activity.compose)
+            implementation(libs.koin.android)
         }
         commonMain.dependencies {
 
+            implementation(libs.koin.core)
 
             val voyagerVersion = "1.1.0-beta02"
             // Multiplatform
