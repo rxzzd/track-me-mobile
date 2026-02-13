@@ -10,9 +10,18 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MaterialTheme {
-                TeamCreateScreen()
-            }
+            TeamCreateScreen(
+                onBackClick = {
+                    // Здесь логика выхода из приложения или перехода на главный экран
+                    // Если вы используете ComponentActivity:
+                    finish()
+                },
+                onNavigateToInfo = { teamData ->
+                    // Здесь будет логика перехода на TeamInfoScreen(data = teamData)
+                    // Пока можно просто вывести в лог для проверки
+                    println("Создана команда: ${teamData.stream}")
+                }
+            )
         }
     }
 }

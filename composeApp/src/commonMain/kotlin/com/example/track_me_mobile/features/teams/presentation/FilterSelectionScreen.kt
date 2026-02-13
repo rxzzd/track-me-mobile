@@ -14,42 +14,54 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.track_me_mobile.core.ui.theme.*
-
-// Основной экран фильтров
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
 @Composable
 fun TeamFilterScreen(
-    currentData: TeamFilterData, // Принимаем текущие данные
+    currentData: TeamFilterData, // Модель из TeamComponents.kt
     onClose: () -> Unit,
-    onApply: (TeamFilterData) -> Unit, // Возвращаем новые данные
+    onApply: (TeamFilterData) -> Unit,
     onReset: () -> Unit
 ) {
-    // Локальное состояние (временное, пока не нажали "Применить")
+    // 1. Локальные состояния для редактирования
     var selectedStream by remember { mutableStateOf(currentData.stream) }
     var selectedTrl by remember { mutableStateOf(currentData.trl) }
-    // Копия списка рынков для редактирования
-    val selectedMarkets = remember { mutableStateListOf<String>().apply { addAll(currentData.markets) } }
+
+    // Используем remember { mutableStateListOf(...) }, чтобы Compose видел изменения в списке
+    val selectedMarkets = remember {
+        mutableStateListOf<String>().apply { addAll(currentData.markets) }
+    }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = TrackMePurpleLight
     ) {
-        Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
             // Кнопка закрытия
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopEnd) {
                 IconButton(onClick = onClose) {
-                    Icon(Icons.Default.Close, contentDescription = "Закрыть", tint = Color.White)
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Закрыть",
+                        tint = Color.White
+                    )
                 }
             }
 
-            // Скроллируемая область с опциями
+            // Основной контент (скроллится)
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .verticalScroll(rememberScrollState())
             ) {
-                // --- Поток ---
-                FilterHeader("Поток") // Вот эта функция, которой не хватало
+                // --- Секция: Поток ---
+                FilterHeader("Поток")
                 val streams = listOf("Название потока 1", "Название потока 2", "Название потока 3")
                 streams.forEach { stream ->
                     FilterCheckboxRow(
@@ -61,7 +73,7 @@ fun TeamFilterScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // --- Рынки НТИ ---
+                // --- Секция: Рынки НТИ ---
                 FilterHeader("Рынки НТИ")
                 val markets = listOf("AutoNet", "HealthNet", "MariNet", "NeuroNet", "SafeNet", "FoodNet", "TechNet", "WearNet")
                 markets.chunked(2).forEach { rowItems ->
@@ -83,9 +95,10 @@ fun TeamFilterScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // --- TRL ---
+                // --- Секция: TRL ---
                 FilterHeader("TRL")
-                listOf("0-2", "3-5", "6-8", "9-10").forEach { trl ->
+                val trlList = listOf("0-2", "3-5", "6-8", "9-10")
+                trlList.forEach { trl ->
                     FilterCheckboxRow(
                         label = trl,
                         isChecked = selectedTrl == trl,
@@ -94,7 +107,7 @@ fun TeamFilterScreen(
                 }
             }
 
-            // Нижние кнопки (Сбросить / Применить)
+            // Нижняя панель с кнопками
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -103,28 +116,46 @@ fun TeamFilterScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 TextButton(onClick = {
-                    // Сброс локальных переменных
                     selectedStream = ""
                     selectedTrl = ""
                     selectedMarkets.clear()
                     onReset()
                 }) {
-                    Text("Сбросить", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    Text(
+                        "Сбросить",
+                        color = Color.White,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
+
                 Spacer(modifier = Modifier.width(16.dp))
+
                 TextButton(onClick = {
-                    // Собираем результат и отправляем в Team_card.kt
-                    onApply(TeamFilterData(selectedStream, selectedMarkets.toList(), selectedTrl))
+                    // Возвращаем собранные данные назад
+                    onApply(
+                        TeamFilterData(
+                            stream = selectedStream,
+                            markets = selectedMarkets.toList(),
+                            trl = selectedTrl
+                        )
+                    )
                 }) {
-                    Text("Применить", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    Text(
+                        "Применить",
+                        color = Color.White,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
         }
     }
 }
 
-// --- Вспомогательные функции (ОБЯЗАТЕЛЬНО ДОЛЖНЫ БЫТЬ ЗДЕСЬ) ---
+// --- Вспомогательные компоненты (внутренние для этого файла) ---
 
+// Убрали private, чтобы функции были доступны во всем пакете presentation
 @Composable
 fun FilterHeader(title: String) {
     Text(
@@ -137,7 +168,11 @@ fun FilterHeader(title: String) {
 }
 
 @Composable
-fun FilterCheckboxRow(label: String, isChecked: Boolean, onCheckChanged: (Boolean) -> Unit) {
+fun FilterCheckboxRow(
+    label: String,
+    isChecked: Boolean,
+    onCheckChanged: (Boolean) -> Unit
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -158,13 +193,14 @@ fun FilterCheckboxRow(label: String, isChecked: Boolean, onCheckChanged: (Boolea
     }
 }
 
-// Превью для проверки
+// --- Превью (теперь должно работать корректно) ---
 @Preview(showBackground = true)
 @Composable
 fun TeamFilterScreenPreview() {
+    // В превью передаем "заглушки" (пустые действия)
     MaterialTheme {
         TeamFilterScreen(
-            currentData = TeamFilterData(),
+            currentData = TeamFilterData(stream = "Название потока 1"),
             onClose = {},
             onApply = {},
             onReset = {}
