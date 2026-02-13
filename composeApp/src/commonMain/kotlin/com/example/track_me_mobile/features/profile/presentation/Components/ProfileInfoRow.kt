@@ -19,7 +19,7 @@ fun ProfileInfoRow(value: String) {
             .fillMaxWidth(0.9f)
             .padding(vertical = 8.dp)
             .height(42.dp),
-        color = TrackMePurpleLight.copy(alpha = 0.2f),
+        color = TrackMePurpleLight.copy(alpha = 0.7f),
         shape = RoundedCornerShape(50)
     ) {
         Box(contentAlignment = Alignment.Center) {
