@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 @Preview
 fun App() {
     MaterialTheme {
-        var showContent by remember { mutableStateOf(false) }
+//        var showContent by remember { mutableStateOf(false) }
         Scaffold(
             topBar = {
                 Box(
@@ -37,25 +37,7 @@ fun App() {
                         .background(Color(0xFF8338EB))
                         .padding(start = 18.dp, end = 18.dp)
                 ) {
-//                    Image(
-//                        painter = painterResource(Res.drawable.img),
-//                        contentDescription = "Logo",
-//                        modifier = Modifier
-//                            .align(Alignment.BottomStart)
-//                            .padding(bottom = 13.dp)
-//                    )
-//                    IconButton(
-//                        onClick = { },
-//                        modifier = Modifier
-//                            .align(Alignment.BottomEnd)
-//                    ) {
-//                        Icon(
-//                            imageVector = Icons.Default.Menu,
-//                            contentDescription = "Menu",
-//                            tint = Color.White,
-//                            modifier = Modifier.size(32.dp)
-//                        )
-//                    }
+                    //add logo and icon
                 }
             }
         ) { paddingValues ->
@@ -83,6 +65,12 @@ fun App() {
 
                 Spacer(modifier = Modifier.height(31.dp))
 
+                StreamCard(
+                    title = "Название потока",
+                    markets = "Рынки НТИ:",
+                    trl = "TRL:",
+                    flow = "Поток:"
+                )
                 StreamCard(
                     title = "Название потока",
                     markets = "Рынки НТИ:",
