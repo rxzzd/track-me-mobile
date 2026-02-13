@@ -36,7 +36,7 @@ fun TrackMePasswordField(
             IconButton(onClick = { passwordVisible = !passwordVisible }) {
                 Icon(
                     painter = painterResource(
-                        if (passwordVisible) Res.drawable.invisible else Res.drawable.visible
+                        if (passwordVisible) Res.drawable.visible else Res.drawable.invisible
                     ),
                     contentDescription = if (passwordVisible) "Скрыть пароль" else "Показать пароль",
                     tint = TrackMeDeepPurple

@@ -2,6 +2,7 @@ package com.example.track_me_mobile.core.ui.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -22,10 +23,10 @@ fun TrackMeButton(
     Button(
         onClick = onClick,
         modifier = modifier
-            .fillMaxWidth()
+            .width(200.dp)
             .height(50.dp),
         enabled = isEnabled,
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(22.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = TrackMePurple,
             contentColor = Color.White,
