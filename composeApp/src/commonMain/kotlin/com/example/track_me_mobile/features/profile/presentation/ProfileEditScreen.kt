@@ -1,6 +1,7 @@
 package com.example.track_me_mobile.features.profile.presentation
 
 import androidx.compose.foundation.background
+import com.example.track_me_mobile.features.profile.presentation.components.ProfileTopHeader
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -10,6 +11,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.TextRange
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material3.*
@@ -17,6 +20,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester // ВАЖНЫЙ ИМПОРТ
+import androidx.compose.ui.focus.focusRequester // ВАЖНЫЙ ИМПОРТ
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalFocusManager
@@ -28,7 +33,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.track_me_mobile.core.ui.theme.*
-import com.example.track_me_mobile.features.profile.presentation.components.*
 
 @Composable
 fun ProfileEditScreen(
@@ -39,23 +43,19 @@ fun ProfileEditScreen(
     onSaveComplete: (String, String, String, String) -> Unit,
     onCancel: () -> Unit
 ) {
-    // Локальный буфер данных (меняется только здесь)
     var name by remember { mutableStateOf(initialName) }
     var email by remember { mutableStateOf(initialEmail) }
     var phone by remember { mutableStateOf(initialPhone) }
     var telegram by remember { mutableStateOf(initialTelegram) }
 
-    // Правила валидации
     val isNameValid = name.trim().split(" ").size >= 2
     val isEmailValid = email.contains("@") && email.contains(".")
     val isPhoneValid = phone.length == 12
     val isTelegramValid = telegram.length > 2
 
-    // Проверка на изменения
     val isChanged = name != initialName || email != initialEmail ||
             phone != initialPhone || telegram != initialTelegram
 
-    // Кнопка активна ТОЛЬКО если всё верно И данные изменены
     val canSave = isNameValid && isEmailValid && isPhoneValid && isTelegramValid && isChanged
 
     Scaffold(
@@ -63,14 +63,15 @@ fun ProfileEditScreen(
         containerColor = BackgroundWhite
     ) { paddingValues ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(paddingValues)
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 34.dp, vertical = 35.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text("Личный кабинет", fontSize = 32.sp, color = TrackMePurple, modifier = Modifier.padding(bottom = 35.dp))
 
-            // АВАТАРКА С ЗНАЧКОМ
             Box(modifier = Modifier.size(180.dp).clip(RoundedCornerShape(20.dp)).background(TrackMePurpleLight.copy(alpha = 0.3f)), contentAlignment = Alignment.Center) {
                 Icon(Icons.Default.Person, null, modifier = Modifier.size(120.dp), tint = TrackMePurple)
                 IconButton(onClick = { }, modifier = Modifier.align(Alignment.TopEnd).padding(8.dp)) {
@@ -82,7 +83,6 @@ fun ProfileEditScreen(
             Text("Администратор", color = TrackMePurple, fontWeight = FontWeight.Bold, fontSize = 16.sp)
             Spacer(modifier = Modifier.height(25.dp))
 
-            // ФИО (без цифр)
             ProfileInputRow(
                 value = name,
                 onValueChange = { if (it.all { c -> c.isLetter() || c.isWhitespace() }) name = it },
@@ -90,16 +90,14 @@ fun ProfileEditScreen(
                 errorText = "Введите фамилию и имя"
             )
 
-            // Почта
             ProfileInputRow(
                 value = email,
                 onValueChange = { email = it },
                 isError = !isEmailValid,
-                errorText = "Некорректный Email (нужна @ и точка)",
+                errorText = "Некорректный Email",
                 keyboardType = KeyboardType.Email
             )
 
-            // Телефон (Защита +7)
             ProfileInputRow(
                 value = phone,
                 onValueChange = { input ->
@@ -113,7 +111,6 @@ fun ProfileEditScreen(
                 keyboardType = KeyboardType.Phone
             )
 
-            // Телеграм (Защита @)
             ProfileInputRow(
                 value = telegram,
                 onValueChange = { if (it.startsWith("@")) telegram = it },
@@ -153,6 +150,30 @@ fun ProfileInputRow(
 ) {
     var isEnabled by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
+    val focusRequester = remember { FocusRequester() }
+
+    // Создаем обертку TextFieldValue для управления курсором
+    var textFieldValueState by remember {
+        mutableStateOf(TextFieldValue(text = value))
+    }
+
+    // Синхронизируем внешнее значение с внутренним TextFieldValue
+    LaunchedEffect(value) {
+        if (textFieldValueState.text != value) {
+            textFieldValueState = textFieldValueState.copy(text = value)
+        }
+    }
+
+    // Эффект активации: переносим курсор в конец и запрашиваем фокус
+    LaunchedEffect(isEnabled) {
+        if (isEnabled) {
+            // Устанавливаем курсор в позицию, равную длине текста
+            textFieldValueState = textFieldValueState.copy(
+                selection = TextRange(textFieldValueState.text.length)
+            )
+            focusRequester.requestFocus()
+        }
+    }
 
     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -167,20 +188,35 @@ fun ProfileInputRow(
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     BasicTextField(
-                        value = value,
-                        onValueChange = onValueChange,
+                        value = textFieldValueState, // Используем TextFieldValue вместо String
+                        onValueChange = { newFieldValue ->
+                            textFieldValueState = newFieldValue
+                            onValueChange(newFieldValue.text)
+                        },
                         enabled = isEnabled,
                         singleLine = true,
                         textStyle = TextStyle(color = TrackMePurple, fontSize = 16.sp, textAlign = TextAlign.Center),
                         keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = ImeAction.Done),
-                        keyboardActions = KeyboardActions(onDone = { isEnabled = false; focusManager.clearFocus() }),
+                        keyboardActions = KeyboardActions(onDone = {
+                            isEnabled = false
+                            focusManager.clearFocus()
+                        }),
                         cursorBrush = SolidColor(TrackMePurple),
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 10.dp)
+                            .focusRequester(focusRequester)
                     )
                 }
             }
             Spacer(modifier = Modifier.width(12.dp))
-            IconButton(onClick = { isEnabled = !isEnabled }, modifier = Modifier.size(24.dp)) {
+            IconButton(
+                onClick = {
+                    isEnabled = !isEnabled
+                    if (!isEnabled) focusManager.clearFocus()
+                },
+                modifier = Modifier.size(24.dp)
+            ) {
                 Icon(Icons.Default.Edit, null, tint = if (isEnabled) Color.Gray else TrackMePurple)
             }
         }
