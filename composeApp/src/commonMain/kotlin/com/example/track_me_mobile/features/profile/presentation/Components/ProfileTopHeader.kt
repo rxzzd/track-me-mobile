@@ -15,6 +15,7 @@ import androidx.compose.ui.geometry.*
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
@@ -98,7 +99,8 @@ fun ProfileTopHeader() {
                     onDismissRequest = { expanded = false },
                     offset = IntOffset(10, (15)) // Небольшая корректировка под статус-бар
                 ) {
-                    val shape = ProfileMenuShape(LocalDensity.current)
+                    val density = LocalDensity.current
+                    val shape = remember(density) { ProfileMenuShape(density) }
 
                     Column(
                         modifier = Modifier

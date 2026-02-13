@@ -6,13 +6,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.transitions.SlideTransition
 import com.example.track_me_mobile.features.auth.presentation.LoginScreen
+import com.example.track_me_mobile.features.profile.presentation.ProfileEditScreen
 import com.example.track_me_mobile.features.profile.presentation.ProfileScreen
-
+import com.example.track_me_mobile.features.profile.presentation.ProfileNavigation
 @Composable
 @Preview
 fun App() {
     MaterialTheme {
-        ProfileScreen()
-
+        // Вызываем навигатор, который сам решит, какой экран показать
+        ProfileNavigation()
     }
 }
