@@ -6,31 +6,34 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.transitions.SlideTransition
+import org.koin.compose.KoinApplication
 import org.koin.compose.KoinContext
+
+// Импорты твоих настроек и ресурсов
+import com.example.track_me_mobile.core.di.appModule
 import com.example.track_me_mobile.core.ui.theme.TrackMeTypography
 import com.example.track_me_mobile.core.ui.theme.TrackMeDeepPurple
 import com.example.track_me_mobile.features.auth.presentation.LoginScreen
 
 @Composable
 fun App() {
-    // Настраиваем цветовую схему Material 3
-    val trackMeColorScheme = lightColorScheme(
-        primary = TrackMeDeepPurple,
-        background = Color.White,
-        surface = Color.White,
-        onPrimary = Color.White,
-        onBackground = Color.Black
-    )
+    KoinApplication(application = {
+        modules(appModule)
+    }) {
+        val trackMeColorScheme = lightColorScheme(
+            primary = TrackMeDeepPurple,
+            background = Color.White,
+            surface = Color.White,
+            onPrimary = Color.White,
+            onBackground = Color.Black,
+            error = Color(0xFFBA1A1A)
+        )
 
-    MaterialTheme(
-        typography = TrackMeTypography(), // Наш Montserrat
-        colorScheme = trackMeColorScheme
-    ) {
-        // Оборачиваем в контекст Koin для Dependency Injection
-        KoinContext {
-            // Навигатор Voyager
+        MaterialTheme(
+            typography = TrackMeTypography(),
+            colorScheme = trackMeColorScheme
+        ) {
             Navigator(screen = LoginScreen()) { navigator ->
-                // Добавляем анимацию переходов (Slide)
                 SlideTransition(navigator)
             }
         }
