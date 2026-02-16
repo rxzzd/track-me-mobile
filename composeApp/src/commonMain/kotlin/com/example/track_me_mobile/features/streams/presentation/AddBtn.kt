@@ -1,6 +1,5 @@
 package com.example.track_me_mobile.features.streams.presentation
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.height

@@ -59,7 +59,7 @@ fun StreamPage() {
                 Column(
                     modifier = Modifier
                         .padding(paddingValues)
-                        .padding(top = 31.dp)
+//                        .padding(top = 31.dp)
                         .safeContentPadding()
                         .fillMaxSize()
                         .background(Color(0xFFF8F3FF))
@@ -74,7 +74,9 @@ fun StreamPage() {
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        FilterBtn(modifier = Modifier.width(49.dp))
+                        FilterBtn(
+                            modifier = Modifier.width(49.dp),
+                            onClick = { showFilterWindow = true })
                         SearchBar(modifier = Modifier.width(244.dp))
                         AddBtn(modifier = Modifier.width(24.dp))
                     }
@@ -123,11 +125,13 @@ fun StreamPage() {
                         flow = "Поток:"
                     )
                 }
-                FilterPopUp(showWindow = showFilterWindow,
+                FilterPopUp(
+                    showWindow = showFilterWindow,
                     onDismiss = { showFilterWindow = false },
                     anchorBounds = filterInfoBlocsBounds.value,
-                    verticalOffset = 20.dp,
-                    previewMode = true)
+                    verticalOffset =(-24).dp,
+                    previewMode = false
+                )
             }
         }
     }

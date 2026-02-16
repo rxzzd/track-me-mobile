@@ -1,29 +1,25 @@
 package com.example.track_me_mobile.features.streams.presentation
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.boundsInRoot
-import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,6 +28,7 @@ import androidx.compose.ui.window.PopupProperties
 import org.jetbrains.compose.resources.Font
 import org.jetbrains.compose.resources.painterResource
 import trackmemobile.composeapp.generated.resources.Mulish_SemiBold
+import trackmemobile.composeapp.generated.resources.Montserrat_Bold
 import trackmemobile.composeapp.generated.resources.Res
 import trackmemobile.composeapp.generated.resources.close_icon
 
@@ -41,7 +38,7 @@ fun FilterPopUp(
     showWindow: Boolean,
     onDismiss: () -> Unit,
     anchorBounds: Rect? = null,
-    verticalOffset: Dp = 20.dp,
+    verticalOffset: Dp = 0.dp,
     previewMode: Boolean = false,
     modifier: Modifier = Modifier
 ) {
@@ -56,48 +53,50 @@ fun FilterPopUp(
                 }
 
                 FilterCardContent(
+                    onDismiss = onDismiss,
                     modifier = Modifier
                         .align(Alignment.TopCenter)
                         .offset(y = offsetY)
                 )
             } else {
                 FilterCardContent(
+                    onDismiss = onDismiss,
                     modifier = modifier.align(Alignment.TopCenter)
                 )
             }
         }
-    } else {
-        Box(
-            modifier = Modifier.fillMaxSize()
+    } else if (showWindow) {
+        Popup(
+            onDismissRequest = onDismiss,
+            properties = PopupProperties(
+                dismissOnBackPress = true,
+                dismissOnClickOutside = true,
+                focusable = true
+            )
         ) {
-            if (showWindow) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clickable { onDismiss() }
-                )
-
-                Popup(
-                    alignment = Alignment.TopCenter,
-                    properties = PopupProperties(
-                        dismissOnBackPress = true,
-                        dismissOnClickOutside = true,
-                        focusable = true,
-                    )
-                ) {
-                    if (anchorBounds != null) {
-                        val density = LocalDensity.current
-                        val offsetY = with(density) {
-                            anchorBounds.bottom.toDp() + verticalOffset
-                        }
-
-                        Box(
-                            modifier = Modifier.offset(y = offsetY)
-                        ) {
-                            FilterCardContent()
-                        }
-                    } else {
-                        FilterCardContent()
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Transparent)
+                    .pointerInput(Unit) {
+                        detectTapGestures { onDismiss() }
+                    }
+            )
+            {
+                if (anchorBounds != null) {
+                    val density = LocalDensity.current
+                    val offsetY = with(density) {
+                        anchorBounds.bottom.toDp() + verticalOffset
+                    }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = offsetY)
+                            .wrapContentHeight()
+                            .clickable { },
+                        contentAlignment = Alignment.TopCenter
+                    ) {
+                        FilterCardContent(onDismiss = onDismiss)
                     }
                 }
             }
@@ -107,17 +106,21 @@ fun FilterPopUp(
 
 @Composable
 fun FilterCardContent(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onDismiss: () -> Unit
 ) {
     val mulishFamily = FontFamily(
         Font(Res.font.Mulish_SemiBold, FontWeight.SemiBold)
     )
-
+    val montserratFamily = FontFamily(
+        Font(Res.font.Montserrat_Bold, FontWeight.Bold)
+    )
     Card(
         modifier = modifier
             .width(328.dp)
             .wrapContentHeight()
-            .clip(RoundedCornerShape(20.dp)),
+            .clip(RoundedCornerShape(20.dp))
+            .clickable { },
         colors = CardDefaults.cardColors(
             containerColor = Color(0xFFCDAFF7)
         )
@@ -146,66 +149,8 @@ fun FilterCardContent(
                     )
 
                     Spacer(modifier = Modifier.height(12.dp))
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(15.dp),
-                        horizontalAlignment = Alignment.Start
-                    ) {
-                        Row(
-                            modifier = Modifier.wrapContentSize(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(46.dp, Alignment.Start)
-                        ) {
-                            FilterOption(
-                                "2016",
-                                isSelected = false,
-                                onCheckedChange = {})
-                            FilterOption(
-                                "2017",
-                                isSelected = false,
-                                onCheckedChange = {})
-                            FilterOption(
-                                "2018",
-                                isSelected = false,
-                                onCheckedChange = {})
-                        }
-                        Row(
-                            modifier = Modifier.wrapContentSize(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(46.dp, Alignment.Start)
-                        ) {
-                            FilterOption(
-                                "2019",
-                                isSelected = false,
-                                onCheckedChange = {})
-                            FilterOption(
-                                "2020",
-                                isSelected = false,
-                                onCheckedChange = {})
-                            FilterOption(
-                                "2021",
-                                isSelected = false,
-                                onCheckedChange = {})
-                        }
-                        Row(
-                            modifier = Modifier.wrapContentSize(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(46.dp, Alignment.Start)
-                        ) {
-                            FilterOption(
-                                "2022",
-                                isSelected = false,
-                                onCheckedChange = {})
-                            FilterOption(
-                                "2023",
-                                isSelected = false,
-                                onCheckedChange = {})
-                            FilterOption(
-                                "2024",
-                                isSelected = false,
-                                onCheckedChange = {})
-                        }
-                    }
+
+                    YearGrid()
 
                     Spacer(modifier = Modifier.height(20.dp))
 
@@ -218,57 +163,11 @@ fun FilterCardContent(
                         fontFamily = mulishFamily,
                         fontWeight = FontWeight.SemiBold
                     )
+
                     Spacer(modifier = Modifier.height(12.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(83.dp, Alignment.Start)
-                    ) {
-                        Column(
-                            modifier = Modifier.wrapContentSize(),
-                            verticalArrangement = Arrangement.spacedBy(15.dp),
-                            horizontalAlignment = Alignment.Start
-                        ) {
-                            FilterOption(
-                                "AutoNet",
-                                isSelected = false,
-                                onCheckedChange = {})
-                            FilterOption(
-                                "MariNet",
-                                isSelected = false,
-                                onCheckedChange = {})
-                            FilterOption(
-                                "SafeNet",
-                                isSelected = false,
-                                onCheckedChange = {})
-                            FilterOption(
-                                "TechNet",
-                                isSelected = false,
-                                onCheckedChange = {})
-                        }
-                        Column(
-                            modifier = Modifier.wrapContentSize(),
-                            verticalArrangement = Arrangement.spacedBy(15.dp),
-                            horizontalAlignment = Alignment.Start
-                        ) {
-                            FilterOption(
-                                "HealthNet",
-                                isSelected = false,
-                                onCheckedChange = {})
-                            FilterOption(
-                                "NeuroNet",
-                                isSelected = false,
-                                onCheckedChange = {})
-                            FilterOption(
-                                "FoodNet",
-                                isSelected = false,
-                                onCheckedChange = {})
-                            FilterOption(
-                                "WearNet",
-                                isSelected = false,
-                                onCheckedChange = {})
-                        }
-                    }
+
+                    MarketGrid()
+
                     Spacer(modifier = Modifier.height(20.dp))
 
                     Text(
@@ -283,46 +182,50 @@ fun FilterCardContent(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    Column(
-                        modifier = Modifier.wrapContentSize(),
-                        verticalArrangement = Arrangement.spacedBy(15.dp),
-                        horizontalAlignment = Alignment.Start
-                    ) {
-                        FilterOption(
-                            "0-2",
-                            isSelected = false,
-                            onCheckedChange = {})
-                        FilterOption(
-                            "3-5",
-                            isSelected = false,
-                            onCheckedChange = {})
-                        FilterOption(
-                            "6-8",
-                            isSelected = false,
-                            onCheckedChange = {})
-                        FilterOption(
-                            "9-10",
-                            isSelected = false,
-                            onCheckedChange = {})
-                    }
+                    TrlGrid()
                 }
             }
-            Icon(
-                painter = painterResource(Res.drawable.close_icon),
-                contentDescription = "Close",
-                tint = Color.White,
+            IconButton(
+                onClick = onDismiss,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(top = 20.dp)
                     .padding(end = 22.dp)
                     .size(12.dp)
+            ) {
+                Icon(
+                    painter = painterResource(Res.drawable.close_icon),
+                    contentDescription = "Close",
+                    tint = Color.White,
+                    modifier = Modifier.size(12.dp)
+                )
+            }
+
+            Text(
+                text = "Сбросить", fontSize = 14.sp,
+                color = Color.White,
+                lineHeight = 14.sp,
+                letterSpacing = 0.sp,
+                fontFamily = montserratFamily,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 20.dp)
+                    .padding(bottom = 46.dp)
+            )
+
+            Text(
+                text = "Применить", fontSize = 14.sp,
+                color = Color.White,
+                lineHeight = 14.sp,
+                letterSpacing = 0.sp,
+                fontFamily = montserratFamily,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 20.dp)
+                    .padding(bottom = 20.dp)
             )
         }
     }
-}
-
-@Preview
-@Composable
-fun FilterPopUpPreview() {
-    FilterCardContent()
 }

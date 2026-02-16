@@ -1,5 +1,6 @@
 package com.example.track_me_mobile.features.streams.presentation
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -19,10 +21,12 @@ import androidx.compose.ui.unit.sp
 import com.example.track_me_mobile.core.ui.theme.*
 
 import org.jetbrains.compose.resources.Font
+import org.jetbrains.compose.resources.painterResource
 import trackmemobile.composeapp.generated.resources.Res
 import trackmemobile.composeapp.generated.resources.Montserrat_Regular
 import trackmemobile.composeapp.generated.resources.Montserrat_ExtraBold
 import trackmemobile.composeapp.generated.resources.Inter_28pt_Black
+import trackmemobile.composeapp.generated.resources.base_stream_photo
 
 @Composable
 fun StreamCard(
@@ -67,7 +71,12 @@ fun StreamCard(
                         .clip(RoundedCornerShape(12.dp))
                         .background(Color(0xFFF5F5F5))
                 ) {
-//                add image
+                    Image(
+                        painter = painterResource(Res.drawable.base_stream_photo),
+                        contentDescription = "Base photo",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
                 }
 
                 Spacer(modifier = Modifier.width(8.dp))

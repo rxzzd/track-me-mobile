@@ -1,6 +1,7 @@
 package com.example.track_me_mobile.features.streams.presentation
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -19,13 +20,15 @@ import trackmemobile.composeapp.generated.resources.filter_icon
 @Composable
 fun FilterBtn(
     modifier: Modifier = Modifier,
+    onClick: () -> Unit
 ) {
     Box(
         modifier = modifier
             .width(49.dp)
             .height(40.dp)
             .clip(RoundedCornerShape(20.dp))
-            .background(Color(0xFF8338EB)),
+            .background(Color(0xFF8338EB))
+            .clickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
         Icon(
