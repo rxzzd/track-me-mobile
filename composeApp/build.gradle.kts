@@ -39,6 +39,16 @@ kotlin {
         }
         commonMain.dependencies {
 
+<<<<<<< Updated upstream
+=======
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.logging)
+            implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.serialization.kotlinx.json)
+            implementation(libs.compose.webview.multiplatform)
+
+
+>>>>>>> Stashed changes
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
             val voyagerVersion = "1.1.0-beta02"
