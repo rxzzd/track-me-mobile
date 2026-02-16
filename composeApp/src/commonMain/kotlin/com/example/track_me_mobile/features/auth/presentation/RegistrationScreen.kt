@@ -26,7 +26,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupProperties
 import org.jetbrains.compose.resources.painterResource
 
 import com.example.track_me_mobile.core.domain.models.Role
@@ -39,7 +38,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 
-// --- Вспомогательные модели и валидация ---
 
 data class PasswordRequirements(
     val hasUppercase: Boolean,
@@ -64,19 +62,8 @@ fun isEmailValid(email: String): Boolean {
     return email.isNotEmpty() && emailRegex.matches(email)
 }
 
-fun isFullNameValid(name: String): Boolean {
-    val nameRegex = "^[a-zA-Zа-яА-ЯёЁ\\s-]+$".toRegex()
-    return name.isNotEmpty() && nameRegex.matches(name)
-}
-
 fun isPhoneValid(phone: String): Boolean {
     return phone.length == 12 && phone.startsWith("+7")
-}
-
-fun isTelegramValid(username: String): Boolean {
-    val clean = username.removePrefix("@")
-    val tgRegex = "^[a-zA-Z0-9_]{4,20}$".toRegex()
-    return clean.isNotEmpty() && tgRegex.matches(clean)
 }
 
 fun Role.toRussian(): String = when (this) {
@@ -85,30 +72,19 @@ fun Role.toRussian(): String = when (this) {
     Role.SUPER_ADMIN -> "Супер-администратор"
 }
 
-// --- Компонент ошибки в стиле капсулы ---
-
 @Composable
 fun ErrorLabel(text: String) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 8.dp)
-            .background(Color(0xFFAC201B), RoundedCornerShape(28.dp))
+            .background(Color(0xFFFF7F7F), RoundedCornerShape(28.dp))
             .padding(horizontal = 20.dp, vertical = 10.dp),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = text,
-            color = Color.White,
-            fontSize = 12.sp,
-            fontFamily = MontserratFontFamily(),
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
-        )
+        Text(text = text, color = Color.White, fontSize = 12.sp, fontFamily = MontserratFontFamily(), fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
     }
 }
-
-// --- Основной экран ---
 
 @Composable
 fun RegistrationScreen() {
@@ -123,35 +99,45 @@ fun RegistrationScreen() {
     var telegram by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
-
     var selectedRole by remember { mutableStateOf<Role?>(null) }
     var isExpanded by remember { mutableStateOf(false) }
-    val availableRoles = listOf(Role.TRACKER, Role.ADMIN)
-
     var isPasswordFocused by remember { mutableStateOf(false) }
     var showErrors by remember { mutableStateOf(false) }
 
-    // Валидация
+    val availableRoles = listOf(Role.TRACKER, Role.ADMIN)
+
+    // Валидация ФИО
+    val fullNameRegex = "^[a-zA-Zа-яА-ЯёЁ\\s-]+$".toRegex()
+    val fullNameValid = fullNameRegex.matches(fullName) && fullName.isNotEmpty()
+    val fullNameError = when {
+        fullName.isEmpty() -> "Введите ФИО"
+        !fullNameRegex.matches(fullName) -> "Используйте только буквы"
+        else -> null
+    }
+
+    // Валидация Telegram
+    val cleanTg = telegram.removePrefix("@")
+    val tgContentRegex = "^[a-zA-Z0-9_]*$".toRegex()
+    val telegramContentValid = tgContentRegex.matches(cleanTg)
+    val telegramLengthValid = cleanTg.length in 4..20
+    val telegramValid = cleanTg.isNotEmpty() && telegramContentValid && telegramLengthValid
+    val telegramError = when {
+        cleanTg.isEmpty() -> "Введите имя пользователя"
+        !telegramLengthValid -> "Telegram ID должен быть от 4 до 20 символов"
+        !telegramContentValid -> "Только латинские буквы"
+        else -> null
+    }
+
     val requirements = checkPassword(password)
     val allMet = requirements.run { hasUppercase && hasLowercase && hasDigit && hasSpecialChar && isMinLength && isMaxLength }
-
-    // Пароли совпадают, если они идентичны и первый пароль не пустой
     val passwordsMatch = password == confirmPassword && password.isNotEmpty()
-
     val emailValid = isEmailValid(email)
-    val fullNameValid = isFullNameValid(fullName)
     val phoneValid = isPhoneValid(phone)
-    val telegramValid = isTelegramValid(telegram)
 
     val arrowRotation by animateFloatAsState(targetValue = if (isExpanded) 180f else 0f)
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-            .padding(horizontal = 24.dp)
-            .verticalScroll(scrollState)
-            .clickable { focusManager.clearFocus() },
+        modifier = Modifier.fillMaxSize().background(Color.White).padding(horizontal = 24.dp).verticalScroll(scrollState).clickable { focusManager.clearFocus() },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(50.dp))
@@ -194,57 +180,31 @@ fun RegistrationScreen() {
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-
-        // ФИО
         Column(modifier = Modifier.fillMaxWidth()) {
             TrackMeTextField(value = fullName, onValueChange = { fullName = it }, label = "ФИО")
-            if (showErrors && !fullNameValid) ErrorLabel("Используйте только буквы (рус/eng)")
+            if (showErrors && fullNameError != null) ErrorLabel(fullNameError)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-
-        // E-mail
         Column(modifier = Modifier.fillMaxWidth()) {
             TrackMeTextField(value = email, onValueChange = { email = it }, label = "E-mail", keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email))
             if (showErrors && !emailValid) ErrorLabel("Введите корректный адрес почты")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-
-        // Телефон
         Column(modifier = Modifier.fillMaxWidth()) {
-            TrackMeTextField(
-                value = phone,
-                onValueChange = { input ->
-                    if (!input.startsWith("+7")) phone = "+7"
-                    else {
-                        val digits = input.substring(2).filter { it.isDigit() }
-                        if (digits.length <= 10) phone = "+7$digits"
-                    }
-                },
-                label = "Телефон",
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
-            )
+            TrackMeTextField(value = phone, onValueChange = { input -> if (input.startsWith("+7") && input.length <= 12) phone = input }, label = "Телефон", keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone))
             if (showErrors && !phoneValid) ErrorLabel("Введите корректный номер (+7XXXXXXXXXX)")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-
-        // Telegram
         Column(modifier = Modifier.fillMaxWidth()) {
-            TrackMeTextField(
-                value = telegram,
-                onValueChange = { input ->
-                    if (input.all { it.isLetterOrDigit() || it == '_' || it == '@' }) telegram = input
-                },
-                label = "Имя пользователя telegram"
-            )
-            if (showErrors && !telegramValid) ErrorLabel("Telegram ID должен быть от 4 до 20 символов")
+            TrackMeTextField(value = telegram, onValueChange = { telegram = it }, label = "Имя пользователя telegram")
+            if (showErrors && telegramError != null) ErrorLabel(telegramError)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Пароль
         Column(modifier = Modifier.fillMaxWidth()) {
             Box(modifier = Modifier.fillMaxWidth()) {
                 TrackMePasswordField(
@@ -256,7 +216,12 @@ fun RegistrationScreen() {
                 if (isPasswordFocused && !allMet) {
                     val popupOffsetY = with(density) { -320.dp.roundToPx() }
                     Popup(alignment = Alignment.TopCenter, offset = IntOffset(0, popupOffsetY)) {
-                        Surface(modifier = Modifier.fillMaxWidth(0.9f).shadow(8.dp, RoundedCornerShape(12.dp)), shape = RoundedCornerShape(12.dp), color = Color(0xFF8338EB)) {
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(0.9f).shadow(8.dp, RoundedCornerShape(20.dp)),
+                            shape = RoundedCornerShape(20.dp),
+                            color = Color.White,
+                            border = BorderStroke(1.dp, Color(0xFF44069A))
+                        ) {
                             Column(modifier = Modifier.padding(16.dp)) {
                                 val lines = listOf(
                                     "пароль должен содержать заглавную букву" to requirements.hasUppercase,
@@ -266,9 +231,10 @@ fun RegistrationScreen() {
                                     "длина пароля: 6-20 символов" to (requirements.isMinLength && requirements.isMaxLength)
                                 )
                                 lines.forEach { (text, met) ->
-                                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 2.dp)) {
-                                        Text(text = "• ", color = if (met) Color.White.copy(alpha = 0.5f) else Color.Yellow, fontSize = 12.sp)
-                                        Text(text = text, color = if (met) Color.White.copy(alpha = 0.5f) else Color.Yellow, fontSize = 12.sp, fontFamily = montserrat)
+                                    val contentColor = if (met) Color(0xFF2E7D32) else Color(0xFF44069A)
+                                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 3.dp)) {
+                                        Text(text = if (met) "✓ " else "• ", color = contentColor, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                                        Text(text = text, color = contentColor, fontSize = 12.sp, fontFamily = montserrat)
                                     }
                                 }
                             }
@@ -276,33 +242,18 @@ fun RegistrationScreen() {
                     }
                 }
             }
-            if (showErrors && !allMet) ErrorLabel("Некорректный пароль (6-20 символов)")
+            if (showErrors && !allMet) ErrorLabel("Некорректный пароль")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-
-        // Повторите пароль
         Column(modifier = Modifier.fillMaxWidth()) {
-            TrackMePasswordField(
-                value = confirmPassword,
-                onValueChange = { confirmPassword = it },
-                label = "Повторите пароль"
-            )
-            if (showErrors && !passwordsMatch) {
-                ErrorLabel("Неправильный пароль")
-            }
+            TrackMePasswordField(value = confirmPassword, onValueChange = { confirmPassword = it }, label = "Повторите пароль")
+            if (showErrors && !passwordsMatch) ErrorLabel("Пароли не совпадают")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-
         Button(
-            onClick = {
-                if (allMet && passwordsMatch && emailValid && fullNameValid && phoneValid && telegramValid && selectedRole != null) {
-                    focusManager.clearFocus()
-                } else {
-                    showErrors = true
-                }
-            },
+            onClick = { if (allMet && passwordsMatch && emailValid && fullNameValid && phoneValid && telegramValid && selectedRole != null) focusManager.clearFocus() else showErrors = true },
             modifier = Modifier.fillMaxWidth().height(56.dp),
             shape = RoundedCornerShape(28.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF44069A), contentColor = Color.White)
