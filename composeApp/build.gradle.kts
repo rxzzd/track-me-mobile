@@ -6,7 +6,6 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
-    kotlin("plugin.serialization") version "2.0.0"
 }
 
 kotlin {
@@ -37,16 +36,19 @@ kotlin {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.koin.android)
-            implementation(libs.ktor.client.okhttp)
         }
         commonMain.dependencies {
 
+<<<<<<< Updated upstream
+=======
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.logging)
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
+            implementation(libs.compose.webview.multiplatform)
 
 
+>>>>>>> Stashed changes
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
             val voyagerVersion = "1.1.0-beta02"

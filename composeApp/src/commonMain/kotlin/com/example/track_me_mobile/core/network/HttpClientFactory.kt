@@ -5,15 +5,19 @@ import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.cookies.*
 import io.ktor.client.plugins.logging.*
+import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 
 object HttpClientFactory {
-    fun create(): HttpClient {
+    fun create(cookieStorage: CookiesStorage): HttpClient {
         return HttpClient {
+            // ВАЖНО: Запрещаем Ktor'у самому бегать по ссылкам перенаправления
+            followRedirects = false
+
             install(HttpCookies) {
-                storage = AcceptAllCookiesStorage()
+                storage = cookieStorage
             }
 
             install(HttpTimeout) {
@@ -32,7 +36,8 @@ object HttpClientFactory {
             install(Logging) {
                 logger = object : Logger {
                     override fun log(message: String) {
-                        napierLog(message)
+                        // Используем тот же логгер, что и в репозитории для единообразия
+                        logDebug("NETWORK_LOG: $message")
                     }
                 }
                 level = LogLevel.INFO
@@ -40,11 +45,9 @@ object HttpClientFactory {
 
             defaultRequest {
                 url(ApiConstants.BASE_URL)
+                // Говорим серверу: "Мы хотим JSON, не шли нам HTML!"
+                header("Accept", "application/json")
             }
         }
-    }
-
-    private fun napierLog(message: String) {
-        println("NETWORK_LOG: $message")
     }
 }
