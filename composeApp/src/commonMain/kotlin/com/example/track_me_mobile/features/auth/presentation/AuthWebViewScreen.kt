@@ -21,34 +21,38 @@ class AuthWebViewScreen(private val onFinish: (String) -> Unit) : Screen {
 
         LaunchedEffect(state.lastLoadedUrl) {
             val url = state.lastLoadedUrl ?: ""
-            if (url.isNotEmpty()) {
-                logDebug("WEBVIEW_TRACE: Сейчас на -> $url")
-            }
+            if (url.isEmpty()) return@LaunchedEffect
 
-            // ЖЕСТКОЕ УСЛОВИЕ УСПЕХА:
-            // Закрываемся ТОЛЬКО если в адресе есть /after-login
+            logDebug("WEBVIEW_TRACE: Проверяем URL -> $url")
+
+            // СУДЯ ПО СКРИНШОТАМ: Успех - это когда нас перекинуло на after-login
             if (url.contains("/after-login")) {
-                logDebug("WEBVIEW_TRACE: ФИНАЛ ДОСТИГНУТ! Собираем куки...")
+                logDebug("WEBVIEW_MATCH: Обнаружен финишный редирект!")
 
-                // Даем время браузеру прописать куку в системную память
-                delay(1000)
+                // Ждем немного, чтобы куки точно записались
+                delay(500)
 
-                // Берем куку именно у API домена
+                // ВАЖНО: Финальную сессию ставит домен API, а не тот домен, на котором after-login
+                // Поэтому забираем куки с API домена
                 val apiCookies = getSyncCookies("https://api.trackme.test.startup-poligon.com")
 
-                if (apiCookies != null && apiCookies.contains("SESSION")) {
-                    logDebug("WEBVIEW_TRACE: Авторизованная сессия получена. Выходим.")
+                if (apiCookies != null && apiCookies.contains("SESSION=")) {
+                    logDebug("WEBVIEW_SUCCESS: Сессия найдена, завершаем вход.")
                     onFinish(apiCookies)
                 } else {
-                    logDebug("WEBVIEW_TRACE: ОШИБКА - Мы на after-login, но SESSION нет!")
+                    logDebug("WEBVIEW_ERROR: URL верный, но куки SESSION нет. Куки: $apiCookies")
                 }
             }
         }
+
+
 
         WebView(
             state = state,
             modifier = Modifier.fillMaxSize(),
             onCreated = { webView ->
+                // Просто вызываем нашу функцию.
+                // Вся магия с переопределением клиента будет внутри неё в androidMain.
                 configureNativeWebView(webView)
             }
         )

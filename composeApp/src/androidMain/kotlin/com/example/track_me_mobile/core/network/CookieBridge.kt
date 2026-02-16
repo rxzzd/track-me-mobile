@@ -16,18 +16,37 @@ actual fun clearWebViewCookies() {
 
 @SuppressLint("SetJavaScriptEnabled")
 actual fun configureNativeWebView(webView: NativeWebView) {
-    // Подготавливаем менеджер кук ПЕРЕД настройкой WebView
-    val cookieManager = CookieManager.getInstance()
+    // В Android модуле NativeWebView — это и есть android.webkit.WebView
+    val cookieManager = android.webkit.CookieManager.getInstance()
     cookieManager.setAcceptCookie(true)
     cookieManager.setAcceptThirdPartyCookies(webView, true)
 
     webView.settings.apply {
         javaScriptEnabled = true
         domStorageEnabled = true
-        databaseEnabled = true
-        // Маскируемся под чистый Chrome
-        userAgentString = "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
-        mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+        // Это самое важное для устранения ERR_HTTP_RESPONSE_CODE_FAILURE
+        userAgentString = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"
+        cacheMode = android.webkit.WebSettings.LOAD_NO_CACHE
+    }
+
+    // Добавляем клиент ПРЯМО ЗДЕСЬ, чтобы не "краснило" в общем коде
+    webView.webViewClient = object : android.webkit.WebViewClient() {
+        override fun shouldOverrideUrlLoading(
+            view: android.webkit.WebView?,
+            request: android.webkit.WebResourceRequest?
+        ): Boolean {
+            // Разрешаем WebView самому обрабатывать редиректы
+            return false
+        }
+
+        // Поможет отладить, если ошибка останется
+        override fun onReceivedHttpError(
+            view: android.webkit.WebView?,
+            request: android.webkit.WebResourceRequest?,
+            errorResponse: android.webkit.WebResourceResponse?
+        ) {
+            logDebug("WEBVIEW_ERROR: Код ${errorResponse?.statusCode} на URL ${request?.url}")
+        }
     }
 }
 
