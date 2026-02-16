@@ -5,60 +5,61 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import com.example.track_me_mobile.core.domain.models.Role
+import com.example.track_me_mobile.core.network.logDebug
 import com.example.track_me_mobile.features.auth.domain.AuthRepository
-import com.example.track_me_mobile.features.auth.domain.AuthError
 import kotlinx.coroutines.launch
 
 class LoginViewModel(private val repository: AuthRepository) : ScreenModel {
 
-    var username by mutableStateOf("")
-        private set
-    var password by mutableStateOf("")
-        private set
     var isLoading by mutableStateOf(false)
         private set
+
     var errorMessage by mutableStateOf<String?>(null)
         private set
 
-    fun onUsernameChanged(newValue: String) {
-        username = newValue
-        errorMessage = null
-    }
-
-    fun onPasswordChanged(newValue: String) {
-        password = newValue
-        errorMessage = null
-    }
-
-    fun onLoginClick(onSuccess: () -> Unit) {
-        if (username.isBlank() || password.isBlank()) {
-            errorMessage = "Заполните все поля"
-            return
-        }
-
+    // Функция для проверки роли ПОСЛЕ того, как пользователь вошел через WebView
+    fun checkAuthAndNavigate(onNavigate: (Role) -> Unit) {
         screenModelScope.launch {
             isLoading = true
             errorMessage = null
 
-            repository.getCsrfToken()
-                .onSuccess { csrf ->
-                    repository.login(username, password, csrf)
-                        .onSuccess {
-                            isLoading = false
-                            onSuccess()
-                        }
-                        .onFailure { handleAuthError(it) }
+            repository.getUserInfo()
+                .onSuccess { userInfo ->
+                    isLoading = false
+                    val role = userInfo.mainRole
+                    if (role == Role.UNKNOWN) {
+                        errorMessage = "Доступ запрещен: роль не определена"
+                    } else {
+                        onNavigate(role)
+                    }
                 }
-                .onFailure { handleAuthError(it) }
+                .onFailure { throwable ->
+                    // ВОТ ТУТ МЫ ДОЛЖНЫ ВЫЗВАТЬ ОБРАБОТЧИК
+                    handleAuthError(throwable)
+                }
         }
     }
 
+    fun loginFromWebView(cookieString: String, onNavigate: (Role) -> Unit) {
+        screenModelScope.launch {
+            try {
+                isLoading = true
+                repository.syncSession(cookieString)
+                checkAuthAndNavigate(onNavigate)
+            } catch (e: Exception) {
+                isLoading = false
+                errorMessage = "Ошибка при входе: ${e.message}"
+                logDebug("DEBUG_TAG: Краш во ViewModel подавлен: ${e.message}")
+            }
+        }
+    }
+
+
     private fun handleAuthError(throwable: Throwable) {
         isLoading = false
-        errorMessage = when (throwable) {
-            is AuthError.InvalidCredentials -> "Неверный логин или пароль"
-            is AuthError.NetworkError -> "Нет соединения с сервером"
-            else -> "Произошла непредвиденная ошибка"
-        }
+        // Выведи текст ошибки из исключения:
+        errorMessage = throwable.message ?: "Неизвестная ошибка"
+        println("DEBUG_TAG: Детальная ошибка -> ${throwable.stackTraceToString()}")
     }
 }
