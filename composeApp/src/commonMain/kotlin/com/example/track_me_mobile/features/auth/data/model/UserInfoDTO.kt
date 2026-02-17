@@ -4,5 +4,12 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class UserInfoDto(
-    val roles: List<String> // Сервер обычно шлет строки ["ADMIN", "TRACKER"]
+    val id: String,
+    val username: String,
+    val roles: List<String>,
+    val fullName: String? = null,
+    val email: String? = null,
+    val phoneNumber: String? = null,
+    val avatarUrl: String? = null,
+    val enabled: Boolean
 )

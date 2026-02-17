@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    kotlin("plugin.serialization") version "2.0.0"
 }
 
 kotlin {
@@ -29,6 +30,7 @@ kotlin {
         androidMain.dependencies {
             val voyagerVersion = "1.1.0-beta02"
             // Android
+            implementation("androidx.activity:activity-compose:1.8.2")
 // Hilt integration
             implementation("cafe.adriel.voyager:voyager-hilt:${voyagerVersion}")
 // LiveData integration
@@ -36,19 +38,17 @@ kotlin {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.koin.android)
+            implementation(libs.ktor.client.okhttp)
         }
         commonMain.dependencies {
-
-<<<<<<< Updated upstream
-=======
+            implementation(libs.compose.webview.multiplatform)
+            implementation("net.openid:appauth:0.11.1")
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.logging)
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
-            implementation(libs.compose.webview.multiplatform)
 
 
->>>>>>> Stashed changes
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
             val voyagerVersion = "1.1.0-beta02"
@@ -92,6 +92,7 @@ android {
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
+        manifestPlaceholders["appAuthRedirectScheme"] = "com.example.trackme"
     }
     packaging {
         resources {
