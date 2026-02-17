@@ -14,7 +14,6 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.example.track_me_mobile.core.domain.models.Role
 import com.example.track_me_mobile.core.network.ApiConstants
 import com.example.track_me_mobile.features.streams.presentation.StreamListScreen
-import com.example.track_me_mobile.features.teams.presentation.TeamListScreen
 
 class LoginWebViewScreen : Screen {
 
@@ -93,7 +92,7 @@ class LoginWebViewScreen : Screen {
                             isLoginHandled = true
                             viewModel.loginFromWebView(gatewayCookies) { role ->
                                 when (role) {
-                                    Role.ADMIN, Role.SUPER_ADMIN -> navigator.replaceAll(TeamListScreen())
+                                    Role.ADMIN, Role.SUPER_ADMIN -> navigator.replaceAll(StreamListScreen())
                                     Role.TRACKER                -> navigator.replaceAll(StreamListScreen())
                                     else                        -> navigator.pop()
                                 }

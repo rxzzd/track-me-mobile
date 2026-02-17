@@ -70,6 +70,7 @@ fun Role.toRussian(): String = when (this) {
     Role.TRACKER -> "Трекер"
     Role.ADMIN -> "Администратор"
     Role.SUPER_ADMIN -> "Супер-администратор"
+    Role.UNKNOWN -> "Неизвестен"
 }
 
 @Composable
