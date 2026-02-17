@@ -24,8 +24,9 @@ class LoginWebViewScreen : Screen {
         val viewModel = koinScreenModel<LoginViewModel>()
 
         AndroidView(factory = { context ->
-            val cookieManager = CookieManager.getInstance()
-            cookieManager.setAcceptCookie(true)
+            val cookieManager = CookieManager.getInstance().apply {
+                setAcceptCookie(true)
+            }
 
             WebView(context).apply {
                 layoutParams = ViewGroup.LayoutParams(
@@ -43,9 +44,6 @@ class LoginWebViewScreen : Screen {
                 webViewClient = object : WebViewClient() {
 
                     private var isLoginHandled = false
-
-                    // Флаг: шлюз уже получил ?code= и начал его обменивать
-                    // Только после этого момента SESSION становится "настоящим"
                     private var codeCallbackReceived = false
 
                     override fun shouldOverrideUrlLoading(
@@ -55,26 +53,21 @@ class LoginWebViewScreen : Screen {
                         val url = request?.url?.toString() ?: return false
                         val uri = request.url
 
-                        android.util.Log.d("TRACKME_WEBVIEW", "→ Редирект на: $url")
-
-                        // Проверяем строго: хост — шлюз, путь начинается с /login/oauth2/code/
-                        // (НЕ path.contains — иначе ловим redirect_uri= в query-параметрах SSO)
+                        // Строгая проверка code callback: хост шлюза + путь /login/oauth2/code/
+                        // (url.contains() ловил бы этот путь внутри redirect_uri= у SSO)
                         val isCodeCallback = uri.host == ApiConstants.GATEWAY_HOST
                                 && uri.path?.startsWith("/login/oauth2/code/") == true
 
                         if (isCodeCallback) {
-                            android.util.Log.d("TRACKME_WEBVIEW", "✓ Настоящий code callback! code=${uri.getQueryParameter("code")?.take(20)}...")
                             codeCallbackReceived = true
                         }
 
-                        // Финальный редирект после успешного обмена токенов — шлюз отправляет
-                        // пользователя на фронт (/after-login или /streams).
-                        // Перехватываем здесь, не даём WebView уходить на веб-сайт.
-                        val isAfterLogin = url.contains("/after-login") || url.contains("trackme.test.startup-poligon.com/streams")
+                        // После обмена code на токены шлюз редиректит на фронт.
+                        // Перехватываем — не даём WebView уйти на веб-сайт.
+                        val isAfterLogin = url.contains("/after-login")
                         if (isAfterLogin && codeCallbackReceived && !isLoginHandled) {
-                            android.util.Log.d("TRACKME_WEBVIEW", "✓ Финальный редирект перехвачен: $url")
                             handleAuthSuccess()
-                            return true // Останавливаем WebView — не открываем веб-сайт
+                            return true
                         }
 
                         return false
@@ -82,12 +75,10 @@ class LoginWebViewScreen : Screen {
 
                     override fun onPageFinished(view: WebView?, url: String?) {
                         super.onPageFinished(view, url)
-                        if (url == null || isLoginHandled) return
+                        if (url == null || isLoginHandled || !codeCallbackReceived) return
 
-                        android.util.Log.d("TRACKME_WEBVIEW", "Страница загружена: $url | codeReceived=$codeCallbackReceived")
-
-                        // Если шлюз завершил обмен токенов и мы оказались на любой его странице
-                        if (codeCallbackReceived && url.contains(ApiConstants.GATEWAY_HOST)) {
+                        // Запасной вариант: если after-login не поймали в shouldOverride
+                        if (url.contains(ApiConstants.GATEWAY_HOST)) {
                             handleAuthSuccess()
                         }
                     }
@@ -95,16 +86,11 @@ class LoginWebViewScreen : Screen {
                     private fun handleAuthSuccess() {
                         if (isLoginHandled) return
 
-                        // SESSION берём с домена шлюза — именно он его выдаёт
                         val gatewayCookies = CookieManager.getInstance()
                             .getCookie("https://${ApiConstants.GATEWAY_HOST}")
 
-                        android.util.Log.d("TRACKME_WEBVIEW", "Куки шлюза: $gatewayCookies")
-
                         if (gatewayCookies?.contains("SESSION=") == true) {
-                            android.util.Log.i("TRACKME_WEBVIEW", "🚀 SESSION получен после обмена токенов!")
                             isLoginHandled = true
-
                             viewModel.loginFromWebView(gatewayCookies) { role ->
                                 when (role) {
                                     Role.ADMIN, Role.SUPER_ADMIN -> navigator.replaceAll(TeamListScreen())
@@ -112,13 +98,11 @@ class LoginWebViewScreen : Screen {
                                     else                        -> navigator.pop()
                                 }
                             }
-                        } else {
-                            android.util.Log.w("TRACKME_WEBVIEW", "⚠ Ожидали SESSION, но его нет. Куки: $gatewayCookies")
                         }
                     }
                 }
 
-                // Очищаем состояние перед стартом
+                // Сбрасываем состояние WebView перед каждым входом
                 clearCache(true)
                 clearHistory()
                 clearFormData()
@@ -126,10 +110,7 @@ class LoginWebViewScreen : Screen {
 
                 cookieManager.removeAllCookies {
                     cookieManager.flush()
-                    postDelayed({
-                        android.util.Log.d("TRACKME_WEBVIEW", "Старт OAuth: ${ApiConstants.AUTH_TRIGGER_URL}")
-                        loadUrl(ApiConstants.AUTH_TRIGGER_URL)
-                    }, 200)
+                    postDelayed({ loadUrl(ApiConstants.AUTH_TRIGGER_URL) }, 200)
                 }
             }
         })

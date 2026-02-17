@@ -8,14 +8,12 @@ import io.ktor.http.ContentType
 import kotlinx.serialization.json.Json
 
 object HttpClientFactory {
-    val sessionCookieStorage = AcceptAllCookiesStorage()
 
-    fun create(): HttpClient {
+    fun create(sessionStorage: SessionStorage): HttpClient {
         return HttpClient {
-            // HttpCookies сам читает хранилище и подставляет нужные куки в каждый запрос.
-            // Не нужно вручную добавлять header(Cookie, ...) — это создаёт конфликт.
+            // Плагин сам берёт SESSION из sessionStorage и подставляет в каждый запрос
             install(HttpCookies) {
-                storage = sessionCookieStorage
+                storage = sessionStorage.cookieStorage
             }
 
             install(ContentNegotiation) {
