@@ -146,7 +146,7 @@ fun FilterCardContent(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    MarketGrid()
+                    MarketGrid(borderColor = Color.White)
 
                     Spacer(modifier = Modifier.height(20.dp))
 

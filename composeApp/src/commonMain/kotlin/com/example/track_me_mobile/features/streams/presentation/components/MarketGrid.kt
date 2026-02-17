@@ -8,10 +8,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun MarketGrid() {
+fun MarketGrid(borderColor: Color) {
     val markets = remember {
         listOf(
             "AutoNet", "MariNet", "SafeNet", "TechNet",
@@ -39,7 +40,8 @@ fun MarketGrid() {
                         isSelected = selectedStates[i],
                         onCheckedChange = { isChecked ->
                             selectedStates[i] = isChecked
-                        }
+                        },
+                        borderColor = borderColor
                     )
                 }
             }
@@ -53,7 +55,8 @@ fun MarketGrid() {
                     isSelected = selectedStates[i],
                     onCheckedChange = { isChecked ->
                         selectedStates[i] = isChecked
-                    }
+                    },
+                    borderColor = borderColor
                 )
             }
         }

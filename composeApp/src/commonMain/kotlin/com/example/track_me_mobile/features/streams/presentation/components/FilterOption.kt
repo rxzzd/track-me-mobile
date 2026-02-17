@@ -26,7 +26,8 @@ fun FilterOption(
     text: String,
     isSelected: Boolean,
     onCheckedChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    borderColor: Color
 ) {
     val mulishFamily = FontFamily(
         Font(Res.font.Mulish_SemiBold, FontWeight.SemiBold)
@@ -48,7 +49,7 @@ fun FilterOption(
                     .matchParentSize()
                     .border(
                         width = 1.dp,
-                        color = Color.White,
+                        color = borderColor,
                         shape = RoundedCornerShape(2.dp)
                     )
             )
