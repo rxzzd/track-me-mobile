@@ -10,7 +10,7 @@ interface AuthRepository {
     // Вход
     suspend fun login(username: String, password: String, csrf: CsrfToken): Result<Unit>
 
+    suspend fun exchangeCodeForSession(code: String): Result<Unit>
     suspend fun getUserInfo(): Result<UserInfo>
-
     suspend fun syncSession(cookieString: String)
 }

@@ -1,9 +1,11 @@
 package com.example.track_me_mobile.core.domain.models
 
 data class UserInfo(
+    val id: String,
+    val username: String,
+    val fullName: String?,
     val roles: List<Role>
 ) {
-    // Удобное свойство, чтобы понять, куда переходить
     val mainRole: Role
         get() = when {
             roles.contains(Role.SUPER_ADMIN) -> Role.SUPER_ADMIN

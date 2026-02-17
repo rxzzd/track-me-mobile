@@ -12,13 +12,8 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.example.track_me_mobile.core.domain.models.Role
-import com.example.track_me_mobile.core.network.clearWebViewCookies
-import com.example.track_me_mobile.core.network.logDebug
 import com.example.track_me_mobile.core.ui.components.TrackMeButton
 import com.example.track_me_mobile.core.ui.theme.TrackMeDeepPurple
-import com.example.track_me_mobile.features.streams.presentation.StreamListScreen
-import com.example.track_me_mobile.features.teams.presentation.TeamListScreen
 
 class LoginScreen : Screen {
 
@@ -31,29 +26,11 @@ class LoginScreen : Screen {
             isLoading = viewModel.isLoading,
             errorMessage = viewModel.errorMessage,
             onLoginClick = {
-                // 1. Очистка старых сессий перед новым входом
-                clearWebViewCookies()
-
-                // 2. Открытие окна SSO
-                navigator.push(AuthWebViewScreen(onFinish = { capturedCookies ->
-                    // 3. Закрываем WebView
-                    navigator.pop()
-
-                    logDebug("DEBUG_TAG: WebView вернул куки. Проверяем роль...")
-
-                    // 4. Синхронизация сессии и переход по ролям
-                    viewModel.loginFromWebView(capturedCookies) { role ->
-                        when (role) {
-                            Role.ADMIN, Role.SUPER_ADMIN -> navigator.replace(StreamListScreen())
-                            Role.TRACKER -> navigator.replace(TeamListScreen())
-                            else -> logDebug("DEBUG_TAG: Роль не определена, остаемся на месте")
-                        }
-                    }
-                }))
+                // ВМЕСТО запуска лаунчера — просто переходим на экран с WebView
+                navigator.push(getLoginWebViewScreen())
             }
         )
     }
-}
 
 @Composable
 fun LoginScreenContent(
@@ -103,4 +80,5 @@ fun LoginScreenContent(
             }
         }
     }
+}
 }

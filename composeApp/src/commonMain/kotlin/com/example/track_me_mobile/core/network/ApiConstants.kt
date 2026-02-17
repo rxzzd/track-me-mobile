@@ -1,13 +1,17 @@
 package com.example.track_me_mobile.core.network
 
-
 object ApiConstants {
-    // Для обычных запросов за данными оставляем /sso/ (как в Swagger)
-    const val BASE_URL = "https://api.trackme.test.startup-poligon.com/sso/"
+    const val GATEWAY_HOST = "api.trackme.test.startup-poligon.com"
+    const val SSO_HOST     = "sso.trackme.test.startup-poligon.com"
 
-    // А вот для триггера авторизации убираем /sso/ перед /oauth2/
-    // Мы берем ту ссылку, которая 100% сработала у тебя в браузере!
-    const val AUTH_TRIGGER_URL = "https://api.trackme.test.startup-poligon.com/oauth2/authorization/track-me-client"
+    private const val GATEWAY_BASE = "https://$GATEWAY_HOST"
 
-    const val CSRF_ENDPOINT = "${BASE_URL}api/csrf"
+    const val AUTH_TRIGGER_URL =
+        "$GATEWAY_BASE/oauth2/authorization/track-me-client" +
+                "?redirect_uri=$GATEWAY_BASE/login/oauth2/code/track-me-client"
+
+    const val CSRF_ENDPOINT = "$GATEWAY_BASE/csrf"
+
+    // Профиль идёт через шлюз с префиксом /sso/
+    const val ACCOUNT_INFO = "$GATEWAY_BASE/sso/api/v1/account/info"
 }

@@ -6,7 +6,6 @@ import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.example.track_me_mobile.core.domain.models.Role
-import com.example.track_me_mobile.core.network.logDebug
 import com.example.track_me_mobile.features.auth.domain.AuthRepository
 import kotlinx.coroutines.launch
 
@@ -18,48 +17,47 @@ class LoginViewModel(private val repository: AuthRepository) : ScreenModel {
     var errorMessage by mutableStateOf<String?>(null)
         private set
 
-    // Функция для проверки роли ПОСЛЕ того, как пользователь вошел через WebView
-    fun checkAuthAndNavigate(onNavigate: (Role) -> Unit) {
-        screenModelScope.launch {
-            isLoading = true
-            errorMessage = null
-
-            repository.getUserInfo()
-                .onSuccess { userInfo ->
-                    isLoading = false
-                    val role = userInfo.mainRole
-                    if (role == Role.UNKNOWN) {
-                        errorMessage = "Доступ запрещен: роль не определена"
-                    } else {
-                        onNavigate(role)
-                    }
-                }
-                .onFailure { throwable ->
-                    // ВОТ ТУТ МЫ ДОЛЖНЫ ВЫЗВАТЬ ОБРАБОТЧИК
-                    handleAuthError(throwable)
-                }
-        }
+    fun startAuth() {
+        isLoading = true
+        errorMessage = null
     }
+
+    fun setError(message: String) {
+        isLoading = false
+        errorMessage = message
+    }
+
 
     fun loginFromWebView(cookieString: String, onNavigate: (Role) -> Unit) {
         screenModelScope.launch {
+            // Используем println для логирования в общем коде
+            println("VM_AUTH: Начало loginFromWebView. Кука получена.")
+            isLoading = true
+            errorMessage = null
+
             try {
-                isLoading = true
                 repository.syncSession(cookieString)
-                checkAuthAndNavigate(onNavigate)
+                println("VM_AUTH: Сессия синхронизирована в Ktor.")
+
+                val result = repository.getUserInfo()
+
+                result.onSuccess { userInfo ->
+                    println("VM_AUTH: УСПЕХ! Профиль получен. Роль: ${userInfo.mainRole}")
+                    isLoading = false
+                    // Это тот самый вызов, который закрывает WebView и переходит дальше
+                    onNavigate(userInfo.mainRole)
+                }
+
+                result.onFailure { error ->
+                    println("VM_AUTH: ПРОВАЛ! Ошибка API: ${error.message}")
+                    isLoading = false
+                    errorMessage = "Ошибка профиля: ${error.message}"
+                }
             } catch (e: Exception) {
+                println("VM_AUTH: КРИТИЧЕСКАЯ ОШИБКА: ${e.message}")
                 isLoading = false
-                errorMessage = "Ошибка при входе: ${e.message}"
-                logDebug("DEBUG_TAG: Краш во ViewModel подавлен: ${e.message}")
+                errorMessage = e.message
             }
         }
-    }
-
-
-    private fun handleAuthError(throwable: Throwable) {
-        isLoading = false
-        // Выведи текст ошибки из исключения:
-        errorMessage = throwable.message ?: "Неизвестная ошибка"
-        println("DEBUG_TAG: Детальная ошибка -> ${throwable.stackTraceToString()}")
     }
 }

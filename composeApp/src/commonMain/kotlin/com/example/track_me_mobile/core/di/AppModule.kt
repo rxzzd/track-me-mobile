@@ -5,6 +5,8 @@ import com.example.track_me_mobile.features.auth.data.AuthRepositoryImpl
 import com.example.track_me_mobile.features.auth.domain.AuthRepository
 import com.example.track_me_mobile.features.auth.presentation.LoginViewModel
 import org.koin.dsl.module
+import org.koin.core.module.Module
+
 
 val appModule = module {
     single { HttpClientFactory.create() } // 1. Клиент
