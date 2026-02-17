@@ -34,7 +34,9 @@ fun StreamPage() {
     MaterialTheme {
 //        var showContent by remember { mutableStateOf(false) }
         val filterInfoBlocsBounds = remember { mutableStateOf<Rect?>(null) }
-        var showFilterWindow by remember { mutableStateOf(false) }
+        var showFilterPopUp by remember { mutableStateOf(false) }
+
+
         Scaffold(
             topBar = {
                 Box(
@@ -76,12 +78,13 @@ fun StreamPage() {
                     ) {
                         FilterBtn(
                             modifier = Modifier.width(49.dp),
-                            onClick = { showFilterWindow = true })
+                            onClick = { showFilterPopUp = true })
                         SearchBar(modifier = Modifier.width(244.dp))
                         AddBtn(modifier = Modifier.width(24.dp))
                     }
 
                     Spacer(modifier = Modifier.height(31.dp))
+
 
                     Row(
                         modifier = Modifier.width(328.dp),
@@ -97,8 +100,8 @@ fun StreamPage() {
                         FilterInfoBlock("TRL(0)")
                         Spacer(modifier = Modifier.weight(1f))
                     }
-
                     Spacer(modifier = Modifier.height(31.dp))
+
 
                     StreamCard(
                         title = "Название потока",
@@ -126,11 +129,10 @@ fun StreamPage() {
                     )
                 }
                 FilterPopUp(
-                    showWindow = showFilterWindow,
-                    onDismiss = { showFilterWindow = false },
+                    showWindow = showFilterPopUp,
+                    onDismiss = { showFilterPopUp = false },
                     anchorBounds = filterInfoBlocsBounds.value,
-                    verticalOffset =(-24).dp,
-                    previewMode = false
+                    verticalOffset = (-24).dp
                 )
             }
         }

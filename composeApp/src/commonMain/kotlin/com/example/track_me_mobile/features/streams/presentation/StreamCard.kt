@@ -46,12 +46,16 @@ fun StreamCard(
 
     Card(
         modifier = modifier
-//            .shadow(
-//                add shadow
-//            )
+            .padding(bottom = 20.dp)
+            .shadow(
+                elevation = 8.dp,
+                shape = RoundedCornerShape(20.dp),
+                clip = true,
+                ambientColor = Color(0xFF7A00E5),
+                spotColor = Color(0xFF7A00E5)
+            )
             .width(328.dp)
-            .height(165.dp)
-            .padding(bottom = 20.dp),
+            .height(165.dp),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color.White

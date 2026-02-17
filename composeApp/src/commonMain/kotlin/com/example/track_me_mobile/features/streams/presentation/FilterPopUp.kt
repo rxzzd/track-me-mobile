@@ -39,33 +39,9 @@ fun FilterPopUp(
     onDismiss: () -> Unit,
     anchorBounds: Rect? = null,
     verticalOffset: Dp = 0.dp,
-    previewMode: Boolean = false,
     modifier: Modifier = Modifier
 ) {
-    if (previewMode) {
-        Box(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            if (anchorBounds != null) {
-                val density = LocalDensity.current
-                val offsetY = with(density) {
-                    anchorBounds.bottom.toDp() + verticalOffset
-                }
-
-                FilterCardContent(
-                    onDismiss = onDismiss,
-                    modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .offset(y = offsetY)
-                )
-            } else {
-                FilterCardContent(
-                    onDismiss = onDismiss,
-                    modifier = modifier.align(Alignment.TopCenter)
-                )
-            }
-        }
-    } else if (showWindow) {
+    if (showWindow) {
         Popup(
             onDismissRequest = onDismiss,
             properties = PopupProperties(
@@ -80,7 +56,8 @@ fun FilterPopUp(
                     .background(Color.Transparent)
                     .pointerInput(Unit) {
                         detectTapGestures { onDismiss() }
-                    }
+                    },
+                contentAlignment = Alignment.TopCenter
             )
             {
                 if (anchorBounds != null) {
@@ -90,7 +67,7 @@ fun FilterPopUp(
                     }
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth()
+                            .width(328.dp)
                             .padding(top = offsetY)
                             .wrapContentHeight()
                             .clickable { },
