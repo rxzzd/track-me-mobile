@@ -51,6 +51,7 @@ kotlin {
 
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
+            implementation("org.jetbrains.compose.material:material-icons-extended:1.6.11")
             val voyagerVersion = "1.1.0-beta02"
             // Multiplatform
             // Navigator

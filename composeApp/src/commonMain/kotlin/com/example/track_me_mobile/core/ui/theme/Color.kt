@@ -11,3 +11,4 @@ val ErrorRed = Color(0xFFB00020)
 val TrackMeDeepPurple = Color(0xFF4A009C)     // Цвет кнопки и заголовка
 val TrackMeLightBackground = Color(0xFFE6D7FB) // Цвет фона полей ввода
 val TrackMeTextSecondary = Color(0xFF44069A)   // Цвет подсказок
+val TextPurple = Color(0xFF8338EB)

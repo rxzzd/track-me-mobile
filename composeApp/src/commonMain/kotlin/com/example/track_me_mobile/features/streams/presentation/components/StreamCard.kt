@@ -1,0 +1,158 @@
+package com.example.track_me_mobile.features.streams.presentation.components
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.track_me_mobile.core.ui.theme.*
+
+import org.jetbrains.compose.resources.Font
+import org.jetbrains.compose.resources.painterResource
+import trackmemobile.composeapp.generated.resources.Res
+import trackmemobile.composeapp.generated.resources.Montserrat_Regular
+import trackmemobile.composeapp.generated.resources.Montserrat_ExtraBold
+import trackmemobile.composeapp.generated.resources.Inter_28pt_Black
+import trackmemobile.composeapp.generated.resources.base_stream_photo
+
+@Composable
+fun StreamCard(
+    title: String = "Заголовок",
+    markets: String = "Рынки НТИ:",
+    trl: String = "TRL:",
+    flow: String = "Поток:",
+    modifier: Modifier = Modifier
+) {
+    val montserratFamily = FontFamily(
+        Font(Res.font.Montserrat_Regular, FontWeight.Normal),
+        Font(Res.font.Montserrat_ExtraBold, FontWeight.ExtraBold)
+    )
+    val interFamily = FontFamily(
+        Font(Res.font.Inter_28pt_Black, FontWeight.Black)
+    )
+
+    Card(
+        modifier = modifier
+            .padding(bottom = 20.dp)
+            .shadow(
+                elevation = 8.dp,
+                shape = RoundedCornerShape(20.dp),
+                clip = true,
+                ambientColor = Color(0xFF7A00E5),
+                spotColor = Color(0xFF7A00E5)
+            )
+            .width(328.dp)
+            .height(165.dp),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        )
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(20.dp),
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.Start
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(width = 148.dp, height = 125.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color(0xFFF5F5F5))
+                ) {
+                    Image(
+                        painter = painterResource(Res.drawable.base_stream_photo),
+                        contentDescription = "Base photo",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .weight(1f),
+                    verticalArrangement = Arrangement.Top
+                ) {
+                    Text(
+                        text = title,
+                        fontSize = 14.sp,
+                        color = TextPurple,
+                        fontFamily = montserratFamily,
+                        fontWeight = FontWeight.ExtraBold,
+                        maxLines = 2,
+                        lineHeight = 14.sp,
+                        letterSpacing = 0.sp,
+                    )
+
+                    Spacer(modifier = Modifier.height(13.dp))
+
+                    Text(
+                        text = markets,
+                        fontSize = 12.sp,
+                        color = TextBlack,
+                        fontFamily = montserratFamily,
+                        fontWeight = FontWeight.Normal,
+                        maxLines = 2,
+                        lineHeight = 12.sp,
+                        letterSpacing = 0.sp
+                    )
+
+                    Text(
+                        text = trl,
+                        fontSize = 12.sp,
+                        color = TextBlack,
+                        fontFamily = montserratFamily,
+                        fontWeight = FontWeight.Normal,
+                        maxLines = 1,
+                        lineHeight = 12.sp,
+                        letterSpacing = 0.sp
+                    )
+                    Text(
+                        text = flow,
+                        fontSize = 12.sp,
+                        color = TextBlack,
+                        fontFamily = montserratFamily,
+                        fontWeight = FontWeight.Normal,
+                        maxLines = 2,
+                        lineHeight = 12.sp,
+                        letterSpacing = 0.sp
+                    )
+                }
+            }
+            Text(
+                text = "Отчет",
+                fontSize = 12.sp,
+                color = Color(0xFF8338EB),
+                fontFamily = interFamily,
+                fontWeight = FontWeight.Black,
+                maxLines = 1,
+                lineHeight = 12.sp,
+                letterSpacing = 0.sp,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(
+                        bottom = 13.dp,
+                        end = 20.dp
+                    )
+            )
+        }
+    }
+}

@@ -14,6 +14,7 @@ import com.example.track_me_mobile.core.di.appModule
 import com.example.track_me_mobile.core.ui.theme.TrackMeTypography
 import com.example.track_me_mobile.core.ui.theme.TrackMeDeepPurple
 import com.example.track_me_mobile.features.auth.presentation.LoginScreen
+import com.example.track_me_mobile.features.streams.presentation.StreamPage
 
 @Composable
 fun App() {
