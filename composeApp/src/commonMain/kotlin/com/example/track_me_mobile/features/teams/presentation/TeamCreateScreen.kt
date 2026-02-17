@@ -132,7 +132,11 @@ fun TeamCreateScreen(
 
                 Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     Button(
-                        onClick = { onNavigateToInfo(teamData) },
+                        onClick = {
+                            // Создаем копию данных с введенным описанием
+                            val finalData = teamData.copy(description = descriptionText)
+                            onNavigateToInfo(finalData)
+                        },
                         colors = ButtonDefaults.buttonColors(containerColor = TrackMePurple),
                         modifier = Modifier.width(200.dp).height(48.dp),
                         shape = RoundedCornerShape(50)

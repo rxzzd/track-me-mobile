@@ -1,53 +1,79 @@
 package com.example.track_me_mobile.features.teams.presentation
 
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import androidx.compose.runtime.rememberCoroutineScope
+
 class CreateTeamLevel : Screen {
     @Composable
-    override fun Content() { // Проверьте, что здесь есть фигурная скобка
+    override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-        val scope = rememberCoroutineScope()
 
         TeamCreateScreen(
             onBackClick = { navigator.pop() },
             onNavigateToInfo = { teamData ->
+                // Переходим на экран информации
                 navigator.push(InfoTeamLevel(teamData))
             }
         )
     }
 }
 
-data class InfoTeamLevel(val data: TeamFilterData) : Screen {
-    // Генерируем уникальный ключ на основе хэша данных
-    override val key: String = "InfoTeamScreen_${data.hashCode()}"
+data class InfoTeamLevel(val initialData: TeamFilterData) : Screen {
+    override val key: String = "InfoTeamScreen"
 
     @Composable
-    override fun Content() {
+    override fun Content() { // Убедитесь, что здесь есть override
         val navigator = LocalNavigator.currentOrThrow
+
+        // Используем remember(initialData), чтобы стейт обновлялся при смене данных
+        var currentData by remember(initialData) { mutableStateOf(initialData) }
+
         TeamInfoScreen(
-            data = data,
+            data = currentData,
             onBackClick = { navigator.pop() },
-            onEditClick = { navigator.push(EditTeamLevel(data)) }
-        )
+            onEditClick = {
+                navigator.push(EditTeamLevel(
+                    initialData = currentData,
+                    onSave = { updated -> currentData = updated }
+                ))
+            },
+            onMeetingsClick = {
+                              navigator.push(MeetingsTeamLevel(listOf())) // Заглушка встреч
+                }
+            )
+        }
     }
-}
 
-data class EditTeamLevel(val initialData: TeamFilterData) : Screen {
+data class EditTeamLevel(
+    val initialData: TeamFilterData,
+    val onSave: (TeamFilterData) -> Unit
+) : Screen {
+
     @Composable
-    override fun Content() {
+    override fun Content() { // Проверьте наличие override здесь!
         val navigator = LocalNavigator.currentOrThrow
-
-        // ВЫЗОВ ФУНКЦИИ ИЗ TeamEditScreen.kt
         TeamEditScreen(
             initialData = initialData,
             onBackClick = { navigator.pop() },
             onSaveClick = { updatedData ->
+                onSave(updatedData)
                 navigator.pop()
             },
             onDeactivateClick = { navigator.popUntilRoot() }
         )
     }
 }
+    data class MeetingsTeamLevel(val meetings: List<MeetingData>) : Screen {
+        @Composable
+        override fun Content() {
+            val navigator = LocalNavigator.currentOrThrow
+            TeamMeetingsScreen(
+                meetings = meetings,
+                onBackClick = { navigator.pop() },
+                onPlanMeetingClick = { /* Логика */ }
+            )
+        }
+    }
+

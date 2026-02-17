@@ -1,12 +1,12 @@
 package com.example.track_me_mobile.features.teams.presentation
-import androidx.compose.ui.tooling.preview.Preview
+
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -14,16 +14,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.track_me_mobile.core.ui.theme.*
-import androidx.compose.material3.MaterialTheme
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TeamInfoScreen(
-    data: TeamFilterData, // Данные приходят снаружи (из БД или с экрана создания)
+    data: TeamFilterData, // Данные, которые приходят из Create или Edit экрана
     onBackClick: () -> Unit,
-    onEditClick: () -> Unit
+    onEditClick: () -> Unit,
+    onMeetingsClick: () -> Unit
 ) {
+    // Используем Scaffold для базовой разметки (шапка + фон)
     Scaffold(
         topBar = {
             TopAppBar(
@@ -41,24 +41,38 @@ fun TeamInfoScreen(
         Column(
             modifier = Modifier
                 .padding(padding)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()) // Чтобы экран прокручивался, если текста много
                 .padding(16.dp)
-                .verticalScroll(rememberScrollState())
         ) {
-            Text("←", color = TrackMePurple, fontSize = 24.sp, fontWeight = FontWeight.Bold, modifier = Modifier.clickable { onBackClick() })
+            // Кнопка возврата (стрелка)
+            Text(
+                text = "←",
+                color = TrackMePurple,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.clickable { onBackClick() }
+            )
+
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Данные
-            InfoTextRow(label = "Название потока:", value = data.stream.ifEmpty { "Не указано" }, isPurple = true)
+            // Основная информация о потоке
+            InfoTextRow(
+                label = "Название потока:",
+                value = data.stream.ifEmpty { "Не указано" },
+                isPurple = true
+            )
             InfoTextRow(label = "Кол-во команд:", value = "12 команд", isPurple = true)
             InfoTextRow(label = "Дата проведения:", value = "01.01.2025 - 10.10.2025", isPurple = true)
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            TrackerRow() // Из TeamComponents.kt
+            // Компонент трекера (из вашего TeamComponents)
+            TrackerRow()
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Рынки
+            // Секция Рынков НТИ
             Text("Рынки НТИ:", fontSize = 14.sp, color = TextBlack)
             Spacer(modifier = Modifier.height(8.dp))
             Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {
@@ -66,7 +80,7 @@ fun TeamInfoScreen(
                     PurpleChip(text = "Нет рынков")
                 } else {
                     data.markets.forEach { market ->
-                        PurpleChip(text = market) // Из TeamComponents.kt
+                        PurpleChip(text = market)
                         Spacer(modifier = Modifier.width(8.dp))
                     }
                 }
@@ -81,7 +95,7 @@ fun TeamInfoScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Описание
+            // --- БЛОК ОПИСАНИЯ (Здесь отображается созданный/отредактированный текст) ---
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -89,54 +103,49 @@ fun TeamInfoScreen(
                     .padding(16.dp)
             ) {
                 Text(
-                    text = "Описание карточки команд... (здесь будет текст)",
+                    // Мы берем описание напрямую из объекта 'data'.
+                    // Когда навигация обновляет этот объект, Compose автоматически перерисует текст.
+                    text = data.description.ifEmpty { "Описание отсутствует" },
                     color = TextBlack,
                     fontSize = 14.sp,
                     lineHeight = 20.sp
                 )
             }
 
-            Spacer(modifier = Modifier.weight(1f))
-            Spacer(modifier = Modifier.height(24.dp))
+            // Пружина (Spacer с весом), чтобы кнопки всегда были внизу
+            Spacer(modifier = Modifier.height(40.dp))
 
-            // Кнопки
+            // --- НИЖНИЙ БЛОК КНОПОК ---
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                TextButton(onClick = onEditClick) {
-                    Text("Редактировать", color = TrackMePurple, fontSize = 16.sp)
+                // Кнопка Редактировать
+                TextButton(
+                    onClick = onEditClick,
+                    modifier = Modifier.height(45.dp)
+                ) {
+                    Text(
+                        text = "Редактировать",
+                        color = TrackMePurple,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium
+                    )
                 }
 
+                // Кнопка Встречи
                 Button(
-                    onClick = { /* Встречи */ },
+                    onClick = onMeetingsClick,
                     colors = ButtonDefaults.buttonColors(containerColor = TrackMePurple),
                     shape = RoundedCornerShape(50),
-                    modifier = Modifier.height(45.dp).width(150.dp)
+                    modifier = Modifier
+                        .height(45.dp)
+                        .width(150.dp)
                 ) {
                     Text("Встречи", color = Color.White, fontWeight = FontWeight.Bold)
                 }
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun TeamInfoScreenPreview() {
-
-    val sampleData = TeamFilterData(
-        stream = "Информационные технологии",
-        markets = listOf("HealthNet", "TechNet", "SafeNet"),
-        trl = "6-8"
-    )
-
-    MaterialTheme {
-        TeamInfoScreen(
-            data = sampleData,
-            onBackClick = { /* Ничего не делаем в превью */ },
-            onEditClick = { /* Ничего не делаем в превью */ }
-        )
     }
 }

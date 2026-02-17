@@ -13,15 +13,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.track_me_mobile.core.ui.theme.*
 
-// --- Модель данных ---
+// --- Обновленная модель данных ---
 data class TeamFilterData(
     val stream: String = "",
     val markets: List<String> = emptyList(),
-    val trl: String = ""
+    val trl: String = "",
+    val description: String = "" // Новое поле
+)
+
+// Модель для встреч
+data class MeetingData(
+    val date: String,
+    val title: String
 )
 
 // --- Общие UI компоненты ---
-
 @Composable
 fun TrackerRow() {
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -51,7 +57,8 @@ fun PurpleChip(text: String) {
 @Composable
 fun InfoTextRow(label: String, value: String, isPurple: Boolean = false) {
     Row(modifier = Modifier.padding(vertical = 4.dp)) {
-        Text(text = "$label ", fontSize = 14.sp, color = TextBlack)
+        Text(text = label, fontSize = 14.sp, color = TextBlack)
+        Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = value,
             fontSize = 14.sp,
