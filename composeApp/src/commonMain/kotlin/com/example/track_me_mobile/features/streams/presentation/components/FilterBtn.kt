@@ -1,4 +1,4 @@
-package com.example.track_me_mobile.features.streams.presentation
+package com.example.track_me_mobile.features.streams.presentation.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
