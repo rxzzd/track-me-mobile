@@ -42,7 +42,6 @@ fun StreamPage() {
         val filterInfoBlocsBounds = remember { mutableStateOf<Rect?>(null) }
         var showFilterPopUp by remember { mutableStateOf(false) }
 
-
         Scaffold(
             topBar = {
                 Box(
