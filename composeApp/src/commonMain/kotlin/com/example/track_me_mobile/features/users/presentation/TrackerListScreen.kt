@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.track_me_mobile.core.domain.models.Role
-
+import com.example.track_me_mobile.features.profile.presentation.components.ProfileTopHeader
 import com.example.track_me_mobile.features.tracker_list.domain.models.TrackerUser
 import com.example.track_me_mobile.features.tracker_list.presentation.components.SearchBar
 import com.example.track_me_mobile.features.tracker_list.presentation.components.TrackerItem
@@ -58,7 +58,7 @@ fun TrackerListContent(
                 .padding(horizontal = 16.dp)
         ) {
             // Отступ, равный высоте хедера (100.dp), чтобы контент не залез ПОД фиолетовую панель
-            Spacer(Modifier.height(100.dp))
+            Spacer(Modifier.height(80.dp))
 
             Spacer(Modifier.height(20.dp))
 
@@ -95,7 +95,7 @@ fun TrackerListContent(
             }
         }
 
-
+        ProfileTopHeader()
 
     }
 }
@@ -148,7 +148,7 @@ fun TrackMeHeader_Preview() {
             .fillMaxSize()
             .background(Color.White) // Фон всего экрана
     ) {
-        
+
 
         // Тестовый контент под хедером
         Column(

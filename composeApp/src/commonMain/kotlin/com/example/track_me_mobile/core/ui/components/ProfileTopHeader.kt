@@ -21,8 +21,10 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.example.track_me_mobile.core.ui.theme.TrackMePurple
-
+import com.example.track_me_mobile.core.navigation.ProfileScreen
 class ProfileMenuShape(val density: Density) : Shape {
     override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density): Outline {
         val path = Path().apply {
@@ -61,8 +63,8 @@ class ProfileMenuShape(val density: Density) : Shape {
 
 @Composable
 fun ProfileTopHeader() {
+    val navigator = LocalNavigator.currentOrThrow
     var expanded by remember { mutableStateOf(false) }
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -122,7 +124,10 @@ fun ProfileTopHeader() {
                             modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp, top = 12.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            MenuTextItem("Личный кабинет") { expanded = false }
+                            MenuTextItem("Личный кабинет") {
+                                expanded = false
+                                navigator.push(ProfileScreen())
+                            }
                             MenuTextItem("Трекеры") { expanded = false }
                             MenuTextItem("Потоки", isBold = true) { expanded = false }
                             MenuTextItem("Все команды") { expanded = false }
