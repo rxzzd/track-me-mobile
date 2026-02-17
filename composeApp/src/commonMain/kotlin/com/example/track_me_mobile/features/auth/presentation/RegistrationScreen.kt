@@ -119,11 +119,11 @@ fun RegistrationScreen() {
     val cleanTg = telegram.removePrefix("@")
     val tgContentRegex = "^[a-zA-Z0-9_]*$".toRegex()
     val telegramContentValid = tgContentRegex.matches(cleanTg)
-    val telegramLengthValid = cleanTg.length in 4..20
+    val telegramLengthValid = cleanTg.length in 5..32
     val telegramValid = cleanTg.isNotEmpty() && telegramContentValid && telegramLengthValid
     val telegramError = when {
         cleanTg.isEmpty() -> "Введите имя пользователя"
-        !telegramLengthValid -> "Telegram ID должен быть от 4 до 20 символов"
+        !telegramLengthValid -> "Telegram ID должен быть от 5 до 32 символов"
         !telegramContentValid -> "Только латинские буквы"
         else -> null
     }
