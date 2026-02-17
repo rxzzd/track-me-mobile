@@ -6,6 +6,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.transitions.SlideTransition
 import com.example.track_me_mobile.features.auth.presentation.LoginScreen
+import com.example.track_me_mobile.features.meetings.presentation.MeetingNavigation
 import com.example.track_me_mobile.features.profile.presentation.ProfileEditScreen
 import com.example.track_me_mobile.features.profile.presentation.ProfileScreen
 import com.example.track_me_mobile.features.profile.presentation.ProfileNavigation
@@ -14,6 +15,9 @@ import com.example.track_me_mobile.features.profile.presentation.ProfileNavigati
 fun App() {
     MaterialTheme {
         // Вызываем навигатор, который сам решит, какой экран показать
-        ProfileNavigation()
+        // В файле App.kt
+        MeetingNavigation(onBack = {
+            // Здесь логика возврата, например: navController.popBackStack(
+        })
     }
 }
