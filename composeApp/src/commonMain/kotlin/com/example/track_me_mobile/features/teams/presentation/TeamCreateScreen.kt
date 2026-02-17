@@ -12,24 +12,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.track_me_mobile.core.ui.theme.*
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.mutableStateOf
-@OptIn(ExperimentalMaterial3Api::class)
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TeamCreateScreen(
     onBackClick: () -> Unit,
-    onNavigateToInfo: (TeamFilterData) -> Unit // Переход на экран просмотра
+    onNavigateToInfo: (TeamFilterData) -> Unit
 ) {
     var showFilter by remember { mutableStateOf(false) }
     var teamData by remember { mutableStateOf(TeamFilterData()) }
+    var descriptionText by remember { mutableStateOf("") }
 
     if (showFilter) {
         TeamFilterScreen(
@@ -51,7 +48,12 @@ fun TeamCreateScreen(
                             Icon(Icons.Default.Menu, contentDescription = null, tint = Color.White)
                         }
                     },
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = TrackMePurple)
+                    // Жестко фиксируем цвета шапки
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = TrackMePurple,
+                        titleContentColor = Color.White,
+                        actionIconContentColor = Color.White
+                    )
                 )
             },
             containerColor = BackgroundWhite
@@ -59,17 +61,25 @@ fun TeamCreateScreen(
             Column(
                 modifier = Modifier
                     .padding(padding)
-                    .padding(16.dp)
+                    .fillMaxSize()
+                    .imePadding() // Отступ для клавиатуры
                     .verticalScroll(rememberScrollState())
+                    .padding(16.dp)
             ) {
-                // Стрелка назад
-                Text("←", color = TrackMePurple, fontSize = 24.sp, fontWeight = FontWeight.Bold, modifier = Modifier.clickable { onBackClick() })
-                Spacer(modifier = Modifier.height(24.dp))
+                // Стрелка назад - всегда фиолетовая
+                Text(
+                    text = "←",
+                    color = TrackMePurple,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.clickable { onBackClick() }
+                )
 
-                TrackerRow() // Из TeamComponents.kt
+                Spacer(modifier = Modifier.height(24.dp))
+                TrackerRow()
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // Кнопки выбора
+                // Секции выбора (теперь кнопки стоят как надо)
                 AddSectionRow(label = "Поток:", value = teamData.stream, onAddClick = { showFilter = true })
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -81,30 +91,56 @@ fun TeamCreateScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Поле описания
-                Box(
+                // ПОЛЕ ВВОДА С ФИКСИРОВАННЫМИ ЦВЕТАМИ
+                OutlinedTextField(
+                    value = descriptionText,
+                    onValueChange = { descriptionText = it },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(150.dp)
-                        .border(1.dp, TrackMePurple.copy(alpha = 0.5f), RoundedCornerShape(16.dp))
-                        .padding(16.dp)
-                ) {
-                    Text("/", color = TextGray, fontSize = 14.sp)
-                }
+                        .height(150.dp),
+                    textStyle = TextStyle(
+                        color = Color.Black, // Основной цвет текста
+                        fontSize = 14.sp
+                    ),
+                    placeholder = {
+                        Text("Описание карточки команд...", color = TextGray)
+                    },
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        // Текст внутри поля (фокус и без)
+                        focusedTextColor = Color.Black,
+                        unfocusedTextColor = Color.Black,
+
+                        // Цвет рамки
+                        focusedBorderColor = TrackMePurple,
+                        unfocusedBorderColor = TrackMePurple, // Убрал alpha, чтобы не было "прозрачности"
+
+                        // Цвета контейнера (делаем всегда прозрачным, чтобы фон не белел)
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+
+                        // Курсор
+                        cursorColor = TrackMePurple,
+
+                        // Это отключит системное изменение цвета при ошибках или наведении
+                        errorTextColor = Color.Black,
+                        disabledTextColor = Color.Black
+                    )
+                )
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // Кнопка Создать -> Переход на следующий экран
                 Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     Button(
                         onClick = { onNavigateToInfo(teamData) },
                         colors = ButtonDefaults.buttonColors(containerColor = TrackMePurple),
-                        modifier = Modifier.width(200.dp).height(45.dp),
-                        shape = RoundedCornerShape(percent = 50)
+                        modifier = Modifier.width(200.dp).height(48.dp),
+                        shape = RoundedCornerShape(50)
                     ) {
-                        Text("Создать", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        Text("Создать", color = Color.White, fontWeight = FontWeight.Bold)
                     }
                 }
+                Spacer(modifier = Modifier.height(24.dp))
             }
         }
     }
@@ -112,15 +148,27 @@ fun TeamCreateScreen(
 
 @Composable
 fun AddSectionRow(label: String, value: String, onAddClick: () -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(text = label, fontSize = 14.sp, color = TextBlack)
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+        // Убрали fillMaxWidth(), чтобы элементы не разлетались
+    ) {
+        // Текст заголовка - всегда черный
+        Text(text = label, fontSize = 14.sp, color = Color.Black)
+
         Spacer(modifier = Modifier.width(16.dp))
 
-        if (value.isNotEmpty() && value != "Не выбрано") {
-            Text(text = value, fontSize = 14.sp, color = TrackMePurple, fontWeight = FontWeight.Bold)
+        // Значение (если выбрано)
+        if (value.isNotEmpty()) {
+            Text(
+                text = value,
+                fontSize = 14.sp,
+                color = TrackMePurple,
+                fontWeight = FontWeight.Bold
+            )
             Spacer(modifier = Modifier.width(8.dp))
         }
 
+        // Кнопка "+" стоит сразу за текстом
         Box(
             modifier = Modifier
                 .size(32.dp)
@@ -131,15 +179,5 @@ fun AddSectionRow(label: String, value: String, onAddClick: () -> Unit) {
         ) {
             Text("+", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
         }
-    }
-}
-@Preview(showBackground = true)
-@Composable
-fun TeamCreateScreenPreview() {
-    MaterialTheme {
-        TeamCreateScreen(
-            onBackClick = {},
-            onNavigateToInfo = {}
-        )
     }
 }
