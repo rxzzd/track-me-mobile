@@ -59,7 +59,7 @@ class ProfileEditScreen : Screen {
         ProfileEditScreenContent(
             initialName     = profile.fullName,
             initialEmail    = profile.email,
-            initialPhone    = profile.phoneNumber,
+            initialPhone    = profile.phoneNumber ?: "+7",
             isSaving        = viewModel.isSaving,
             errorMessage    = viewModel.errorMessage,
             onSaveComplete  = { name, email, phone ->
@@ -209,7 +209,6 @@ fun ProfileInputRow(
 
     LaunchedEffect(isEnabled) {
         if (isEnabled) {
-            // Устанавливаем курсор в конец текста при активации
             textFieldValueState = textFieldValueState.copy(
                 selection = TextRange(textFieldValueState.text.length)
             )
@@ -223,12 +222,7 @@ fun ProfileInputRow(
                 modifier = Modifier
                     .weight(1f)
                     .height(42.dp)
-                    // ДОБАВЛЕНО: Теперь все поле кликабельно
-                    .clickable {
-                        if (!isEnabled) {
-                            isEnabled = true
-                        }
-                    },
+                    .clickable { isEnabled = true }, // <-- Добавлено сюда
                 color    = TrackMePurpleLight.copy(alpha = 0.2f),
                 shape    = RoundedCornerShape(50),
                 border   = androidx.compose.foundation.BorderStroke(
@@ -245,15 +239,8 @@ fun ProfileInputRow(
                         },
                         enabled       = isEnabled,
                         singleLine    = true,
-                        textStyle     = TextStyle(
-                            color = TrackMePurple,
-                            fontSize = 16.sp,
-                            textAlign = TextAlign.Center
-                        ),
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = keyboardType,
-                            imeAction = ImeAction.Done
-                        ),
+                        textStyle     = TextStyle(color = TrackMePurple, fontSize = 16.sp, textAlign = TextAlign.Center),
+                        keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = ImeAction.Done),
                         keyboardActions = KeyboardActions(onDone = {
                             isEnabled = false
                             focusManager.clearFocus()
@@ -267,8 +254,6 @@ fun ProfileInputRow(
                 }
             }
             Spacer(modifier = Modifier.width(12.dp))
-
-            // Иконка теперь просто дублирует поведение или отключает фокус
             IconButton(
                 onClick  = {
                     isEnabled = !isEnabled
@@ -276,20 +261,12 @@ fun ProfileInputRow(
                 },
                 modifier = Modifier.size(24.dp)
             ) {
-                Icon(
-                    Icons.Default.Edit,
-                    contentDescription = null,
-                    tint = if (isEnabled) Color.Gray else TrackMePurple
-                )
+                Icon(Icons.Default.Edit, null, tint = if (isEnabled) Color.Gray else TrackMePurple)
             }
         }
         if (isError && isEnabled) {
-            Text(
-                text = errorText,
-                color = Color.Red,
-                fontSize = 12.sp,
-                modifier = Modifier.padding(start = 20.dp, top = 2.dp)
-            )
+            Text(errorText, color = Color.Red, fontSize = 12.sp,
+                modifier = Modifier.padding(start = 20.dp, top = 2.dp))
         }
     }
 }

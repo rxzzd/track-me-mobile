@@ -16,9 +16,16 @@ class ProfileRepositoryImpl(
 
     override suspend fun getAccountInfo(): Result<UserProfile> {
         return try {
+            println("PROFILE_REPO: GET ${ApiConstants.ACCOUNT_INFO}")
+
             val dto = httpClient.get(ApiConstants.ACCOUNT_INFO).body<AccountInfoDto>()
+
+            println("PROFILE_REPO: Успешно загружен профиль: ${dto.username}, roles: ${dto.roles}")
+
             Result.success(dto.toDomain())
         } catch (e: Exception) {
+            println("PROFILE_REPO: Ошибка загрузки профиля: ${e.message}")
+            e.printStackTrace()
             Result.failure(e)
         }
     }

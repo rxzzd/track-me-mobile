@@ -54,7 +54,7 @@ class ProfileScreen : Screen {
                 ProfileScreenContent(
                     name      = p.fullName,
                     email     = p.email,
-                    phone     = p.phoneNumber,
+                    phone     = p.phoneNumber ?: "Не указан",
                     // telegram пока не приходит с сервера — берём из username как fallback
                     telegram  = "@${p.username}",
                     role      = p.roles.firstOrNull() ?: "Пользователь",
