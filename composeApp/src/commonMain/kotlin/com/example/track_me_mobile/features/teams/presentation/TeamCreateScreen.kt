@@ -20,11 +20,11 @@ import com.example.track_me_mobile.core.ui.theme.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TeamCreateScreen(
+    viewModel: TeamViewModel,
     onBackClick: () -> Unit,
-    onNavigateToInfo: (TeamFilterData) -> Unit
+    onNavigateToInfo: () -> Unit   // данные уже в ViewModel, ничего не передаём
 ) {
-    var teamData by remember { mutableStateOf(TeamFilterData()) }
-    var descriptionText by remember { mutableStateOf("") }
+    val teamData by viewModel.teamData.collectAsState()
 
     val streams = listOf("Название потока 1", "Название потока 2", "Название потока 3")
     val markets = listOf("AutoNet", "HealthNet", "MariNet", "NeuroNet", "SafeNet", "FoodNet", "TechNet", "WearNet")
@@ -39,11 +39,7 @@ fun TeamCreateScreen(
                         Icon(Icons.Default.Menu, contentDescription = null, tint = Color.White)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = TrackMePurple,
-                    titleContentColor = Color.White,
-                    actionIconContentColor = Color.White
-                )
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = TrackMePurple)
             )
         },
         containerColor = BackgroundWhite
@@ -65,14 +61,19 @@ fun TeamCreateScreen(
             )
 
             Spacer(modifier = Modifier.height(24.dp))
-            TrackerRow()
+
+            TrackerRow(
+                name = teamData.trackerName,
+                onNameChanged = { viewModel.updateTrackerName(it) }
+            )
+
             Spacer(modifier = Modifier.height(20.dp))
 
             DropdownSectionRow(
                 label = "Поток:",
                 options = streams,
                 selectedValue = teamData.stream,
-                onValueSelected = { teamData = teamData.copy(stream = it) }
+                onValueSelected = { viewModel.updateStream(it) }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -81,7 +82,7 @@ fun TeamCreateScreen(
                 label = "Рынки НТИ:",
                 options = markets,
                 selectedValues = teamData.markets,
-                onValuesChanged = { teamData = teamData.copy(markets = it) }
+                onValuesChanged = { viewModel.updateMarkets(it) }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -90,19 +91,19 @@ fun TeamCreateScreen(
                 label = "TRL:",
                 options = trlList,
                 selectedValue = teamData.trl,
-                onValueSelected = { teamData = teamData.copy(trl = it) }
+                onValueSelected = { viewModel.updateTrl(it) }
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
             OutlinedTextField(
-                value = descriptionText,
-                onValueChange = { descriptionText = it },
+                value = teamData.description,
+                onValueChange = { viewModel.updateDescription(it) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(150.dp),
                 textStyle = TextStyle(color = Color.Black, fontSize = 14.sp),
-                placeholder = { Text("Описание карточки команд...", color = TextGray) },
+                placeholder = { Text("Описание карточки команды...", color = TextGray) },
                 shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedTextColor = Color.Black,
@@ -111,9 +112,7 @@ fun TeamCreateScreen(
                     unfocusedBorderColor = TrackMePurple,
                     focusedContainerColor = Color.Transparent,
                     unfocusedContainerColor = Color.Transparent,
-                    cursorColor = TrackMePurple,
-                    errorTextColor = Color.Black,
-                    disabledTextColor = Color.Black
+                    cursorColor = TrackMePurple
                 )
             )
 
@@ -121,10 +120,7 @@ fun TeamCreateScreen(
 
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Button(
-                    onClick = {
-                        val finalData = teamData.copy(description = descriptionText)
-                        onNavigateToInfo(finalData)
-                    },
+                    onClick = { onNavigateToInfo() },
                     colors = ButtonDefaults.buttonColors(containerColor = TrackMePurple),
                     modifier = Modifier.width(200.dp).height(48.dp),
                     shape = RoundedCornerShape(50)
@@ -132,6 +128,7 @@ fun TeamCreateScreen(
                     Text("Создать", color = Color.White, fontWeight = FontWeight.Bold)
                 }
             }
+
             Spacer(modifier = Modifier.height(24.dp))
         }
     }
@@ -165,14 +162,10 @@ fun DropdownSectionRow(
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold
                 )
-                Spacer(modifier = Modifier.width(6.dp))
 
             }
 
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
-            ) {
+            DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                 options.forEach { option ->
                     DropdownMenuItem(
                         text = {
@@ -222,7 +215,6 @@ fun MultiDropdownSectionRow(
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold
                 )
-                Spacer(modifier = Modifier.width(6.dp))
 
             }
 
@@ -251,8 +243,7 @@ fun MultiDropdownSectionRow(
                             }
                         },
                         onClick = {
-                            if (isChecked) selected.remove(option)
-                            else selected.add(option)
+                            if (isChecked) selected.remove(option) else selected.add(option)
                             onValuesChanged(selected.toList())
                         }
                     )

@@ -3,42 +3,109 @@ package com.example.track_me_mobile.features.teams.presentation
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.track_me_mobile.core.ui.theme.*
 
-// --- Обновленная модель данных ---
 data class TeamFilterData(
     val stream: String = "",
     val markets: List<String> = emptyList(),
     val trl: String = "",
-    val description: String = "" // Новое поле
+    val description: String = "",
+    val trackerName: String = ""
 )
 
-// Модель для встреч
 data class MeetingData(
     val date: String,
     val title: String
 )
 
-// --- Общие UI компоненты ---
 @Composable
-fun TrackerRow() {
+fun TrackerRow(
+    name: String = "",
+    onNameChanged: ((String) -> Unit)? = null
+) {
+    var isEditing by remember { mutableStateOf(false) }
+    var editText by remember(name) { mutableStateOf(name) }
+    val focusRequester = remember { FocusRequester() }
+
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text("Трекер:", fontSize = 14.sp, color = TextBlack)
         Spacer(modifier = Modifier.width(16.dp))
+
         Box(
             modifier = Modifier
                 .background(TrackMePurpleLight.copy(alpha = 0.3f), RoundedCornerShape(50))
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            Text("Иванов Иван Иванович", color = TrackMePurple, fontSize = 14.sp)
+            if (isEditing && onNameChanged != null) {
+                BasicTextField(
+                    value = editText,
+                    onValueChange = { editText = it },
+                    textStyle = TextStyle(color = TrackMePurple, fontSize = 14.sp),
+                    cursorBrush = SolidColor(TrackMePurple),
+                    singleLine = true,
+                    modifier = Modifier
+                        .focusRequester(focusRequester)
+                        .widthIn(min = 80.dp),
+                    decorationBox = { innerTextField ->
+                        if (editText.isEmpty()) {
+                            Text(
+                                text = "Введите имя трекера",
+                                color = TrackMePurple.copy(alpha = 0.4f),
+                                fontSize = 14.sp
+                            )
+                        }
+                        innerTextField()
+                    }
+                )
+                LaunchedEffect(Unit) { focusRequester.requestFocus() }
+            } else {
+                // Если имя пустое — показываем placeholder
+                Text(
+                    text = name.ifEmpty { "Введите имя трекера" },
+                    color = if (name.isEmpty()) TrackMePurple.copy(alpha = 0.4f) else TrackMePurple,
+                    fontSize = 14.sp
+                )
+            }
+        }
+
+        if (onNameChanged != null) {
+            Spacer(modifier = Modifier.width(8.dp))
+            IconButton(
+                onClick = {
+                    if (isEditing) {
+                        onNameChanged(editText)
+                        isEditing = false
+                    } else {
+                        isEditing = true
+                    }
+                },
+                modifier = Modifier.size(32.dp)
+            ) {
+                Icon(
+                    imageVector = if (isEditing) Icons.Default.Check else Icons.Default.Edit,
+                    contentDescription = if (isEditing) "Сохранить" else "Редактировать",
+                    tint = TrackMePurple,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
         }
     }
 }

@@ -18,12 +18,15 @@ import com.example.track_me_mobile.core.ui.theme.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TeamInfoScreen(
-    data: TeamFilterData, // Данные, которые приходят из Create или Edit экрана
+    viewModel: TeamViewModel,
     onBackClick: () -> Unit,
     onEditClick: () -> Unit,
-    onMeetingsClick: () -> Unit
+    onMeetingsClick: () -> Unit,
+    onFilterClick: () -> Unit
 ) {
-    // Используем Scaffold для базовой разметки (шапка + фон)
+    // Подписка на StateFlow — экран перерисуется автоматически при любом изменении
+    val data by viewModel.teamData.collectAsState()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -42,10 +45,9 @@ fun TeamInfoScreen(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState()) // Чтобы экран прокручивался, если текста много
+                .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            // Кнопка возврата (стрелка)
             Text(
                 text = "←",
                 color = TrackMePurple,
@@ -56,23 +58,16 @@ fun TeamInfoScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Основная информация о потоке
-            InfoTextRow(
-                label = "Название потока:",
-                value = data.stream.ifEmpty { "Не указано" },
-                isPurple = true
-            )
+            InfoTextRow(label = "Название потока:", value = data.stream.ifEmpty { "Не указано" }, isPurple = true)
             InfoTextRow(label = "Кол-во команд:", value = "12 команд", isPurple = true)
             InfoTextRow(label = "Дата проведения:", value = "01.01.2025 - 10.10.2025", isPurple = true)
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Компонент трекера (из вашего TeamComponents)
-            TrackerRow()
+            TrackerRow(name = data.trackerName) // только отображение, без редактирования
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Секция Рынков НТИ
             Text("Рынки НТИ:", fontSize = 14.sp, color = TextBlack)
             Spacer(modifier = Modifier.height(8.dp))
             Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {
@@ -88,14 +83,12 @@ fun TeamInfoScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // TRL
             Text("TRL:", fontSize = 14.sp, color = TextBlack)
             Spacer(modifier = Modifier.height(8.dp))
             PurpleChip(text = data.trl.ifEmpty { "Не указано" })
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // --- БЛОК ОПИСАНИЯ (Здесь отображается созданный/отредактированный текст) ---
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -103,8 +96,6 @@ fun TeamInfoScreen(
                     .padding(16.dp)
             ) {
                 Text(
-                    // Мы берем описание напрямую из объекта 'data'.
-                    // Когда навигация обновляет этот объект, Compose автоматически перерисует текст.
                     text = data.description.ifEmpty { "Описание отсутствует" },
                     color = TextBlack,
                     fontSize = 14.sp,
@@ -112,20 +103,14 @@ fun TeamInfoScreen(
                 )
             }
 
-            // Пружина (Spacer с весом), чтобы кнопки всегда были внизу
             Spacer(modifier = Modifier.height(40.dp))
 
-            // --- НИЖНИЙ БЛОК КНОПОК ---
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // Кнопка Редактировать
-                TextButton(
-                    onClick = onEditClick,
-                    modifier = Modifier.height(45.dp)
-                ) {
+                TextButton(onClick = onEditClick, modifier = Modifier.height(45.dp)) {
                     Text(
                         text = "Редактировать",
                         color = TrackMePurple,
@@ -134,14 +119,11 @@ fun TeamInfoScreen(
                     )
                 }
 
-                // Кнопка Встречи
                 Button(
                     onClick = onMeetingsClick,
                     colors = ButtonDefaults.buttonColors(containerColor = TrackMePurple),
                     shape = RoundedCornerShape(50),
-                    modifier = Modifier
-                        .height(45.dp)
-                        .width(150.dp)
+                    modifier = Modifier.height(45.dp).width(150.dp)
                 ) {
                     Text("Встречи", color = Color.White, fontWeight = FontWeight.Bold)
                 }

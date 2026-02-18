@@ -10,27 +10,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.track_me_mobile.core.ui.theme.*
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.mutableStateOf
+
 @Composable
 fun TeamFilterScreen(
-    currentData: TeamFilterData, // Модель из TeamComponents.kt
-    onClose: () -> Unit,
-    onApply: (TeamFilterData) -> Unit,
-    onReset: () -> Unit
+    viewModel: TeamViewModel,   // ← принимаем ViewModel вместо currentData + колбэков
+    onClose: () -> Unit
 ) {
-    // 1. Локальные состояния для редактирования
-    var selectedStream by remember { mutableStateOf(currentData.stream) }
-    var selectedTrl by remember { mutableStateOf(currentData.trl) }
+    // Читаем текущие данные из ViewModel как начальное состояние черновика
+    val currentData by viewModel.teamData.collectAsState()
 
-    // Используем remember { mutableStateListOf(...) }, чтобы Compose видел изменения в списке
-    val selectedMarkets = remember {
+    // Локальный черновик фильтра — не трогаем ViewModel, пока не нажато "Применить"
+    var selectedStream by remember(currentData) { mutableStateOf(currentData.stream) }
+    var selectedTrl by remember(currentData) { mutableStateOf(currentData.trl) }
+    val selectedMarkets = remember(currentData) {
         mutableStateListOf<String>().apply { addAll(currentData.markets) }
     }
 
@@ -43,7 +38,6 @@ fun TeamFilterScreen(
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            // Кнопка закрытия
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopEnd) {
                 IconButton(onClick = onClose) {
                     Icon(
@@ -54,13 +48,12 @@ fun TeamFilterScreen(
                 }
             }
 
-            // Основной контент (скроллится)
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .verticalScroll(rememberScrollState())
             ) {
-                // --- Секция: Поток ---
+                // --- Поток ---
                 FilterHeader("Поток")
                 val streams = listOf("Название потока 1", "Название потока 2", "Название потока 3")
                 streams.forEach { stream ->
@@ -73,7 +66,7 @@ fun TeamFilterScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // --- Секция: Рынки НТИ ---
+                // --- Рынки НТИ ---
                 FilterHeader("Рынки НТИ")
                 val markets = listOf("AutoNet", "HealthNet", "MariNet", "NeuroNet", "SafeNet", "FoodNet", "TechNet", "WearNet")
                 markets.chunked(2).forEach { rowItems ->
@@ -95,7 +88,7 @@ fun TeamFilterScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // --- Секция: TRL ---
+                // --- TRL ---
                 FilterHeader("TRL")
                 val trlList = listOf("0-2", "3-5", "6-8", "9-10")
                 trlList.forEach { trl ->
@@ -107,7 +100,7 @@ fun TeamFilterScreen(
                 }
             }
 
-            // Нижняя панель с кнопками
+            // Нижняя панель кнопок
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -116,46 +109,37 @@ fun TeamFilterScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 TextButton(onClick = {
+                    // Сбрасываем черновик и сразу применяем сброс в ViewModel
                     selectedStream = ""
                     selectedTrl = ""
                     selectedMarkets.clear()
-                    onReset()
-                }) {
-                    Text(
-                        "Сбросить",
-                        color = Color.White,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
+                    viewModel.applyEdit(
+                        currentData.copy(stream = "", trl = "", markets = emptyList())
                     )
+                }) {
+                    Text("Сбросить", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 }
 
                 Spacer(modifier = Modifier.width(16.dp))
 
                 TextButton(onClick = {
-                    // Возвращаем собранные данные назад
-                    onApply(
-                        TeamFilterData(
+                    // Применяем черновик в ViewModel через applyEdit
+                    viewModel.applyEdit(
+                        currentData.copy(
                             stream = selectedStream,
                             markets = selectedMarkets.toList(),
                             trl = selectedTrl
                         )
                     )
+                    onClose()
                 }) {
-                    Text(
-                        "Применить",
-                        color = Color.White,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Text("Применить", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
     }
 }
 
-// --- Вспомогательные компоненты (внутренние для этого файла) ---
-
-// Убрали private, чтобы функции были доступны во всем пакете presentation
 @Composable
 fun FilterHeader(title: String) {
     Text(
@@ -190,20 +174,5 @@ fun FilterCheckboxRow(
             )
         )
         Text(text = label, color = TextBlack, fontSize = 16.sp)
-    }
-}
-
-// --- Превью (теперь должно работать корректно) ---
-@Preview(showBackground = true)
-@Composable
-fun TeamFilterScreenPreview() {
-    // В превью передаем "заглушки" (пустые действия)
-    MaterialTheme {
-        TeamFilterScreen(
-            currentData = TeamFilterData(stream = "Название потока 1"),
-            onClose = {},
-            onApply = {},
-            onReset = {}
-        )
     }
 }
