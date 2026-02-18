@@ -2,7 +2,6 @@ package com.example.track_me_mobile.features.teams.presentation
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
@@ -24,164 +23,241 @@ fun TeamCreateScreen(
     onBackClick: () -> Unit,
     onNavigateToInfo: (TeamFilterData) -> Unit
 ) {
-    var showFilter by remember { mutableStateOf(false) }
     var teamData by remember { mutableStateOf(TeamFilterData()) }
     var descriptionText by remember { mutableStateOf("") }
 
-    if (showFilter) {
-        TeamFilterScreen(
-            currentData = teamData,
-            onClose = { showFilter = false },
-            onApply = { newData ->
-                teamData = newData
-                showFilter = false
-            },
-            onReset = { teamData = TeamFilterData() }
-        )
-    } else {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text("TrackMe", color = Color.White, fontWeight = FontWeight.Bold) },
-                    actions = {
-                        IconButton(onClick = { }) {
-                            Icon(Icons.Default.Menu, contentDescription = null, tint = Color.White)
-                        }
-                    },
-                    // Жестко фиксируем цвета шапки
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = TrackMePurple,
-                        titleContentColor = Color.White,
-                        actionIconContentColor = Color.White
-                    )
-                )
-            },
-            containerColor = BackgroundWhite
-        ) { padding ->
-            Column(
-                modifier = Modifier
-                    .padding(padding)
-                    .fillMaxSize()
-                    .imePadding() // Отступ для клавиатуры
-                    .verticalScroll(rememberScrollState())
-                    .padding(16.dp)
-            ) {
-                // Стрелка назад - всегда фиолетовая
-                Text(
-                    text = "←",
-                    color = TrackMePurple,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.clickable { onBackClick() }
-                )
+    val streams = listOf("Название потока 1", "Название потока 2", "Название потока 3")
+    val markets = listOf("AutoNet", "HealthNet", "MariNet", "NeuroNet", "SafeNet", "FoodNet", "TechNet", "WearNet")
+    val trlList = listOf("0-2", "3-5", "6-8", "9-10")
 
-                Spacer(modifier = Modifier.height(24.dp))
-                TrackerRow()
-                Spacer(modifier = Modifier.height(20.dp))
-
-                // Секции выбора (теперь кнопки стоят как надо)
-                AddSectionRow(label = "Поток:", value = teamData.stream, onAddClick = { showFilter = true })
-                Spacer(modifier = Modifier.height(16.dp))
-
-                val marketsLabel = if (teamData.markets.isNotEmpty()) "${teamData.markets.size} выбрано" else ""
-                AddSectionRow(label = "Рынки НТИ:", value = marketsLabel, onAddClick = { showFilter = true })
-                Spacer(modifier = Modifier.height(16.dp))
-
-                AddSectionRow(label = "TRL:", value = teamData.trl, onAddClick = { showFilter = true })
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // ПОЛЕ ВВОДА С ФИКСИРОВАННЫМИ ЦВЕТАМИ
-                OutlinedTextField(
-                    value = descriptionText,
-                    onValueChange = { descriptionText = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(150.dp),
-                    textStyle = TextStyle(
-                        color = Color.Black, // Основной цвет текста
-                        fontSize = 14.sp
-                    ),
-                    placeholder = {
-                        Text("Описание карточки команд...", color = TextGray)
-                    },
-                    shape = RoundedCornerShape(16.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        // Текст внутри поля (фокус и без)
-                        focusedTextColor = Color.Black,
-                        unfocusedTextColor = Color.Black,
-
-                        // Цвет рамки
-                        focusedBorderColor = TrackMePurple,
-                        unfocusedBorderColor = TrackMePurple, // Убрал alpha, чтобы не было "прозрачности"
-
-                        // Цвета контейнера (делаем всегда прозрачным, чтобы фон не белел)
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-
-                        // Курсор
-                        cursorColor = TrackMePurple,
-
-                        // Это отключит системное изменение цвета при ошибках или наведении
-                        errorTextColor = Color.Black,
-                        disabledTextColor = Color.Black
-                    )
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    Button(
-                        onClick = {
-                            // Создаем копию данных с введенным описанием
-                            val finalData = teamData.copy(description = descriptionText)
-                            onNavigateToInfo(finalData)
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = TrackMePurple),
-                        modifier = Modifier.width(200.dp).height(48.dp),
-                        shape = RoundedCornerShape(50)
-                    ) {
-                        Text("Создать", color = Color.White, fontWeight = FontWeight.Bold)
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("TrackMe", color = Color.White, fontWeight = FontWeight.Bold) },
+                actions = {
+                    IconButton(onClick = { }) {
+                        Icon(Icons.Default.Menu, contentDescription = null, tint = Color.White)
                     }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = TrackMePurple,
+                    titleContentColor = Color.White,
+                    actionIconContentColor = Color.White
+                )
+            )
+        },
+        containerColor = BackgroundWhite
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize()
+                .imePadding()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp)
+        ) {
+            Text(
+                text = "←",
+                color = TrackMePurple,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.clickable { onBackClick() }
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+            TrackerRow()
+            Spacer(modifier = Modifier.height(20.dp))
+
+            DropdownSectionRow(
+                label = "Поток:",
+                options = streams,
+                selectedValue = teamData.stream,
+                onValueSelected = { teamData = teamData.copy(stream = it) }
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            MultiDropdownSectionRow(
+                label = "Рынки НТИ:",
+                options = markets,
+                selectedValues = teamData.markets,
+                onValuesChanged = { teamData = teamData.copy(markets = it) }
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            DropdownSectionRow(
+                label = "TRL:",
+                options = trlList,
+                selectedValue = teamData.trl,
+                onValueSelected = { teamData = teamData.copy(trl = it) }
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            OutlinedTextField(
+                value = descriptionText,
+                onValueChange = { descriptionText = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(150.dp),
+                textStyle = TextStyle(color = Color.Black, fontSize = 14.sp),
+                placeholder = { Text("Описание карточки команд...", color = TextGray) },
+                shape = RoundedCornerShape(16.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = Color.Black,
+                    unfocusedTextColor = Color.Black,
+                    focusedBorderColor = TrackMePurple,
+                    unfocusedBorderColor = TrackMePurple,
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    cursorColor = TrackMePurple,
+                    errorTextColor = Color.Black,
+                    disabledTextColor = Color.Black
+                )
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                Button(
+                    onClick = {
+                        val finalData = teamData.copy(description = descriptionText)
+                        onNavigateToInfo(finalData)
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = TrackMePurple),
+                    modifier = Modifier.width(200.dp).height(48.dp),
+                    shape = RoundedCornerShape(50)
+                ) {
+                    Text("Создать", color = Color.White, fontWeight = FontWeight.Bold)
                 }
-                Spacer(modifier = Modifier.height(24.dp))
+            }
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+    }
+}
+
+@Composable
+fun DropdownSectionRow(
+    label: String,
+    options: List<String>,
+    selectedValue: String,
+    onValueSelected: (String) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(text = label, fontSize = 14.sp, color = Color.Black)
+        Spacer(modifier = Modifier.width(16.dp))
+
+        Box {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(50))
+                    .background(TrackMePurple)
+                    .clickable { expanded = true }
+                    .padding(horizontal = 16.dp, vertical = 6.dp)
+            ) {
+                Text(
+                    text = if (selectedValue.isEmpty()) "+" else selectedValue,
+                    color = Color.White,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+
+            }
+
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                options.forEach { option ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = option,
+                                color = if (option == selectedValue) TrackMePurple else Color.Black,
+                                fontWeight = if (option == selectedValue) FontWeight.Bold else FontWeight.Normal
+                            )
+                        },
+                        onClick = {
+                            onValueSelected(option)
+                            expanded = false
+                        }
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-fun AddSectionRow(label: String, value: String, onAddClick: () -> Unit) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically
-        // Убрали fillMaxWidth(), чтобы элементы не разлетались
-    ) {
-        // Текст заголовка - всегда черный
-        Text(text = label, fontSize = 14.sp, color = Color.Black)
+fun MultiDropdownSectionRow(
+    label: String,
+    options: List<String>,
+    selectedValues: List<String>,
+    onValuesChanged: (List<String>) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val selected = remember(selectedValues) { selectedValues.toMutableStateList() }
 
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(text = label, fontSize = 14.sp, color = Color.Black)
         Spacer(modifier = Modifier.width(16.dp))
 
-        // Значение (если выбрано)
-        if (value.isNotEmpty()) {
-            Text(
-                text = value,
-                fontSize = 14.sp,
-                color = TrackMePurple,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-        }
+        Box {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(50))
+                    .background(TrackMePurple)
+                    .clickable { expanded = true }
+                    .padding(horizontal = 16.dp, vertical = 6.dp)
+            ) {
+                Text(
+                    text = if (selected.isEmpty()) "+" else "${selected.size} выбрано",
+                    color = Color.White,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.width(6.dp))
 
-        // Кнопка "+" стоит сразу за текстом
-        Box(
-            modifier = Modifier
-                .size(32.dp)
-                .clip(CircleShape)
-                .background(TrackMePurple)
-                .clickable { onAddClick() },
-            contentAlignment = Alignment.Center
-        ) {
-            Text("+", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            }
+
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = {
+                    expanded = false
+                    onValuesChanged(selected.toList())
+                }
+            ) {
+                options.forEach { option ->
+                    val isChecked = selected.contains(option)
+                    DropdownMenuItem(
+                        text = {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Checkbox(
+                                    checked = isChecked,
+                                    onCheckedChange = null,
+                                    colors = CheckboxDefaults.colors(
+                                        checkedColor = TrackMePurple,
+                                        uncheckedColor = Color.Gray
+                                    )
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(text = option, color = Color.Black)
+                            }
+                        },
+                        onClick = {
+                            if (isChecked) selected.remove(option)
+                            else selected.add(option)
+                            onValuesChanged(selected.toList())
+                        }
+                    )
+                }
+            }
         }
     }
 }

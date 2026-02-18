@@ -4,6 +4,10 @@ import androidx.compose.runtime.*
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+
 
 class CreateTeamLevel : Screen {
     @Composable
@@ -24,27 +28,30 @@ data class InfoTeamLevel(val initialData: TeamFilterData) : Screen {
     override val key: String = "InfoTeamScreen"
 
     @Composable
-    override fun Content() { // Убедитесь, что здесь есть override
+    override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
+        var currentData by remember { mutableStateOf(initialData) }
 
-        // Используем remember(initialData), чтобы стейт обновлялся при смене данных
-        var currentData by remember(initialData) { mutableStateOf(initialData) }
+        // Следим за верхним экраном — когда EditTeamLevel закрылся, читаем результат
+        val topScreen = navigator.lastItem
+        LaunchedEffect(topScreen) {
+            if (topScreen is InfoTeamLevel) {
+                // мы снова наверху — данные уже в currentData
+            }
+        }
 
         TeamInfoScreen(
             data = currentData,
             onBackClick = { navigator.pop() },
             onEditClick = {
-                navigator.push(EditTeamLevel(
-                    initialData = currentData,
-                    onSave = { updated -> currentData = updated }
-                ))
+                navigator.push(EditTeamLevel(currentData) { updated ->
+                    currentData = updated  // обновляем до push
+                })
             },
-            onMeetingsClick = {
-                              navigator.push(MeetingsTeamLevel(listOf())) // Заглушка встреч
-                }
-            )
-        }
+            onMeetingsClick = { navigator.push(MeetingsTeamLevel(listOf())) }
+        )
     }
+}
 
 data class EditTeamLevel(
     val initialData: TeamFilterData,
