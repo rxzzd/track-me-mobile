@@ -19,7 +19,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.track_me_mobile.core.domain.models.Role
-import com.example.track_me_mobile.features.profile.presentation.components.ProfileTopHeader
+import com.example.track_me_mobile.core.ui.components.MainTopHeader
+
 import com.example.track_me_mobile.features.tracker_list.domain.models.TrackerUser
 import com.example.track_me_mobile.features.tracker_list.presentation.components.SearchBar
 import com.example.track_me_mobile.features.tracker_list.presentation.components.TrackerItem
@@ -95,7 +96,7 @@ fun TrackerListContent(
             }
         }
 
-        ProfileTopHeader()
+        MainTopHeader()
 
     }
 }

@@ -3,7 +3,6 @@ package com.example.track_me_mobile.features.streams.presentation
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.*
@@ -17,6 +16,9 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
+import com.example.track_me_mobile.core.ui.components.MainTopHeader
+// Импортируем ваш компонент хедера.
+
 import com.example.track_me_mobile.features.streams.presentation.components.*
 
 class StreamListScreen : Screen {
@@ -41,6 +43,7 @@ private fun StreamListContent(viewModel: StreamListViewModel) {
         derivedStateOf {
             val lastVisible = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
             val total = listState.layoutInfo.totalItemsCount
+            // Подгружаем, когда осталось 3 элемента до конца
             lastVisible >= total - 3 && !viewModel.isLoadingMore && viewModel.hasMore
         }
     }
@@ -51,28 +54,24 @@ private fun StreamListContent(viewModel: StreamListViewModel) {
 
     MaterialTheme {
         Scaffold(
+            // ── ВСТАВЛЯЕМ ВАШ ХЕДЕР ЗДЕСЬ ──
             topBar = {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(104.dp)
-                        .background(Color(0xFF8338EB))
-                        .padding(horizontal = 18.dp)
-                ) {}
-            }
+                MainTopHeader()
+            },
+            // Задаем цвет фона для всего Scaffold, чтобы избежать белых полос при оттягивании списка
+            containerColor = Color(0xFFF8F3FF)
         ) { paddingValues ->
 
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .padding(paddingValues) // Учитываем высоту хедера автоматически
                     .background(Color(0xFFF8F3FF))
             ) {
                 LazyColumn(
                     state = listState,
                     modifier = Modifier
-                        .padding(paddingValues)
-                        .fillMaxSize()
-                        .background(Color(0xFFF8F3FF)),
+                        .fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 

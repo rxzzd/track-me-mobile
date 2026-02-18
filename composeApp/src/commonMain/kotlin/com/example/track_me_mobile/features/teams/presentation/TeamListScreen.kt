@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
+import com.example.track_me_mobile.core.ui.components.MainTopHeader
 import com.example.track_me_mobile.core.ui.theme.TrackMeDeepPurple
 
 class TeamListScreen : Screen {
@@ -21,5 +22,6 @@ class TeamListScreen : Screen {
                 Text("ЭКРАН КОМАНД (TRACKER)", fontSize = 24.sp, fontWeight = FontWeight.Bold)
             }
         }
+        MainTopHeader()
     }
 }

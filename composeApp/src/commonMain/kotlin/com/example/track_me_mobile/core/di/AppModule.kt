@@ -2,6 +2,7 @@ package com.example.track_me_mobile.core.di
 
 import com.example.track_me_mobile.core.network.HttpClientFactory
 import com.example.track_me_mobile.core.network.SessionStorage
+import com.example.track_me_mobile.core.ui.components.GlobalHeaderViewModel
 import com.example.track_me_mobile.features.auth.data.AuthRepositoryImpl
 import com.example.track_me_mobile.features.auth.domain.AuthRepository
 import com.example.track_me_mobile.features.auth.presentation.LoginViewModel
@@ -20,4 +21,5 @@ val appModule = module {
     single<StreamRepository> { StreamRepositoryImpl(get()) }
     factory { StreamListViewModel(get()) }
     factory { LoginViewModel(get(), get()) }
+    factory { GlobalHeaderViewModel(get()) }
 }

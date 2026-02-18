@@ -2,7 +2,7 @@ package com.example.track_me_mobile.core.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val TrackMePurple = Color(0xFF44069A)
+val TrackMePurple = Color(0xFF8338EB)
 val TrackMePurpleLight = Color(0xFFBB86FC)
 val TextBlack = Color(0xFF1D1D1D)
 val TextGray = Color(0xFF888888)
