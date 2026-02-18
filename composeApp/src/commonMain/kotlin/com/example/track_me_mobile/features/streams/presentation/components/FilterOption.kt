@@ -17,9 +17,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.Font
 import org.jetbrains.compose.resources.painterResource
-import trackmemobile.composeapp.generated.resources.Mulish_SemiBold
-import trackmemobile.composeapp.generated.resources.Res
-import trackmemobile.composeapp.generated.resources.tick_icon
+import com.example.track_me_mobile.generated.resources.Mulish_SemiBold
+import com.example.track_me_mobile.generated.resources.Res
+import com.example.track_me_mobile.generated.resources.tick_icon
 
 @Composable
 fun FilterOption(

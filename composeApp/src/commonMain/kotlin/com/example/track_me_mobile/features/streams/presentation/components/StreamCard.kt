@@ -22,11 +22,11 @@ import com.example.track_me_mobile.core.ui.theme.*
 
 import org.jetbrains.compose.resources.Font
 import org.jetbrains.compose.resources.painterResource
-import trackmemobile.composeapp.generated.resources.Res
-import trackmemobile.composeapp.generated.resources.Montserrat_Regular
-import trackmemobile.composeapp.generated.resources.Montserrat_ExtraBold
-import trackmemobile.composeapp.generated.resources.Inter_28pt_Black
-import trackmemobile.composeapp.generated.resources.base_stream_photo
+import com.example.track_me_mobile.generated.resources.Res
+import com.example.track_me_mobile.generated.resources.Montserrat_Regular
+import com.example.track_me_mobile.generated.resources.Montserrat_ExtraBold
+import com.example.track_me_mobile.generated.resources.Inter_28pt_Black
+import com.example.track_me_mobile.generated.resources.base_stream_photo
 
 @Composable
 fun StreamCard(

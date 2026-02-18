@@ -6,7 +6,9 @@ import com.example.track_me_mobile.features.auth.data.AuthRepositoryImpl
 import com.example.track_me_mobile.features.auth.domain.AuthRepository
 import com.example.track_me_mobile.features.auth.presentation.LoginViewModel
 import org.koin.dsl.module
-
+import com.example.track_me_mobile.features.streams.data.StreamRepositoryImpl
+import com.example.track_me_mobile.features.streams.domain.StreamRepository
+import com.example.track_me_mobile.features.streams.presentation.StreamListViewModel
 val appModule = module {
     single { SessionStorage() }
     single { HttpClientFactory.create(get()) }
@@ -15,6 +17,7 @@ val appModule = module {
     // LoginViewModel требует оба: интерфейс для getUserInfo, impl для saveSession.
     single { AuthRepositoryImpl(get(), get()) }
     single<AuthRepository> { get<AuthRepositoryImpl>() }
-
+    single<StreamRepository> { StreamRepositoryImpl(get()) }
+    factory { StreamListViewModel(get()) }
     factory { LoginViewModel(get(), get()) }
 }

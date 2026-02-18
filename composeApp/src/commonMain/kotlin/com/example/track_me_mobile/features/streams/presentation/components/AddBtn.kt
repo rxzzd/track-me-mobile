@@ -12,8 +12,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.Composable
 import org.jetbrains.compose.resources.painterResource
-import trackmemobile.composeapp.generated.resources.Res
-import trackmemobile.composeapp.generated.resources.add_icon
+import com.example.track_me_mobile.generated.resources.Res
+import com.example.track_me_mobile.generated.resources.add_icon
+
 
 @Composable
 fun AddBtn(
