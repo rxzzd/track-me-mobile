@@ -5,6 +5,9 @@ import com.example.track_me_mobile.core.network.SessionStorage
 import com.example.track_me_mobile.features.auth.data.AuthRepositoryImpl
 import com.example.track_me_mobile.features.auth.domain.AuthRepository
 import com.example.track_me_mobile.features.auth.presentation.LoginViewModel
+import com.example.track_me_mobile.features.profile.data.ProfileRepositoryImpl
+import com.example.track_me_mobile.features.profile.domain.ProfileRepository
+import com.example.track_me_mobile.features.profile.presentation.ProfileViewModel
 import org.koin.dsl.module
 
 val appModule = module {
@@ -17,4 +20,7 @@ val appModule = module {
     single<AuthRepository> { get<AuthRepositoryImpl>() }
 
     factory { LoginViewModel(get(), get()) }
+
+    single<ProfileRepository> { ProfileRepositoryImpl(get()) }
+    factory { ProfileViewModel(get()) }
 }

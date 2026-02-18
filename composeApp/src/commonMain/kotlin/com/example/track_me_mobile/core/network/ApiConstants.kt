@@ -14,4 +14,5 @@ object ApiConstants {
 
     // Профиль идёт через шлюз с префиксом /sso/
     const val ACCOUNT_INFO = "$GATEWAY_BASE/sso/api/v1/account/info"
+    const val ACCOUNT_UPDATE = "$GATEWAY_BASE/sso/api/v1/account/update"
 }

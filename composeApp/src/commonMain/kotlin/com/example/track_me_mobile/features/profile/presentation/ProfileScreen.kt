@@ -15,15 +15,65 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.koin.koinScreenModel
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.example.track_me_mobile.core.ui.theme.*
-import com.example.track_me_mobile.features.profile.presentation.components.*
+import com.example.track_me_mobile.features.profile.presentation.components.ProfileTopHeader
+
+class ProfileScreen : Screen {
+
+    @Composable
+    override fun Content() {
+        val navigator = LocalNavigator.currentOrThrow
+        val viewModel = koinScreenModel<ProfileViewModel>()
+
+        when {
+            viewModel.isLoading -> {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = TrackMePurple)
+                }
+            }
+            viewModel.errorMessage != null -> {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = viewModel.errorMessage ?: "",
+                            color = MaterialTheme.colorScheme.error
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(onClick = { viewModel.loadProfile() }) {
+                            Text("Повторить")
+                        }
+                    }
+                }
+            }
+            viewModel.profile != null -> {
+                val p = viewModel.profile!!
+                ProfileScreenContent(
+                    name      = p.fullName,
+                    email     = p.email,
+                    phone     = p.phoneNumber,
+                    // telegram пока не приходит с сервера — берём из username как fallback
+                    telegram  = "@${p.username}",
+                    role      = p.roles.firstOrNull() ?: "Пользователь",
+                    onNavigateToEdit = {
+                        navigator.push(ProfileEditScreen())
+                    }
+                )
+            }
+        }
+    }
+}
 
 @Composable
-fun ProfileScreen(
+fun ProfileScreenContent(
     name: String,
     email: String,
     phone: String,
     telegram: String,
+    role: String,
     onNavigateToEdit: () -> Unit
 ) {
     Scaffold(
@@ -61,7 +111,7 @@ fun ProfileScreen(
             }
 
             Spacer(modifier = Modifier.height(15.dp))
-            Text("Администратор", color = TrackMePurple, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Text(role, color = TrackMePurple, fontWeight = FontWeight.Bold, fontSize = 16.sp)
             Spacer(modifier = Modifier.height(25.dp))
 
             ProfileStaticRow(name)
@@ -82,8 +132,8 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            TextButton(onClick = { /* Логика отчета */ }) {
-                Text("Загрузить отчет", color = TrackMePurple, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            TextButton(onClick = { /* Логика отчёта */ }) {
+                Text("Загрузить отчёт", color = TrackMePurple, fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }
 
             TextButton(onClick = onNavigateToEdit) {
