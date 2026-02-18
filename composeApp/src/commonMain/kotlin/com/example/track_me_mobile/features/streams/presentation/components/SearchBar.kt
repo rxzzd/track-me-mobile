@@ -85,7 +85,7 @@ fun SearchBar(
                     onValueChange = onValueChange,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .align(Alignment.CenterStart),
+                        .fillMaxHeight(),
                     textStyle = LocalTextStyle.current.copy(
                         fontSize = 14.sp,
                         color = Color.Black,
