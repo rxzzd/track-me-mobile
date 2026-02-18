@@ -39,7 +39,7 @@ fun MeetingDetailScreen(
                 IconButton(onClick = onBack) { Icon(Icons.Default.Close, null, tint = TrackMePurple) }
             }
 
-            // Статус результата (под датой)
+            // Дата и Плашка результата
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 16.dp)) {
                 Text("Дата: ", color = Color.Black, fontSize = 16.sp)
                 Surface(color = TrackMePurple, shape = RoundedCornerShape(50)) {
@@ -56,10 +56,10 @@ fun MeetingDetailScreen(
                 }
             }
 
-            // Поля с фиолетовой обводкой и ЧЕРНЫМ текстом
             MeetingDetailField("Задачи к следующей встрече:", tasks)
             MeetingDetailField("Информация о команде:", teamInfo)
 
+            // Статус команды
             Text("Текущий статус команды:", fontWeight = FontWeight.Medium, color = Color.Black)
             Surface(
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 20.dp).height(48.dp),
@@ -73,7 +73,7 @@ fun MeetingDetailScreen(
 
             MeetingDetailField("Запись встречи:", linkRecord.ifEmpty { "Ссылка отсутствует" })
 
-            // Ссылка на видеовстречу с кнопкой перехода
+            // Видеовстреча
             Text("Ссылка на видеовстречу:", fontWeight = FontWeight.Medium, color = Color.Black)
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 8.dp, bottom = 32.dp)) {
                 Surface(
@@ -86,12 +86,17 @@ fun MeetingDetailScreen(
                 }
                 Spacer(Modifier.width(12.dp))
                 IconButton(
-                    onClick = { if (linkVideo.startsWith("http")) uriHandler.openUri(linkVideo) },
+                    onClick = {
+                        if (linkVideo.isNotEmpty()) {
+                            val url = if (!linkVideo.startsWith("http")) "https://$linkVideo" else linkVideo
+                            try { uriHandler.openUri(url) } catch (e: Exception) { /* обработка ошибки */ }
+                        }
+                    },
                     modifier = Modifier.size(56.dp).background(Color(0xFFD1F3E0), RoundedCornerShape(12.dp))
                 ) { Icon(Icons.Default.Videocam, null, tint = Color(0xFF6DB371), modifier = Modifier.size(28.dp)) }
             }
 
-            Button(onClick = onEditClick, modifier = Modifier.fillMaxWidth().height(66.dp).padding(bottom = 24.dp), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8A64EB)), shape = RoundedCornerShape(16.dp)) {
+            Button(onClick = onEditClick, modifier = Modifier.fillMaxWidth().height(56.dp).padding(bottom = 24.dp), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8A64EB)), shape = RoundedCornerShape(16.dp)) {
                 Text("Редактировать", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
             }
         }
@@ -103,7 +108,7 @@ fun MeetingDetailField(label: String, text: String) {
     Column(modifier = Modifier.padding(bottom = 20.dp)) {
         Text(label, fontWeight = FontWeight.Medium, color = Color.Black)
         Surface(modifier = Modifier.fillMaxWidth().padding(top = 8.dp).border(1.dp, TrackMePurple, RoundedCornerShape(25.dp)), shape = RoundedCornerShape(25.dp), color = Color.White) {
-            Text(text, color = Color.Black, modifier = Modifier.padding(16.dp), fontSize = 14.sp) // Принудительно черный
+            Text(text, color = Color.Black, modifier = Modifier.padding(16.dp), fontSize = 14.sp)
         }
     }
 }
