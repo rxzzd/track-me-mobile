@@ -10,7 +10,7 @@ data class AccountInfoDto(
     @SerialName("roles")       val roles: List<String>,
     @SerialName("fullName")    val fullName: String,
     @SerialName("email")       val email: String,
-    @SerialName("phoneNumber") val phoneNumber: String,
+    @SerialName("phoneNumber") val phoneNumber: String? = null,
     @SerialName("avatarUrl")   val avatarUrl: String? = null,
     @SerialName("enabled")     val enabled: Boolean
 )
