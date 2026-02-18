@@ -1,16 +1,10 @@
 package com.example.track_me_mobile.features.streams.presentation.components
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -29,10 +23,8 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import org.jetbrains.compose.resources.Font
 import org.jetbrains.compose.resources.painterResource
-import com.example.track_me_mobile.generated.resources.Mulish_SemiBold
-import com.example.track_me_mobile.generated.resources.Montserrat_Bold
-import com.example.track_me_mobile.generated.resources.Res
-import com.example.track_me_mobile.generated.resources.close_icon
+import com.example.track_me_mobile.generated.resources.*
+import androidx.compose.foundation.gestures.detectTapGestures
 
 @Composable
 fun FilterPopUp(
@@ -41,7 +33,7 @@ fun FilterPopUp(
     anchorBounds: Rect? = null,
     verticalOffset: Dp = 0.dp,
     modifier: Modifier = Modifier,
-    // Состояние фильтров
+    availableMarkets: List<String> = emptyList(),
     selectedYears: Set<String> = emptySet(),
     selectedMarkets: Set<String> = emptySet(),
     selectedTrls: Set<String> = emptySet(),
@@ -54,50 +46,34 @@ fun FilterPopUp(
     if (showWindow) {
         Popup(
             onDismissRequest = onDismiss,
-            properties = PopupProperties(
-                dismissOnBackPress = true,
-                dismissOnClickOutside = true,
-                focusable = true
-            )
+            properties = PopupProperties(focusable = true)
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.Transparent)
-                    .pointerInput(Unit) {
-                        detectTapGestures { onDismiss() }
-                    },
+                    .pointerInput(Unit) { detectTapGestures { onDismiss() } },
                 contentAlignment = Alignment.TopCenter
             ) {
                 if (anchorBounds != null) {
                     val density = LocalDensity.current
-                    val offsetY = with(density) {
-                        anchorBounds.bottom.toDp() + verticalOffset
-                    }
+                    val offsetY = with(density) { anchorBounds.bottom.toDp() + verticalOffset }
+
                     Box(
                         modifier = Modifier
-                            .width(328.dp)
                             .padding(top = offsetY)
-                            .wrapContentHeight()
-                            .clickable { },
-                        contentAlignment = Alignment.TopCenter
+                            .pointerInput(Unit) { detectTapGestures { } }
                     ) {
                         FilterCardContent(
                             onDismiss = onDismiss,
+                            availableMarkets = availableMarkets,
                             selectedYears = selectedYears,
                             selectedMarkets = selectedMarkets,
                             selectedTrls = selectedTrls,
                             onYearToggle = onYearToggle,
                             onMarketToggle = onMarketToggle,
                             onTrlToggle = onTrlToggle,
-                            onApply = {
-                                onApply()
-                                onDismiss()
-                            },
-                            onReset = {
-                                onReset()
-                                onDismiss()
-                            }
+                            onApply = { onApply(); onDismiss() },
+                            onReset = { onReset(); onDismiss() }
                         )
                     }
                 }
@@ -110,102 +86,71 @@ fun FilterPopUp(
 fun FilterCardContent(
     modifier: Modifier = Modifier,
     onDismiss: () -> Unit,
-    selectedYears: Set<String> = emptySet(),
-    selectedMarkets: Set<String> = emptySet(),
-    selectedTrls: Set<String> = emptySet(),
-    onYearToggle: (String) -> Unit = {},
-    onMarketToggle: (String) -> Unit = {},
-    onTrlToggle: (String) -> Unit = {},
-    onApply: () -> Unit = {},
-    onReset: () -> Unit = {}
+    availableMarkets: List<String>,
+    selectedYears: Set<String>,
+    selectedMarkets: Set<String>,
+    selectedTrls: Set<String>,
+    onYearToggle: (String) -> Unit,
+    onMarketToggle: (String) -> Unit,
+    onTrlToggle: (String) -> Unit,
+    onApply: () -> Unit,
+    onReset: () -> Unit
 ) {
     val mulishFamily = FontFamily(Font(Res.font.Mulish_SemiBold, FontWeight.SemiBold))
     val montserratFamily = FontFamily(Font(Res.font.Montserrat_Bold, FontWeight.Bold))
+    val scrollState = rememberScrollState()
 
     Card(
         modifier = modifier
             .width(328.dp)
-            .height(560.dp)
-            .clip(RoundedCornerShape(20.dp))
-            .clickable(
-                indication = null,
-                interactionSource = remember { MutableInteractionSource() }
-            ) { },
+            .heightIn(max = 600.dp)
+            .clip(RoundedCornerShape(20.dp)),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFCDAFF7))
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight(),
-            contentAlignment = Alignment.TopStart
-        ) {
+        Box(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 28.dp)
-                    .padding(top = 20.dp)
-                    .padding(bottom = 60.dp) // место под кнопки
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = 24.dp)
+                    .padding(top = 24.dp, bottom = 80.dp)
             ) {
-                // ── Год ──────────────────────────────────────────────────────
-                Text(
-                    text = "Год",
-                    fontSize = 20.sp,
-                    color = Color.White,
-                    lineHeight = 20.sp,
-                    letterSpacing = 0.sp,
-                    fontFamily = mulishFamily,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                YearGrid(
-                    selectedYears = selectedYears,
-                    onYearToggle = onYearToggle
+                FilterSectionTitle("Год", mulishFamily)
+                AlignedFilterGrid(
+                    items = listOf("2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025", "2026"),
+                    columns = 3,
+                    selectedItems = selectedYears,
+                    onToggle = onYearToggle,
+                    fontFamily = mulishFamily
                 )
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
-                // ── Рынки НТИ ────────────────────────────────────────────────
-                Text(
-                    text = "Рынки НТИ",
-                    fontSize = 20.sp,
-                    color = Color.White,
-                    lineHeight = 20.sp,
-                    letterSpacing = 0.sp,
-                    fontFamily = mulishFamily,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                MarketGrid(
-                    selectedMarkets = selectedMarkets,
-                    onMarketToggle = onMarketToggle
+                FilterSectionTitle("Рынки НТИ", mulishFamily)
+                AlignedFilterGrid(
+                    items = availableMarkets,
+                    columns = 2,
+                    selectedItems = selectedMarkets,
+                    onToggle = onMarketToggle,
+                    fontFamily = mulishFamily
                 )
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
-                // ── TRL ──────────────────────────────────────────────────────
-                Text(
-                    text = "TRL",
-                    fontSize = 20.sp,
-                    color = Color.White,
-                    lineHeight = 20.sp,
-                    letterSpacing = 0.sp,
-                    fontFamily = mulishFamily,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                TrlGrid(
-                    selectedTrls = selectedTrls,
-                    onTrlToggle = onTrlToggle
+                FilterSectionTitle("TRL", mulishFamily)
+                AlignedFilterGrid(
+                    items = listOf("0-2", "3-5", "6-8", "9-10"),
+                    columns = 3,
+                    selectedItems = selectedTrls,
+                    onToggle = onTrlToggle,
+                    fontFamily = mulishFamily
                 )
             }
 
-            // ── Крестик закрытия ─────────────────────────────────────────────
+
             IconButton(
                 onClick = onDismiss,
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(top = 20.dp, end = 22.dp)
-                    .size(12.dp)
+                modifier = Modifier.align(Alignment.TopEnd).padding(16.dp).size(24.dp)
             ) {
                 Icon(
                     painter = painterResource(Res.drawable.close_icon),
@@ -215,34 +160,132 @@ fun FilterCardContent(
                 )
             }
 
-            // ── Кнопки Сбросить / Применить ──────────────────────────────────
+            // Кнопки внизу - цвет текста изменен на Black
             Row(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(end = 20.dp, bottom = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    .fillMaxWidth()
+                    .background(Color(0xFFCDAFF7))
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = "Сбросить",
-                    fontSize = 14.sp,
                     color = Color.White,
-                    lineHeight = 14.sp,
-                    letterSpacing = 0.sp,
                     fontFamily = montserratFamily,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.clickable { onReset() }
+                    fontSize = 14.sp,
+                    modifier = Modifier.clickable { onReset() }.padding(8.dp)
                 )
+                Spacer(modifier = Modifier.width(16.dp))
                 Text(
                     text = "Применить",
-                    fontSize = 14.sp,
                     color = Color.White,
-                    lineHeight = 14.sp,
-                    letterSpacing = 0.sp,
                     fontFamily = montserratFamily,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.clickable { onApply() }
+                    fontSize = 14.sp,
+                    modifier = Modifier.clickable { onApply() }.padding(8.dp)
                 )
             }
         }
     }
 }
+
+@Composable
+fun FilterSectionTitle(title: String, fontFamily: FontFamily) {
+    Text(
+        text = title,
+        fontSize = 20.sp,
+        color = Color.White, // Изменено на Black
+        fontFamily = fontFamily,
+        fontWeight = FontWeight.SemiBold,
+        modifier = Modifier.padding(bottom = 12.dp)
+    )
+}
+
+@Composable
+fun AlignedFilterGrid(
+    items: List<String>,
+    columns: Int,
+    selectedItems: Set<String>,
+    onToggle: (String) -> Unit,
+    fontFamily: FontFamily
+) {
+    val rows = items.chunked(columns)
+
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        rows.forEach { rowItems ->
+            Row(modifier = Modifier.fillMaxWidth()) {
+                rowItems.forEach { item ->
+                    FilterItem(
+                        label = item,
+                        isSelected = selectedItems.contains(item),
+                        onToggle = { onToggle(item) },
+                        fontFamily = fontFamily,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                repeat(columns - rowItems.size) {
+                    Spacer(modifier = Modifier.weight(1f))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun FilterItem(
+    label: String,
+    isSelected: Boolean,
+    onToggle: () -> Unit,
+    fontFamily: FontFamily,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) { onToggle() }
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(18.dp)
+                .border(
+                    width = 1.5.dp,
+                    color = Color.White,
+                    shape = RoundedCornerShape(4.dp)
+                )
+                .background(
+                    color = if (isSelected) Color.Black.copy(alpha = 0.1f) else Color.Transparent,
+                    shape = RoundedCornerShape(4.dp)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            if (isSelected) {
+                // ИСПОЛЬЗУЕМ painterResource для PNG иконки tick_icon
+                Icon(
+                    painter = painterResource(Res.drawable.tick_icon),
+                    contentDescription = "Selected",
+                    tint = Color.Black, // Цвет галочки теперь черный
+                    modifier = Modifier.size(12.dp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.width(10.dp))
+
+        Text(
+            text = label,
+            color = Color.Black, // Изменено на Black
+            fontSize = 14.sp,
+            fontFamily = fontFamily,
+            maxLines = 1,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+        )
+    }
+}
+
+@Composable
+fun Dp.sp() = with(LocalDensity.current) { this@sp.toSp() }

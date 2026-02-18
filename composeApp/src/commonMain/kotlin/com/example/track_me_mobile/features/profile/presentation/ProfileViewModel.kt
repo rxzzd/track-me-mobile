@@ -38,17 +38,12 @@ class ProfileViewModel(
             isLoading = true
             errorMessage = null
 
-            println("PROFILE: Начало загрузки профиля")
-
             repository.getAccountInfo()
                 .onSuccess { userProfile ->
-                    println("PROFILE: Профиль загружен: ${userProfile.username}")
                     profile = userProfile
                     isLoading = false
                 }
-                .onFailure { error ->
-                    println("PROFILE: Ошибка: ${error.message}")
-                    error.printStackTrace()
+                .onFailure {
                     errorMessage = "Не удалось загрузить профиль"
                     isLoading = false
                 }

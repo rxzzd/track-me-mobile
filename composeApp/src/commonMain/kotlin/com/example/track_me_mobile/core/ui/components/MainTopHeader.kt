@@ -23,7 +23,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.example.track_me_mobile.core.domain.models.Role
-import com.example.track_me_mobile.core.navigation.ProfileScreen
+import com.example.track_me_mobile.features.profile.presentation.ProfileScreen
 import com.example.track_me_mobile.core.navigation.TrackerListScreen
 import com.example.track_me_mobile.core.ui.models.HeaderMenuItem
 import com.example.track_me_mobile.core.ui.theme.TrackMePurple

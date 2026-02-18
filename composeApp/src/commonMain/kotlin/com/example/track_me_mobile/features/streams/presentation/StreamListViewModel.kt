@@ -46,12 +46,18 @@ class StreamListViewModel(
     var selectedTrls by mutableStateOf<Set<String>>(emptySet())
         private set
 
+    var availableMarkets by mutableStateOf<List<String>>(emptyList())
+        private set
+
+    private var marketNameMap by mutableStateOf<Map<String, String>>(emptyMap())
+
     // ─── Пагинация ──────────────────────────────────────────────────────────
     private var currentPage = 0
     private val pageSize = 10
 
     init {
         loadStreams(reset = true)
+        loadMarkets()
     }
 
     // ─── Публичные методы ────────────────────────────────────────────────────
@@ -161,13 +167,28 @@ class StreamListViewModel(
         selectedYears.forEach { year ->
             result += StreamFilter(fieldName = "year", type = "EQ", value = year)
         }
-        selectedMarkets.forEach { market ->
-            result += StreamFilter(fieldName = "ntiMarkets.name", type = "EQ", value = market)
+        selectedMarkets.forEach { displayName ->
+            val internalName = marketNameMap[displayName] ?: displayName
+            result += StreamFilter(fieldName = "ntiMarkets.name", type = "EQ", value = internalName)
         }
         selectedTrls.forEach { trl ->
             result += StreamFilter(fieldName = "teamCards.readinessLevel", type = "EQ", value = trl)
         }
 
         return result
+    }
+
+    private fun loadMarkets() {
+        screenModelScope.launch {
+            repository.getNtiMarkets()
+                .onSuccess { markets ->
+                    availableMarkets = markets.map { it.displayName }.sorted()
+                    marketNameMap = markets.associate { it.displayName to it.name }
+                    println("### NTI_MARKETS loaded: ${availableMarkets.size} markets")
+                }
+                .onFailure {
+                    println("### NTI_MARKETS failed to load")
+                }
+        }
     }
 }

@@ -1,6 +1,7 @@
 package com.example.track_me_mobile.features.streams.data
 
 import com.example.track_me_mobile.core.network.ApiConstants
+import com.example.track_me_mobile.features.streams.data.model.NtiMarketDto
 import com.example.track_me_mobile.features.streams.data.model.StreamFilterDto
 import com.example.track_me_mobile.features.streams.data.model.StreamFilterRequest
 import com.example.track_me_mobile.features.streams.data.model.StreamPageDto
@@ -35,7 +36,6 @@ class StreamRepositoryImpl(
                 }
             )
 
-            // ШАГ 1: получаем CSRF токен (SESSION подставляется плагином автоматически)
             val csrfResponse = client.get(ApiConstants.CSRF_ENDPOINT) {
                 header(HttpHeaders.Accept, "application/json")
             }
@@ -46,7 +46,6 @@ class StreamRepositoryImpl(
 
             println("### STREAM_DEBUG → POST ${ApiConstants.STREAMS_ENDPOINT}?page=$page&size=$size")
 
-            // ШАГ 2: POST с CSRF токеном в заголовке
             val response = client.post(ApiConstants.STREAMS_ENDPOINT) {
                 parameter("page", page)
                 parameter("size", size)
@@ -76,7 +75,29 @@ class StreamRepositoryImpl(
         }
     }
 
-    // Маппинг DTO → Domain
+    override suspend fun getNtiMarkets(): Result<List<NtiMarket>> {
+        return try {
+            println("### NTI_MARKETS: Fetching from ${ApiConstants.NTI_MARKETS_ENDPOINT}")
+
+            val response = client.get(ApiConstants.NTI_MARKETS_ENDPOINT) {
+                header(HttpHeaders.Accept, "application/json")
+            }
+
+            if (response.status != HttpStatusCode.OK) {
+                return Result.failure(Exception("HTTP ${response.status}"))
+            }
+
+            val markets = response.body<List<NtiMarketDto>>()
+            println("### NTI_MARKETS: Loaded ${markets.size} markets")
+
+            Result.success(markets.map { NtiMarket(it.id, it.name, it.displayName) })
+        } catch (e: Exception) {
+            println("### NTI_MARKETS ERROR: ${e.message}")
+            e.printStackTrace()
+            Result.failure(e)
+        }
+    }
+
     private fun StreamPageDto.toDomain() = StreamPage(
         content = content.map { it.toDomain() },
         totalPages = page.totalPages,
@@ -95,5 +116,4 @@ class StreamRepositoryImpl(
         meetingsCount = meetingsCount,
         ntiMarkets = ntiMarkets.map { NtiMarket(it.id, it.name, it.displayName) }
     )
-
 }

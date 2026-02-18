@@ -183,6 +183,7 @@ private fun StreamListContent(viewModel: StreamListViewModel) {
                     onDismiss = { showFilterPopUp = false },
                     anchorBounds = filterInfoBlockBounds.value,
                     verticalOffset = (-24).dp,
+                    availableMarkets = viewModel.availableMarkets,
                     selectedYears = viewModel.selectedYears,
                     selectedMarkets = viewModel.selectedMarkets,
                     selectedTrls = viewModel.selectedTrls,

@@ -36,8 +36,9 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.example.track_me_mobile.core.ui.components.MainTopHeader
 import com.example.track_me_mobile.core.ui.theme.*
-import com.example.track_me_mobile.features.profile.presentation.components.ProfileTopHeader
+
 
 class ProfileEditScreen : Screen {
 
@@ -94,7 +95,7 @@ fun ProfileEditScreenContent(
     val canSave   = isNameValid && isEmailValid && isPhoneValid && isChanged && !isSaving
 
     Scaffold(
-        topBar = { ProfileTopHeader() },
+        topBar = { MainTopHeader() },
         containerColor = BackgroundWhite
     ) { paddingValues ->
         Column(

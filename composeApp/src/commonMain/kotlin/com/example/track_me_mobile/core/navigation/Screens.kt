@@ -13,10 +13,3 @@ class TrackerListScreen : Screen {
     }
 }
 
-// Объект для профиля
-class ProfileScreen : Screen {
-    @Composable
-    override fun Content() {
-        ProfileContent() // Вызываем твой Composable профиля
-    }
-}
