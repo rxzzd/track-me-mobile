@@ -22,7 +22,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import cafe.adriel.voyager.core.screen.Screen
 import com.example.track_me_mobile.core.ui.components.MainTopHeader
-import com.example.track_me_mobile.core.ui.theme.TrackMeDeepPurple
 import cafe.adriel.voyager.koin.koinScreenModel
 import com.example.track_me_mobile.core.ui.theme.MontserratFontFamily
 import com.example.track_me_mobile.features.teams.domain.models.TeamCard
@@ -89,13 +88,19 @@ fun TeamListContent(
     var showFilters by remember { mutableStateOf(false) }
     val selectedMarkets = remember { mutableStateListOf<String>() }
     val selectedTrls    = remember { mutableStateListOf<TrlOption>() }
+    Scaffold(
+        topBar = { MainTopHeader() },
+        containerColor = Color.White
+    ) { paddingValues ->
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
+            .padding(paddingValues)
             .padding(horizontal = 20.dp)
     ) {
+
         // ── Заголовок ──
         Row(
             modifier = Modifier.padding(vertical = 16.dp),
@@ -132,7 +137,7 @@ fun TeamListContent(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    painter = painterResource(Res.drawable.filter_icon),
+                    painter = painterResource(Res.drawable.filter_icon1),
                     contentDescription = null,
                     tint = Color.White,
                     modifier = Modifier.size(22.dp)
@@ -147,7 +152,11 @@ fun TeamListContent(
                 modifier = Modifier.weight(1f).height(40.dp),
                 singleLine = true,
                 cursorBrush = SolidColor(DarkPurple),
-                textStyle = TextStyle(fontSize = 14.sp, fontFamily = montserrat, color = Color.White),
+                textStyle = TextStyle(
+                    fontSize = 14.sp,
+                    fontFamily = montserrat,
+                    color = Color.White
+                ),
                 decorationBox = { innerTextField ->
                     Row(
                         modifier = Modifier
@@ -165,7 +174,12 @@ fun TeamListContent(
                         Spacer(modifier = Modifier.width(8.dp))
                         Box(modifier = Modifier.weight(1f)) {
                             if (searchQuery.isEmpty()) {
-                                Text("Найти", fontSize = 14.sp, fontFamily = montserrat, color = Color.White)
+                                Text(
+                                    "Найти",
+                                    fontSize = 14.sp,
+                                    fontFamily = montserrat,
+                                    color = Color.White
+                                )
                             }
                             innerTextField()
                         }
@@ -217,7 +231,7 @@ fun TeamListContent(
                 }
             }
         }
-        MainTopHeader()
+    }
     }
 
     // ── Диалог фильтров ──
