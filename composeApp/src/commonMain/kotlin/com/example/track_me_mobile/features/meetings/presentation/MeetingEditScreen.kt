@@ -19,8 +19,8 @@ import com.example.track_me_mobile.core.ui.theme.TrackMePurple
 import com.example.track_me_mobile.features.meetings.presentation.components.*
 import com.example.track_me_mobile.features.profile.presentation.components.ProfileTopHeader
 import java.text.SimpleDateFormat
-import java.util.Locale   // Исправляет Unresolved reference 'getDefault'
-import java.util.Calendar // Исправляет Unresolved reference 'getInstance'
+import java.util.Locale
+import java.util.Calendar
 import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,7 +33,8 @@ fun MeetingEditScreen(
     initialLinkVideo: String,
     initialDate: String,
     initialMeetingResult: String,
-    onSave: (String, String, String, String, String, String, String) -> Unit,
+    initialScreenshot: String?, // Добавлено
+    onSave: (String, String, String, String, String, String, String, String?) -> Unit, // Теперь 8 параметров
     onBack: () -> Unit
 ) {
     var tasks by remember { mutableStateOf(initialTasks) }
@@ -43,9 +44,10 @@ fun MeetingEditScreen(
     var linkVideo by remember { mutableStateOf(initialLinkVideo) }
     var selectedDateText by remember { mutableStateOf(initialDate) }
     var meetingResult by remember { mutableStateOf(initialMeetingResult) }
+    var screenshotUri by remember { mutableStateOf(initialScreenshot) } // Добавлено
     var isExpanded by remember { mutableStateOf(false) }
 
-    // Проверка: прошла ли дата или сегодня (для активации кнопок)
+    // Твоя оригинальная проверка даты
     val isDatePassed = remember(selectedDateText) {
         try {
             val sdf = SimpleDateFormat("dd.MM", Locale.getDefault())
@@ -85,13 +87,12 @@ fun MeetingEditScreen(
                 .padding(horizontal = 24.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            // Заголовок и кнопка назад
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 16.dp, bottom = 12.dp)) {
                 IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, null, tint = TrackMePurple) }
                 Text("Редактирование", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = TrackMePurple)
             }
 
-            // Кнопки Состоялась / Не состоялась (активны только если дата прошла)
+            // Твои кнопки Состоялась / Не состоялась
             Row(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 val isDoneSelected = meetingResult == "Состоялась"
                 val isFailedSelected = meetingResult == "Не состоялась"
@@ -121,7 +122,6 @@ fun MeetingEditScreen(
                 ) { Text("Не состоялась") }
             }
 
-            // Выбор даты
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 8.dp)) {
                 Text("Дата: ", color = Color.Black)
                 Surface(onClick = { showDatePicker = true }, color = TrackMePurple, shape = RoundedCornerShape(50)) {
@@ -129,12 +129,11 @@ fun MeetingEditScreen(
                 }
             }
 
-            // Поля ввода (черный текст)
             MeetingInputRow("Задачи к следующей встрече:", tasks, { tasks = it }, isEnabled = true)
             Spacer(Modifier.height(8.dp))
             MeetingInputRow("Информация о команде:", teamInfo, { teamInfo = it }, isEnabled = true)
 
-            // Выпадающий список статуса команды
+            // Твой выпадающий список статуса
             Text("Текущий статус команды:", color = Color.Black, modifier = Modifier.padding(top = 16.dp))
             Column(
                 modifier = Modifier
@@ -178,6 +177,13 @@ fun MeetingEditScreen(
                 }
             }
 
+            // СКРИНШОТ СРАЗУ ПОСЛЕ СТАТУСА
+            ScreenshotPickerBlock(
+                screenshotUri = screenshotUri,
+                isEditing = true,
+                onUploadClick = { screenshotUri = "dummy_path" }
+            )
+
             Spacer(modifier = Modifier.height(16.dp))
             MeetingInputRow("Запись встречи (ссылка):", linkRecord, { linkRecord = it }, isEnabled = true)
             Spacer(Modifier.height(8.dp))
@@ -185,9 +191,9 @@ fun MeetingEditScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Кнопка сохранения (передает 7 параметров)
+            // Твоя кнопка сохранения (теперь передает screenshotUri)
             Button(
-                onClick = { onSave(tasks, teamInfo, linkRecord, linkVideo, status, selectedDateText, meetingResult) },
+                onClick = { onSave(tasks, teamInfo, linkRecord, linkVideo, status, selectedDateText, meetingResult, screenshotUri) },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = TrackMePurple),
                 shape = RoundedCornerShape(16.dp)
