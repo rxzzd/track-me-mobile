@@ -20,96 +20,73 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.tooling.preview.Preview
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.koin.koinScreenModel
 import com.example.track_me_mobile.core.ui.theme.MontserratFontFamily
+import com.example.track_me_mobile.features.teams.domain.models.TeamCard
 import com.example.track_me_mobile.generated.resources.*
 import org.jetbrains.compose.resources.painterResource
 
-
-val PrimaryPurple = Color(0xFF8338EB)
-val DarkPurple = Color(0xFF44069A)
-val LightPurpleBg = Color(0xFFF0E5FF)
-val SearchBarBg = Color(0xFFCDAFF7)
-val StatusGreen = Color(0xFF0DB862)
-val StatusGray = Color(0xFF878685)
-val FilterModalBg = Color(0xFFD7C7FF)
+// ─────────────────────────────────────────────
+// Цвета перенести в core/ui/theme/Color.kt !
+// Здесь оставлены временно, чтобы не сломать превью
+// ─────────────────────────────────────────────
+val PrimaryPurple    = Color(0xFF8338EB)
+val DarkPurple       = Color(0xFF44069A)
+val LightPurpleBg    = Color(0xFFF0E5FF)
+val SearchBarBg      = Color(0xFFCDAFF7)
+val StatusGreen      = Color(0xFF0DB862)
+val StatusGray       = Color(0xFF878685)
+val FilterModalBg    = Color(0xFFD7C7FF)
 val ProjectLabelColor = Color(0xFF8338EB)
 
+// TRL-опции для фильтра — оставляем локально, они не приходят с сервера
 data class TrlOption(val label: String, val range: IntRange)
 
 val trlOptions = listOf(
-    TrlOption("0-2", 0..2),
-    TrlOption("3-5", 3..5),
-    TrlOption("6-8", 6..8),
+    TrlOption("0-2",  0..2),
+    TrlOption("3-5",  3..5),
+    TrlOption("6-8",  6..8),
     TrlOption("9-10", 9..10)
 )
 
-data class ProjectInfo(
-    val id: Int,
-    val title: String,
-    val description: String,
-    val ntiMarkets: String,
-    val trl: Int,
-    val isFinished: Boolean
-)
+// ─────────────────────────────────────────────
+// Screen — точка входа из навигации
+// ─────────────────────────────────────────────
 
-@Composable
-fun CustomCheckbox(
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .size(20.dp)
-            .border(1.dp, Color.White, RoundedCornerShape(4.dp))
-            .background(if (checked) Color.White.copy(alpha = 0.2f) else Color.Transparent)
-            .clickable { onCheckedChange(!checked) },
-        contentAlignment = Alignment.Center
-    ) {
-        if (checked) {
-            Icon(
-                painter = painterResource(Res.drawable.icon_check),
-                contentDescription = null,
-                tint = DarkPurple,
-                modifier = Modifier.size(16.dp)
-            )
-        }
+class TeamListScreen : Screen {
+    @Composable
+    override fun Content() {
+        val viewModel = koinScreenModel<TeamListViewModel>()
+
+        TeamListContent(
+            state          = viewModel.state,
+            searchQuery    = viewModel.searchQuery,
+            onSearchChange = viewModel::onSearchQueryChange,
+            onFilterApply  = viewModel::onFilterApply,
+            onRetry        = viewModel::loadTeams
+        )
     }
 }
 
+// ─────────────────────────────────────────────
+// Главный composable — принимает данные из ViewModel
+// Разметка не изменилась, только источник данных
+// ─────────────────────────────────────────────
+
 @Composable
-fun StreamsScreen() {
+fun TeamListContent(
+    state: TeamListState,
+    searchQuery: String,
+    onSearchChange: (String) -> Unit,
+    onFilterApply: (List<String>, List<IntRange>) -> Unit,
+    onRetry: () -> Unit
+) {
     val montserrat = MontserratFontFamily()
 
-    var searchQuery by remember { mutableStateOf("") }
     var showFilters by remember { mutableStateOf(false) }
-
     val selectedMarkets = remember { mutableStateListOf<String>() }
-    val selectedTrls = remember { mutableStateListOf<TrlOption>() }
-
-    val projects = remember {
-        listOf(
-            ProjectInfo(1, "Нейросеть для медицины", "Разработка системы анализа снимков.", "HealthNet, NeuroNet", 4, false),
-            ProjectInfo(2, "Беспилотный тягач", "Прототип автономного транспорта.", "AutoNet", 7, true),
-            ProjectInfo(3, "Эко-ферма 2.0", "Система автоматического полива.", "FoodNet, EcoNet", 1, true)
-        )
-    }
-
-    val filteredProjects = remember(searchQuery, selectedMarkets.size, selectedTrls.size) {
-        projects.filter { project ->
-            val matchesSearch = project.title.contains(searchQuery, ignoreCase = true) ||
-                    project.description.contains(searchQuery, ignoreCase = true)
-
-            val matchesMarket = selectedMarkets.isEmpty() || selectedMarkets.any { market ->
-                project.ntiMarkets.contains(market, ignoreCase = true)
-            }
-
-            val matchesTrl = selectedTrls.isEmpty() || selectedTrls.any { project.trl in it.range }
-
-            matchesSearch && matchesMarket && matchesTrl
-        }
-    }
+    val selectedTrls    = remember { mutableStateListOf<TrlOption>() }
 
     Column(
         modifier = Modifier
@@ -117,6 +94,7 @@ fun StreamsScreen() {
             .background(Color.White)
             .padding(horizontal = 20.dp)
     ) {
+        // ── Заголовок ──
         Row(
             modifier = Modifier.padding(vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -129,21 +107,16 @@ fun StreamsScreen() {
             )
             Spacer(Modifier.width(12.dp))
             Text(
-                text = "Поток №1",
+                text = "Команды",
                 fontFamily = montserrat,
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 color = DarkPurple,
                 modifier = Modifier.weight(1f)
             )
-            Icon(
-                painter = painterResource(Res.drawable.first_pencil),
-                contentDescription = null,
-                tint = PrimaryPurple,
-                modifier = Modifier.size(24.dp).clickable { }
-            )
         }
 
+        // ── Строка поиска + фильтр + добавить ──
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
@@ -168,7 +141,7 @@ fun StreamsScreen() {
 
             BasicTextField(
                 value = searchQuery,
-                onValueChange = { searchQuery = it },
+                onValueChange = onSearchChange,   // ← идёт в ViewModel
                 modifier = Modifier.weight(1f).height(40.dp),
                 singleLine = true,
                 cursorBrush = SolidColor(DarkPurple),
@@ -210,16 +183,41 @@ fun StreamsScreen() {
 
         Spacer(Modifier.height(20.dp))
 
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(bottom = 20.dp)
-        ) {
-            items(filteredProjects) { project ->
-                ProjectCard(project)
+        // ── Тело — зависит от состояния ──
+        when (val s = state) {
+
+            is TeamListState.Loading -> {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = PrimaryPurple)
+                }
+            }
+
+            is TeamListState.Error -> {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(s.message, color = Color.Gray, fontFamily = montserrat)
+                        Spacer(Modifier.height(12.dp))
+                        Button(onClick = onRetry) {
+                            Text("Повторить", fontFamily = montserrat)
+                        }
+                    }
+                }
+            }
+
+            is TeamListState.Success -> {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = PaddingValues(bottom = 20.dp)
+                ) {
+                    items(s.teams) { team ->
+                        TeamCard(team)   // ← теперь принимает доменную модель
+                    }
+                }
             }
         }
     }
 
+    // ── Диалог фильтров ──
     if (showFilters) {
         Dialog(onDismissRequest = { showFilters = false }) {
             Surface(
@@ -229,14 +227,24 @@ fun StreamsScreen() {
             ) {
                 FilterDialogContent(
                     selectedMarkets = selectedMarkets,
-                    selectedTrls = selectedTrls,
-                    onDismiss = { showFilters = false }
+                    selectedTrls    = selectedTrls,
+                    onDismiss = {
+                        showFilters = false
+                        // Передаём выбранные фильтры в ViewModel
+                        onFilterApply(
+                            selectedMarkets.toList(),
+                            selectedTrls.map { it.range }
+                        )
+                    }
                 )
             }
         }
     }
 }
 
+// ─────────────────────────────────────────────
+// Диалог фильтров — разметка не изменилась
+// ─────────────────────────────────────────────
 @Composable
 fun FilterDialogContent(
     selectedMarkets: SnapshotStateList<String>,
@@ -244,11 +252,22 @@ fun FilterDialogContent(
     onDismiss: () -> Unit
 ) {
     val montserrat = MontserratFontFamily()
-    val markets = listOf("AutoNet", "HealthNet", "MariNet", "NeuroNet", "SafeNet", "FoodNet", "EnergyNet", "WearNet", "AeroNet", "EduNet", "GameNet", "EcoNet", "HomeNet", "SportNet")
+    val markets = listOf(
+        "AutoNet", "HealthNet", "MariNet", "NeuroNet", "SafeNet",
+        "FoodNet", "EnergyNet", "WearNet", "AeroNet", "EduNet",
+        "GameNet", "EcoNet", "HomeNet", "SportNet"
+    )
 
     Column(modifier = Modifier.padding(20.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("Рынки НТИ", fontFamily = montserrat, fontWeight = FontWeight.Bold, fontSize = 20.sp, color = Color.White, modifier = Modifier.weight(1f))
+            Text(
+                "Рынки НТИ",
+                fontFamily = montserrat,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                color = Color.White,
+                modifier = Modifier.weight(1f)
+            )
             IconButton(onClick = onDismiss) {
                 Icon(painterResource(Res.drawable.ic_close), null, Modifier.size(20.dp), Color.White)
             }
@@ -314,9 +333,13 @@ fun FilterDialogContent(
     }
 }
 
+// ─────────────────────────────────────────────
+// Карточка команды — теперь принимает TeamCard из domain
+// ─────────────────────────────────────────────
 @Composable
-fun ProjectCard(project: ProjectInfo) {
+fun TeamCard(team: TeamCard) {
     val montserrat = MontserratFontFamily()
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -328,6 +351,7 @@ fun ProjectCard(project: ProjectInfo) {
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Фото команды (пока заглушка — аватар придёт позже)
             Box(contentAlignment = Alignment.BottomCenter) {
                 Box(
                     modifier = Modifier
@@ -335,19 +359,19 @@ fun ProjectCard(project: ProjectInfo) {
                         .clip(RoundedCornerShape(12.dp))
                         .background(Color(0xFFD9D9D9))
                 )
-
+                // Статус enabled → "Активна" / "Неактивна"
                 Box(
                     modifier = Modifier
                         .padding(bottom = 8.dp)
                         .size(width = 89.dp, height = 14.dp)
                         .background(
-                            color = if (project.isFinished) StatusGreen else StatusGray,
+                            color = if (team.enabled) StatusGreen else StatusGray,
                             shape = RoundedCornerShape(7.dp)
                         ),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = if (project.isFinished) "Завершён" else "В процессе",
+                        text = if (team.enabled) "Активна" else "Неактивна",
                         color = Color.White,
                         modifier = Modifier.offset(y = (-1).dp),
                         style = TextStyle(
@@ -372,7 +396,7 @@ fun ProjectCard(project: ProjectInfo) {
                     verticalAlignment = Alignment.Top
                 ) {
                     Text(
-                        text = project.title,
+                        text = team.name,
                         fontFamily = montserrat,
                         fontWeight = FontWeight.Normal,
                         fontSize = 14.sp,
@@ -384,9 +408,7 @@ fun ProjectCard(project: ProjectInfo) {
                     Icon(
                         painter = painterResource(Res.drawable.first_pencil),
                         contentDescription = null,
-                        modifier = Modifier
-                            .size(15.dp)
-                            .clickable { },
+                        modifier = Modifier.size(15.dp).clickable { },
                         tint = DarkPurple
                     )
                 }
@@ -394,7 +416,7 @@ fun ProjectCard(project: ProjectInfo) {
                 Spacer(Modifier.height(4.dp))
 
                 Text(
-                    text = project.description,
+                    text = team.description,
                     fontFamily = montserrat,
                     fontSize = 11.sp,
                     lineHeight = 15.sp,
@@ -409,73 +431,40 @@ fun ProjectCard(project: ProjectInfo) {
                         fontSize = 11.sp,
                         color = ProjectLabelColor
                     )
-                    Text(text = "Рынки НТИ: ${project.ntiMarkets}", style = labelStyle)
-                    Text(text = "TRL: TRL ${project.trl}", style = labelStyle)
-                    Text(text = "Поток: Поток", style = labelStyle)
+                    val marketsText = team.ntiMarkets.joinToString(", ") { it.displayName }
+                    Text(text = "Рынки НТИ: $marketsText", style = labelStyle)
+                    Text(text = "TRL: ${team.readinessLevel}", style = labelStyle)
+                    Text(text = "Поток: ${team.stream?.name ?: "—"}", style = labelStyle)
                 }
             }
         }
     }
 }
 
-
-@Preview(showBackground = true, name = "1. Главный экран (Поток №1)")
+// ─────────────────────────────────────────────
+// Checkbox — без изменений
+// ─────────────────────────────────────────────
 @Composable
-fun StreamsScreenPreview() {
-    MaterialTheme {
-        Surface(modifier = Modifier.fillMaxSize(), color = Color.White) {
-            StreamsScreen()
-        }
-    }
-}
-
-@Preview(showBackground = true, name = "2. Диалог фильтров (Вид)")
-@Composable
-fun FilterDialogPreview() {
-    val testMarkets = remember { mutableStateListOf("AutoNet", "HealthNet") }
-    val testTrls = remember { mutableStateListOf(trlOptions[1]) }
-
-    MaterialTheme {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.4f))
-                .padding(20.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Surface(
-                shape = RoundedCornerShape(28.dp),
-                color = FilterModalBg,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                FilterDialogContent(
-                    selectedMarkets = testMarkets,
-                    selectedTrls = testTrls,
-                    onDismiss = {}
-                )
-            }
-        }
-    }
-}
-
-@Preview(showBackground = true, name = "3. Карточка проекта")
-@Composable
-fun ProjectCardPreview() {
-    val sampleProject = ProjectInfo(
-        id = 1,
-        title = "Нейросеть для медицины",
-        description = "Разработка системы анализа снимков для выявления патологий на ранних стадиях.",
-        ntiMarkets = "HealthNet, NeuroNet",
-        trl = 4,
-        isFinished = false
-    )
-    MaterialTheme {
-        Box(
-            modifier = Modifier
-                .background(Color.White)
-                .padding(16.dp)
-        ) {
-            ProjectCard(project = sampleProject)
+fun CustomCheckbox(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .size(20.dp)
+            .border(1.dp, Color.White, RoundedCornerShape(4.dp))
+            .background(if (checked) Color.White.copy(alpha = 0.2f) else Color.Transparent)
+            .clickable { onCheckedChange(!checked) },
+        contentAlignment = Alignment.Center
+    ) {
+        if (checked) {
+            Icon(
+                painter = painterResource(Res.drawable.icon_check),
+                contentDescription = null,
+                tint = DarkPurple,
+                modifier = Modifier.size(16.dp)
+            )
         }
     }
 }
