@@ -48,7 +48,7 @@ kotlin {
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
 
-
+            implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.1")
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
             implementation("org.jetbrains.compose.material:material-icons-extended:1.6.11")

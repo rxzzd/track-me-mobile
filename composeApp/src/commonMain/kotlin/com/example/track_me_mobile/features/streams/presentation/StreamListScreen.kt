@@ -16,6 +16,8 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.example.track_me_mobile.core.ui.components.MainTopHeader
 // Импортируем ваш компонент хедера.
 
@@ -38,7 +40,7 @@ private fun StreamListContent(viewModel: StreamListViewModel) {
     var showFilterPopUp by remember { mutableStateOf(false) }
 
     val listState = rememberLazyListState()
-
+    val navigator = LocalNavigator.currentOrThrow
     val shouldLoadMore by remember {
         derivedStateOf {
             val lastVisible = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
@@ -93,7 +95,8 @@ private fun StreamListContent(viewModel: StreamListViewModel) {
                                 onValueChange = { viewModel.onSearchQueryChange(it) },
                                 onSearch = { viewModel.applyFilters() }
                             )
-                            AddBtn(modifier = Modifier.width(24.dp))
+                            AddBtn(modifier = Modifier.width(24.dp),
+                                onClick = {navigator.push(AddStreamScreen())})
                         }
                         Spacer(modifier = Modifier.height(16.dp))
                     }

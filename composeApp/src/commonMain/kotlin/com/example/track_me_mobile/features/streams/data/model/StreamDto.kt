@@ -35,3 +35,14 @@ data class PageMetaDto(
     val totalElements: Long,
     val totalPages: Int
 )
+
+@Serializable
+data class StreamCreateDto(
+    val name: String,
+    val startDate: String,
+    val endDate: String,
+    val ntiMarketIds: List<String>,
+    val description: String,
+    val trackStartDate: String,
+    val meetingsCount: Int
+)

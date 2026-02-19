@@ -18,13 +18,12 @@ fun MarketGrid(
     borderColor: Color
 ) {
     if (availableMarkets.isEmpty()) {
-        // Пока рынки грузятся — показываем плейсхолдер или ничего
         return
     }
 
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
-        modifier = Modifier.fillMaxWidth().height(200.dp), // фиксированная высота чтобы не конфликтовать с родительским скроллом
+        modifier = Modifier.fillMaxWidth().height(200.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {

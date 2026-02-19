@@ -1,4 +1,5 @@
-package com.example.track_me_mobile.features.streams.presentation
+package com.example.track_me_mobile.features.streams.presentation.components
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
@@ -6,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -14,51 +16,58 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.Font
-import trackmemobile.composeapp.generated.resources.Mulish_SemiBold
-import trackmemobile.composeapp.generated.resources.Res
+import com.example.track_me_mobile.generated.resources.Res
+import com.example.track_me_mobile.generated.resources.Montserrat_Regular
+
 
 @Composable
-fun DateInputField(
+fun StreamNameInput(
     modifier: Modifier = Modifier,
     value: String = "",
     onValueChange: (String) -> Unit,
+    placeholder: String = "Название потока",
 ) {
-    val mulishFamily = FontFamily(
-        Font(Res.font.Mulish_SemiBold, FontWeight.SemiBold)
+    val montserratFamily = FontFamily(
+        Font(Res.font.Montserrat_Regular, FontWeight.Normal)
     )
-    val mask = "__.__.____"
-
     BasicTextField(
         value = value,
         onValueChange = onValueChange,
         modifier = modifier
-            .width(120.dp)
+            .width(268.dp)
             .height(40.dp)
-            .background(
-                color = Color(0xFFE6D7FB),
-                shape = RoundedCornerShape(50.dp)
-            )
-            .padding(horizontal = 24.dp, vertical = 11.dp),
+            .background(Color(0xFFE6D7FB), shape = RoundedCornerShape(50.dp))
+            .padding(horizontal = 20.dp, vertical = 12.dp),
         textStyle = TextStyle(
             fontSize = 14.sp,
             color = Color(0xFF44069A),
-            fontFamily = mulishFamily,
-            fontWeight = FontWeight.SemiBold
+            lineHeight = 14.sp,
+            letterSpacing = 0.sp,
+            fontFamily = montserratFamily,
+            fontWeight = FontWeight.Normal
         ),
-        enabled = false,
-        readOnly = true,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Text,
+            imeAction = ImeAction.Done
+        ),
         decorationBox = { innerTextField ->
             Box(
                 contentAlignment = Alignment.CenterStart
             ) {
                 if (value.isEmpty()) {
                     Text(
-                        text = mask,
+                        text = placeholder,
                         color = Color(0xFF44069A),
-                        fontSize = 14.sp
+                        fontSize = 14.sp,
+                        lineHeight = 14.sp,
+                        letterSpacing = 0.sp,
+                        fontFamily = montserratFamily,
+                        fontWeight = FontWeight.Normal
                     )
                 }
                 innerTextField()

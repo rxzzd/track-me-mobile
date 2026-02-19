@@ -1,7 +1,6 @@
-package com.example.track_me_mobile.features.streams.presentation
+package com.example.track_me_mobile.features.streams.presentation.components
 
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,8 +15,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.Font
-import trackmemobile.composeapp.generated.resources.Montserrat_ExtraBold
-import trackmemobile.composeapp.generated.resources.Res
+import com.example.track_me_mobile.generated.resources.Res
+import com.example.track_me_mobile.generated.resources.Montserrat_ExtraBold
 
 @Composable
 fun StreamButton(

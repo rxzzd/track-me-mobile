@@ -1,4 +1,4 @@
-package com.example.track_me_mobile.features.streams.presentation
+package com.example.track_me_mobile.features.streams.presentation.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,10 +21,9 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.track_me_mobile.features.streams.presentation.components.MarketGrid
 import org.jetbrains.compose.resources.Font
-import trackmemobile.composeapp.generated.resources.Mulish_SemiBold
-import trackmemobile.composeapp.generated.resources.Res
+import com.example.track_me_mobile.generated.resources.Res
+import com.example.track_me_mobile.generated.resources.Mulish_SemiBold
 
 @Composable
 fun AddStreamMarket(
@@ -67,7 +66,13 @@ fun AddStreamMarket(
 
                     Spacer(modifier = Modifier.height(23.dp))
 
-                    MarketGrid(borderColor = Color(0xFF4E13A0))
+                    MarketGrid(
+                        listOf(
+                        "AutoNet", "MariNet", "SafeNet", "TechNet",
+                        "HealthNet", "NeuroNet", "FoodNet", "WearNet"
+                    ),
+                        setOf(), {}, borderColor = Color(0xFF4E13A0)
+                    )
 
                 }
             }

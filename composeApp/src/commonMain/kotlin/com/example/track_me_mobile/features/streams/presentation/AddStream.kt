@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
@@ -32,10 +31,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
+import com.example.track_me_mobile.features.streams.presentation.components.AddStreamMarket
+import com.example.track_me_mobile.features.streams.presentation.components.AddStreamPhoto
+import com.example.track_me_mobile.features.streams.presentation.components.DateInputField
+import com.example.track_me_mobile.features.streams.presentation.components.StreamButton
+import com.example.track_me_mobile.features.streams.presentation.components.StreamNameInput
 import org.jetbrains.compose.resources.Font
-import trackmemobile.composeapp.generated.resources.Mulish_SemiBold
-import trackmemobile.composeapp.generated.resources.Res
+import com.example.track_me_mobile.generated.resources.Mulish_SemiBold
+import com.example.track_me_mobile.generated.resources.Res
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

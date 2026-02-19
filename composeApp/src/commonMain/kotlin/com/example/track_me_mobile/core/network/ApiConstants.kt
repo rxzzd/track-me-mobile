@@ -6,6 +6,7 @@ object ApiConstants {
 
     private const val GATEWAY_BASE = "https://$GATEWAY_HOST"
     val STREAMS_ENDPOINT = "https://$GATEWAY_HOST/backend/api/v1/admin/streams"
+    val CREATE_STREAM_ENDPOINT = "https://$GATEWAY_HOST/backend/api/v1/admin/streams"
     val NTI_MARKETS_ENDPOINT = "https://$GATEWAY_HOST/backend/api/v1/streams/nti-markets"
     const val AUTH_TRIGGER_URL =
         "$GATEWAY_BASE/oauth2/authorization/track-me-client" +
