@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import com.example.track_me_mobile.core.domain.UserInfoHolder
 import com.example.track_me_mobile.core.domain.models.Role
 import com.example.track_me_mobile.features.auth.data.AuthRepositoryImpl
 import com.example.track_me_mobile.features.auth.domain.AuthRepository
@@ -12,9 +13,8 @@ import kotlinx.coroutines.launch
 
 class LoginViewModel(
     private val repository: AuthRepository,
-    // AuthRepositoryImpl нужен напрямую для saveSession —
-    // это data-операция, не входит в domain-интерфейс
-    private val repositoryImpl: AuthRepositoryImpl
+    private val repositoryImpl: AuthRepositoryImpl,
+    private val userInfoHolder: UserInfoHolder  // ← сохраняем UserInfo после логина
 ) : ScreenModel {
 
     var isLoading by mutableStateOf(false)
@@ -33,10 +33,11 @@ class LoginViewModel(
 
                 repository.getUserInfo()
                     .onSuccess { userInfo ->
+                        userInfoHolder.save(userInfo)  // ← теперь UserInfo доступен всем
                         isLoading = false
                         onNavigate(userInfo.mainRole)
                     }
-                    .onFailure { error ->
+                    .onFailure {
                         isLoading = false
                         errorMessage = "Не удалось загрузить профиль"
                     }

@@ -23,20 +23,24 @@ class LoginScreen : Screen {
         val viewModel = koinScreenModel<LoginViewModel>()
 
         LoginScreenContent(
-            isLoading = viewModel.isLoading,
+            isLoading    = viewModel.isLoading,
             errorMessage = viewModel.errorMessage,
             onLoginClick = {
-                // ВМЕСТО запуска лаунчера — просто переходим на экран с WebView
                 navigator.push(getLoginWebViewScreen())
+            },
+            onRegisterClick = {
+                navigator.push(RegistrationScreen())
             }
         )
     }
+}
 
 @Composable
 fun LoginScreenContent(
     isLoading: Boolean,
     errorMessage: String?,
-    onLoginClick: () -> Unit
+    onLoginClick: () -> Unit,
+    onRegisterClick: () -> Unit
 ) {
     Surface(modifier = Modifier.fillMaxSize(), color = Color.White) {
         Column(
@@ -68,6 +72,13 @@ fun LoginScreenContent(
                     text = "Войти через SSO",
                     onClick = onLoginClick
                 )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                TrackMeButton(
+                    text = "Регистрация",
+                    onClick = onRegisterClick
+                )
             }
 
             errorMessage?.let {
@@ -80,5 +91,4 @@ fun LoginScreenContent(
             }
         }
     }
-}
 }

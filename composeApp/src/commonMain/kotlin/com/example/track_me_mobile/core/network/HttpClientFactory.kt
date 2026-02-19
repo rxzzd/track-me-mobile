@@ -22,6 +22,8 @@ object HttpClientFactory {
                     isLenient = true
                 }, contentType = ContentType.Any)
             }
+
+            followRedirects = false
         }
     }
 }
