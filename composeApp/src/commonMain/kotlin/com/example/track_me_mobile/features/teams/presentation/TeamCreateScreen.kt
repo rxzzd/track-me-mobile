@@ -16,13 +16,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.track_me_mobile.core.ui.theme.*
-
+import androidx.compose.foundation.text.BasicTextField
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TeamCreateScreen(
     viewModel: TeamViewModel,
     onBackClick: () -> Unit,
-    onNavigateToInfo: () -> Unit   // данные уже в ViewModel, ничего не передаём
+    onNavigateToInfo: () -> Unit
 ) {
     val teamData by viewModel.teamData.collectAsState()
 
@@ -96,25 +96,69 @@ fun TeamCreateScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            OutlinedTextField(
-                value = teamData.description,
-                onValueChange = { viewModel.updateDescription(it) },
+            val descriptionScrollState = rememberScrollState()
+
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(150.dp),
-                textStyle = TextStyle(color = Color.Black, fontSize = 14.sp),
-                placeholder = { Text("Описание карточки команды...", color = TextGray) },
-                shape = RoundedCornerShape(16.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = Color.Black,
-                    unfocusedTextColor = Color.Black,
-                    focusedBorderColor = TrackMePurple,
-                    unfocusedBorderColor = TrackMePurple,
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    cursorColor = TrackMePurple
+                    .height(150.dp)
+                    .border(1.5.dp, TrackMePurple, RoundedCornerShape(16.dp))
+            ) {
+                BasicTextField(
+                    value = teamData.description,
+                    onValueChange = { viewModel.updateDescription(it) },
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(start = 16.dp, top = 12.dp, bottom = 12.dp, end = 20.dp)
+                        .verticalScroll(descriptionScrollState),
+                    textStyle = TextStyle(color = Color.Black, fontSize = 14.sp),
+                    maxLines = Int.MAX_VALUE,
+                    decorationBox = { innerTextField ->
+                        if (teamData.description.isEmpty()) {
+                            Text("Описание карточки команды...", color = TextGray, fontSize = 14.sp)
+                        }
+                        innerTextField()
+                    }
                 )
-            )
+
+                val maxScroll = descriptionScrollState.maxValue
+                val currentScroll = descriptionScrollState.value
+
+                if (maxScroll > 0) {
+                    val thumbHeightFraction = 150f / (150f + maxScroll)
+                    val thumbTopFraction = currentScroll.toFloat() / maxScroll * (1f - thumbHeightFraction)
+
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .padding(end = 6.dp)
+                            .width(6.dp)
+                            .fillMaxHeight()
+                            .padding(vertical = 12.dp)
+                            .background(TrackMePurple, RoundedCornerShape(3.dp))
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.TopCenter)
+                                .width(4.dp)
+                                .fillMaxHeight(thumbHeightFraction)
+                                .offset(y = (126.dp * thumbTopFraction))
+                                .background(Color.White, RoundedCornerShape(2.dp))
+                        )
+                    }
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .padding(end = 6.dp)
+                            .width(6.dp)
+                            .fillMaxHeight()
+                            .padding(vertical = 12.dp)
+                            .border(1.dp, TrackMePurple.copy(alpha = 0.5f), RoundedCornerShape(3.dp))
+                            .background(Color.White, RoundedCornerShape(3.dp))
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(32.dp))
 

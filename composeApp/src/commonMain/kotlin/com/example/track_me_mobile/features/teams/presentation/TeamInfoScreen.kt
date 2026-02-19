@@ -24,7 +24,6 @@ fun TeamInfoScreen(
     onMeetingsClick: () -> Unit,
     onFilterClick: () -> Unit
 ) {
-    // Подписка на StateFlow — экран перерисуется автоматически при любом изменении
     val data by viewModel.teamData.collectAsState()
 
     Scaffold(
@@ -64,7 +63,7 @@ fun TeamInfoScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            TrackerRow(name = data.trackerName) // только отображение, без редактирования
+            TrackerRow(name = data.trackerName)
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -89,18 +88,62 @@ fun TeamInfoScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            val descriptionScrollState = rememberScrollState()
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .border(1.dp, TrackMePurple, RoundedCornerShape(16.dp))
-                    .padding(16.dp)
+                    .height(150.dp)
+                    .border(1.5.dp, TrackMePurple.copy(alpha = 0.5f), RoundedCornerShape(16.dp))
             ) {
                 Text(
                     text = data.description.ifEmpty { "Описание отсутствует" },
-                    color = TextBlack,
+                    color = if (data.description.isEmpty()) Color.Gray else TextBlack,
                     fontSize = 14.sp,
-                    lineHeight = 20.sp
+                    lineHeight = 20.sp,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(start = 16.dp, top = 12.dp, bottom = 12.dp, end = 20.dp)
+                        .verticalScroll(descriptionScrollState)
                 )
+
+                val maxScroll = descriptionScrollState.maxValue
+                val currentScroll = descriptionScrollState.value
+
+                if (maxScroll > 0) {
+                    val thumbHeightFraction = 150f / (150f + maxScroll)
+                    val thumbTopFraction = currentScroll.toFloat() / maxScroll * (1f - thumbHeightFraction)
+
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .padding(end = 6.dp)
+                            .width(6.dp)
+                            .fillMaxHeight()
+                            .padding(vertical = 12.dp)
+                            .background(TrackMePurple, RoundedCornerShape(3.dp))
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.TopCenter)
+                                .width(4.dp)
+                                .fillMaxHeight(thumbHeightFraction)
+                                .offset(y = (126.dp * thumbTopFraction))
+                                .background(Color.White, RoundedCornerShape(2.dp))
+                        )
+                    }
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .padding(end = 6.dp)
+                            .width(6.dp)
+                            .fillMaxHeight()
+                            .padding(vertical = 12.dp)
+                            .border(1.dp, TrackMePurple.copy(alpha = 0.5f), RoundedCornerShape(3.dp))
+                            .background(Color.White, RoundedCornerShape(3.dp))
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(40.dp))

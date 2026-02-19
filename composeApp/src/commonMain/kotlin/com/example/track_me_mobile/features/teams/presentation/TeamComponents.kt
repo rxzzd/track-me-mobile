@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.track_me_mobile.core.ui.theme.*
 
+
 data class TeamFilterData(
     val stream: String = "",
     val markets: List<String> = emptyList(),
@@ -77,7 +78,6 @@ fun TrackerRow(
                 )
                 LaunchedEffect(Unit) { focusRequester.requestFocus() }
             } else {
-                // Если имя пустое — показываем placeholder
                 Text(
                     text = name.ifEmpty { "Введите имя трекера" },
                     color = if (name.isEmpty()) TrackMePurple.copy(alpha = 0.4f) else TrackMePurple,

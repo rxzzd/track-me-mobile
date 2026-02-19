@@ -16,13 +16,11 @@ import com.example.track_me_mobile.core.ui.theme.*
 
 @Composable
 fun TeamFilterScreen(
-    viewModel: TeamViewModel,   // ← принимаем ViewModel вместо currentData + колбэков
+    viewModel: TeamViewModel,
     onClose: () -> Unit
 ) {
-    // Читаем текущие данные из ViewModel как начальное состояние черновика
     val currentData by viewModel.teamData.collectAsState()
 
-    // Локальный черновик фильтра — не трогаем ViewModel, пока не нажато "Применить"
     var selectedStream by remember(currentData) { mutableStateOf(currentData.stream) }
     var selectedTrl by remember(currentData) { mutableStateOf(currentData.trl) }
     val selectedMarkets = remember(currentData) {
@@ -53,7 +51,7 @@ fun TeamFilterScreen(
                     .weight(1f)
                     .verticalScroll(rememberScrollState())
             ) {
-                // --- Поток ---
+
                 FilterHeader("Поток")
                 val streams = listOf("Название потока 1", "Название потока 2", "Название потока 3")
                 streams.forEach { stream ->
@@ -65,8 +63,6 @@ fun TeamFilterScreen(
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
-
-                // --- Рынки НТИ ---
                 FilterHeader("Рынки НТИ")
                 val markets = listOf("AutoNet", "HealthNet", "MariNet", "NeuroNet", "SafeNet", "FoodNet", "TechNet", "WearNet")
                 markets.chunked(2).forEach { rowItems ->
@@ -87,8 +83,6 @@ fun TeamFilterScreen(
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
-
-                // --- TRL ---
                 FilterHeader("TRL")
                 val trlList = listOf("0-2", "3-5", "6-8", "9-10")
                 trlList.forEach { trl ->
@@ -100,7 +94,6 @@ fun TeamFilterScreen(
                 }
             }
 
-            // Нижняя панель кнопок
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -109,7 +102,6 @@ fun TeamFilterScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 TextButton(onClick = {
-                    // Сбрасываем черновик и сразу применяем сброс в ViewModel
                     selectedStream = ""
                     selectedTrl = ""
                     selectedMarkets.clear()
@@ -123,7 +115,6 @@ fun TeamFilterScreen(
                 Spacer(modifier = Modifier.width(16.dp))
 
                 TextButton(onClick = {
-                    // Применяем черновик в ViewModel через applyEdit
                     viewModel.applyEdit(
                         currentData.copy(
                             stream = selectedStream,

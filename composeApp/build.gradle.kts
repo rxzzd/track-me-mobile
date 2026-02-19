@@ -47,7 +47,7 @@ kotlin {
             implementation("cafe.adriel.voyager:voyager-transitions:$voyagerVersion")
             // Koin integration
             implementation("cafe.adriel.voyager:voyager-koin:$voyagerVersion")
-
+            implementation("network.chaintech:kmp-date-time-picker:1.0.6")
             // Android
             // Hilt integration
             implementation("cafe.adriel.voyager:voyager-hilt:$voyagerVersion")

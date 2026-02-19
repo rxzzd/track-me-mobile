@@ -5,8 +5,6 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import androidx.lifecycle.viewmodel.compose.viewModel
-// ViewModel создаётся один раз в CreateTeamLevel и передаётся по ссылке дальше.
-// Все экраны работают с одним экземпляром — данные всегда синхронизированы.
 
 class CreateTeamLevel : Screen {
     @Composable
@@ -22,7 +20,6 @@ class CreateTeamLevel : Screen {
     }
 }
 
-// Не data class — ViewModel не сериализуема
 class InfoTeamLevel(private val viewModel: TeamViewModel) : Screen {
     @Composable
     override fun Content() {
