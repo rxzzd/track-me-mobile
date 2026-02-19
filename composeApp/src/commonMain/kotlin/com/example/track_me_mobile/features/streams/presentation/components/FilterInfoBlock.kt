@@ -14,8 +14,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.Font
-import trackmemobile.composeapp.generated.resources.Mulish_SemiBold
-import trackmemobile.composeapp.generated.resources.Res
+import com.example.track_me_mobile.generated.resources.Mulish_SemiBold
+import com.example.track_me_mobile.generated.resources.Res
 
 @Composable
 fun FilterInfoBlock(

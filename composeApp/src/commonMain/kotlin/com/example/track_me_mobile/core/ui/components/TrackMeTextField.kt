@@ -1,18 +1,18 @@
 package com.example.track_me_mobile.core.ui.components
-
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.unit.dp
-import com.example.track_me_mobile.core.ui.theme.TrackMePurple
+import androidx.compose.ui.unit.sp
+import com.example.track_me_mobile.core.ui.theme.TrackMeDeepPurple
+import com.example.track_me_mobile.core.ui.theme.TrackMeLightBackground
+import com.example.track_me_mobile.core.ui.theme.TrackMeTextSecondary
 
 @Composable
 fun TrackMeTextField(
@@ -20,29 +20,28 @@ fun TrackMeTextField(
     onValueChange: (String) -> Unit,
     label: String,
     modifier: Modifier = Modifier,
-    isPassword: Boolean = false
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    trailingIcon: @Composable (() -> Unit)? = null, // Можно передать иконку, а можно нет
+    leadingIcon: @Composable (() -> Unit)? = null,  // Например, лупа для поиска
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
 ) {
-    OutlinedTextField(
+    TextField(
         value = value,
         onValueChange = onValueChange,
-        label = { Text(label) },
+        placeholder = { Text(text = label, color = TrackMeTextSecondary, fontSize = 14.sp) },
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
+        shape = CircleShape,
         singleLine = true,
-        visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
-        colors = OutlinedTextFieldDefaults.colors(
-            // Цвета в активном состоянии
-            focusedBorderColor = TrackMePurple,
-            focusedLabelColor = TrackMePurple,
-            cursorColor = TrackMePurple,
-
-            // Цвета в обычном состоянии
-            unfocusedBorderColor = Color.Gray,
-            unfocusedLabelColor = Color.Gray,
-
-            // Цвет фона внутри поля)
-            focusedContainerColor = Color.Transparent,
-            unfocusedContainerColor = Color.Transparent
+        visualTransformation = visualTransformation,
+        trailingIcon = trailingIcon,
+        leadingIcon = leadingIcon,
+        keyboardOptions = keyboardOptions,
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = TrackMeLightBackground,
+            unfocusedContainerColor = TrackMeLightBackground,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            cursorColor = TrackMeDeepPurple
         )
     )
 }

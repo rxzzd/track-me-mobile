@@ -22,11 +22,11 @@ import com.example.track_me_mobile.core.ui.theme.*
 
 import org.jetbrains.compose.resources.Font
 import org.jetbrains.compose.resources.painterResource
-import trackmemobile.composeapp.generated.resources.Res
-import trackmemobile.composeapp.generated.resources.Montserrat_Regular
-import trackmemobile.composeapp.generated.resources.Montserrat_ExtraBold
-import trackmemobile.composeapp.generated.resources.Inter_28pt_Black
-import trackmemobile.composeapp.generated.resources.base_stream_photo
+import com.example.track_me_mobile.generated.resources.Res
+import com.example.track_me_mobile.generated.resources.Montserrat_Regular
+import com.example.track_me_mobile.generated.resources.Montserrat_ExtraBold
+import com.example.track_me_mobile.generated.resources.Inter_28pt_Black
+import com.example.track_me_mobile.generated.resources.base_stream_photo
 
 @Composable
 fun StreamCard(
@@ -55,23 +55,26 @@ fun StreamCard(
                 spotColor = Color(0xFF7A00E5)
             )
             .width(328.dp)
-            .height(165.dp),
+            .heightIn(min = 165.dp),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color.White
         )
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
+
+        Box(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
             Row(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxWidth() // Растягиваем по ширине
+                    .wrapContentHeight() // Растем по высоте контента
                     .padding(20.dp),
                 verticalAlignment = Alignment.Top,
                 horizontalArrangement = Arrangement.Start
             ) {
+                // Картинка (оставляем фиксированной, как в дизайне)
                 Box(
                     modifier = Modifier
-                        .size(width = 148.dp, height = 125.dp)
+                        .size(width = 110.dp, height = 110.dp) // Немного уменьшил, чтобы текст влез
                         .clip(RoundedCornerShape(12.dp))
                         .background(Color(0xFFF5F5F5))
                 ) {
@@ -83,12 +86,12 @@ fun StreamCard(
                     )
                 }
 
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(12.dp))
 
                 Column(
                     modifier = Modifier
-                        .fillMaxHeight()
-                        .weight(1f),
+                        .weight(1f) // Занимает всё оставшееся пространство в ширину
+                        .wrapContentHeight(), // Растет вниз по тексту
                     verticalArrangement = Arrangement.Top
                 ) {
                     Text(
@@ -98,11 +101,11 @@ fun StreamCard(
                         fontFamily = montserratFamily,
                         fontWeight = FontWeight.ExtraBold,
                         maxLines = 2,
-                        lineHeight = 14.sp,
+                        lineHeight = 16.sp, // Увеличил межстрочный интервал для читаемости
                         letterSpacing = 0.sp,
                     )
 
-                    Spacer(modifier = Modifier.height(13.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
                         text = markets,
@@ -110,10 +113,11 @@ fun StreamCard(
                         color = TextBlack,
                         fontFamily = montserratFamily,
                         fontWeight = FontWeight.Normal,
-                        maxLines = 2,
-                        lineHeight = 12.sp,
-                        letterSpacing = 0.sp
+                        maxLines = 3, // Увеличил, если список рынков длинный
+                        lineHeight = 14.sp
                     )
+
+                    Spacer(modifier = Modifier.height(4.dp))
 
                     Text(
                         text = trl,
@@ -121,10 +125,11 @@ fun StreamCard(
                         color = TextBlack,
                         fontFamily = montserratFamily,
                         fontWeight = FontWeight.Normal,
-                        maxLines = 1,
-                        lineHeight = 12.sp,
-                        letterSpacing = 0.sp
+
+                        maxLines = 2,
+                        lineHeight = 14.sp
                     )
+
                     Text(
                         text = flow,
                         fontSize = 12.sp,
@@ -132,26 +137,23 @@ fun StreamCard(
                         fontFamily = montserratFamily,
                         fontWeight = FontWeight.Normal,
                         maxLines = 2,
-                        lineHeight = 12.sp,
-                        letterSpacing = 0.sp
+                        lineHeight = 14.sp
                     )
+
+                    // Добавим отступ снизу, чтобы текст не наезжал на кнопку "Отчет"
+                    Spacer(modifier = Modifier.height(25.dp))
                 }
             }
+
             Text(
                 text = "Отчет",
                 fontSize = 12.sp,
                 color = Color(0xFF8338EB),
                 fontFamily = interFamily,
                 fontWeight = FontWeight.Black,
-                maxLines = 1,
-                lineHeight = 12.sp,
-                letterSpacing = 0.sp,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(
-                        bottom = 13.dp,
-                        end = 20.dp
-                    )
+                    .padding(bottom = 13.dp, end = 20.dp)
             )
         }
     }
