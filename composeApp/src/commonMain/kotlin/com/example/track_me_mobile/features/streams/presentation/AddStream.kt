@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import org.jetbrains.compose.resources.Font
 import trackmemobile.composeapp.generated.resources.Mulish_SemiBold
 import trackmemobile.composeapp.generated.resources.Res
@@ -61,26 +62,33 @@ fun AddStreamPage() {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-//                    .padding(paddingValues)
-//                    .padding(top = 31.dp)
                     .background(Color(0xFFF8F3FF))
             ) {
                 Column(
                     modifier = Modifier
                         .padding(paddingValues)
-//                        .padding(top = 31.dp)
-                        .safeContentPadding()
                         .fillMaxSize()
-                        .background(Color(0xFFF8F3FF))
-                        .verticalScroll(rememberScrollState()),
-//                    .padding(horizontal = 16.dp),
+                        .verticalScroll(rememberScrollState())
+                        .padding(top = 18.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
+                    Text(
+                        "Создание потока",
+                        fontSize = 32.sp,
+                        color = Color(0xFF44069A),
+                        fontFamily = mulishFamily,
+                        fontWeight = FontWeight.SemiBold,
+                        lineHeight = 32.sp,
+                        letterSpacing = 0.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
                     AddStreamPhoto()
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    StreamNameInput(value = name.value, onValueChange = {name.value = it})
+                    StreamNameInput(value = name.value, onValueChange = { name.value = it })
 
                     Spacer(modifier = Modifier.height(14.dp))
 
@@ -100,7 +108,7 @@ fun AddStreamPage() {
                             lineHeight = 14.sp,
                             letterSpacing = 0.sp
                         )
-                       DateInputField(value = startDate, onValueChange = { startDate = it })
+                        DateInputField(value = startDate, onValueChange = { startDate = it })
                     }
 
                     Spacer(modifier = Modifier.height(14.dp))
@@ -121,7 +129,7 @@ fun AddStreamPage() {
                             lineHeight = 14.sp,
                             letterSpacing = 0.sp
                         )
-                       DateInputField(value = endDate, onValueChange = { endDate = it })
+                        DateInputField(value = endDate, onValueChange = { endDate = it })
                     }
 
                     Spacer(modifier = Modifier.height(9.dp))
