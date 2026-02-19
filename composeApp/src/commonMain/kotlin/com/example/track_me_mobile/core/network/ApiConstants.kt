@@ -17,4 +17,10 @@ object ApiConstants {
     const val ACCOUNT_INFO = "$GATEWAY_BASE/sso/api/v1/account/info"
     const val ACCOUNT_UPDATE = "$GATEWAY_BASE/sso/api/v1/account/update"
 
+    const val USERS_TRACKERS        = "$GATEWAY_BASE/sso/api/v1/users/trackers"
+    const val USERS_ADMINISTRATORS  = "$GATEWAY_BASE/sso/api/v1/users/administrators"
+    const val USERS_INFO            = "$GATEWAY_BASE/sso/api/v1/users" // + /{username}/info
+    const val USERS_ENABLE          = "$GATEWAY_BASE/sso/api/v1/users/enable"
+    const val USERS_DISABLE         = "$GATEWAY_BASE/sso/api/v1/users/disable"
+
 }

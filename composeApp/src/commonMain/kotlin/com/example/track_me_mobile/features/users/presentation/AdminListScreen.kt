@@ -19,17 +19,17 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.example.track_me_mobile.features.profile.presentation.UserProfileScreen
 import com.example.track_me_mobile.core.ui.components.MainTopHeader
+import com.example.track_me_mobile.features.users.presentation.components.AdminItem
 import com.example.track_me_mobile.features.streams.presentation.components.SearchBar
 import com.example.track_me_mobile.features.tracker_list.presentation.components.SearchBar
-import com.example.track_me_mobile.features.users.presentation.components.TrackerItem
 import org.koin.compose.koinInject
 
 @Composable
-fun TrackerListScreen() {
-    val viewModel: TrackerListViewModel = koinInject()
+fun AdminListScreen() {
+    val viewModel: AdminListViewModel = koinInject()
     val state by viewModel.state.collectAsState()
 
-    TrackerListContent(
+    AdminListContent(
         state = state,
         onSearchQueryChange = { viewModel.onSearchQueryChanged(it) },
         onDeleteUser = { viewModel.deleteUser(it) },
@@ -39,8 +39,8 @@ fun TrackerListScreen() {
 }
 
 @Composable
-fun TrackerListContent(
-    state: TrackerListState,
+fun AdminListContent(
+    state: AdminListState,
     onSearchQueryChange: (String) -> Unit,
     onDeleteUser: (String) -> Unit,
     onConfirmUser: (String) -> Unit,
@@ -68,7 +68,7 @@ fun TrackerListContent(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = "← Трекеры",
+                    text = "← Администраторы",
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF44069A)
@@ -133,7 +133,7 @@ fun TrackerListContent(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         items(state.users) { user ->
-                            TrackerItem(
+                            AdminItem(
                                 user = user,
                                 onConfirm = { onConfirmUser(user.telegramNick) },
                                 onDelete = { onDeleteUser(user.telegramNick) },

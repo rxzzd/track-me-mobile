@@ -6,7 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon // Добавили Icon
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -17,20 +17,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-
-import com.example.track_me_mobile.features.users.domain.models.TrackerUser
+import com.example.track_me_mobile.features.users.domain.models.AdminUser
 import com.example.track_me_mobile.generated.resources.Res
 import com.example.track_me_mobile.generated.resources.edit
 import com.example.track_me_mobile.generated.resources.icon_false
 import com.example.track_me_mobile.generated.resources.icon_true
 import org.jetbrains.compose.resources.painterResource
 
-
-
 @Composable
-fun TrackerItem(
-    user: TrackerUser,
+fun AdminItem(
+    user: AdminUser,
     onConfirm: () -> Unit,
     onDelete: () -> Unit,
     onProfileClick: () -> Unit
@@ -91,7 +87,6 @@ fun TrackerItem(
                         onClick = { onConfirm(); isMenuOpen = false },
                         modifier = Modifier.size(36.dp)
                     ) {
-                        // ЗАМЕНА: ГАЛОЧКА (`true`)
                         Icon(
                             painter = painterResource(Res.drawable.icon_true),
                             contentDescription = "Confirm",
@@ -103,7 +98,6 @@ fun TrackerItem(
                         onClick = { onDelete(); isMenuOpen = false },
                         modifier = Modifier.size(36.dp)
                     ) {
-                        // ЗАМЕНА: КРЕСТИК (`false`)
                         Icon(
                             painter = painterResource(Res.drawable.icon_false),
                             contentDescription = "Delete",
@@ -116,7 +110,6 @@ fun TrackerItem(
                 // Статус пользователя (когда меню закрыто)
                 Box(modifier = Modifier.padding(end = 12.dp)) {
                     if (user.isConfirmed) {
-                        // ЗАМЕНА: СТАТУС ПОДТВЕРЖДЕН (`true`)
                         Icon(
                             painter = painterResource(Res.drawable.icon_true),
                             contentDescription = "Confirmed",
@@ -124,7 +117,6 @@ fun TrackerItem(
                             modifier = Modifier.size(24.dp)
                         )
                     } else {
-                        // ЗАМЕНА: СТАТУС ОЖИДАНИЯ (ic_edit)
                         Icon(
                             painter = painterResource(Res.drawable.edit),
                             contentDescription = "Pending",

@@ -25,12 +25,12 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.example.track_me_mobile.core.domain.models.Role
 import com.example.track_me_mobile.features.profile.presentation.ProfileScreen
 import com.example.track_me_mobile.core.navigation.TrackerListScreen
+import com.example.track_me_mobile.core.navigation.AdminListScreen
 import com.example.track_me_mobile.core.ui.models.HeaderMenuItem
 import com.example.track_me_mobile.core.ui.theme.TrackMePurple
-
 import com.example.track_me_mobile.features.streams.presentation.StreamListScreen
 import com.example.track_me_mobile.features.teams.presentation.TeamListScreen
-import org.koin.compose.koinInject // Или koinViewModel() в зависимости от версии
+import org.koin.compose.koinInject
 
 @Composable
 fun MainTopHeader() {
@@ -38,22 +38,18 @@ fun MainTopHeader() {
     val userRole by viewModel.userRole.collectAsState()
 
     val navigator = LocalNavigator.currentOrThrow
-    // 1. Получаем текущий экран
     val currentScreen = navigator.lastItem
 
     var expanded by remember { mutableStateOf(false) }
 
-    // Пересчитываем пункты меню при изменении роли ИЛИ текущего экрана
     val menuItems = remember(userRole, currentScreen) {
         val list = mutableListOf<HeaderMenuItem>()
 
-        // Вспомогательная функция, чтобы не дублировать код
         fun navigate(target: Screen) {
-            // Проверяем: если класс текущего экрана НЕ совпадает с целевым, тогда пушим
             if (currentScreen!!::class != target::class) {
                 navigator.push(target)
             }
-            expanded = false // В любом случае закрываем меню
+            expanded = false
         }
 
         // 1. Личный кабинет
@@ -65,8 +61,8 @@ fun MainTopHeader() {
 
         when (userRole) {
             Role.SUPER_ADMIN -> {
-                list.add(HeaderMenuItem("Администраторы", currentScreen is TrackerListScreen) {
-                    navigate(TrackerListScreen())
+                list.add(HeaderMenuItem("Администраторы", currentScreen is AdminListScreen) {
+                    navigate(AdminListScreen())
                 })
                 list.add(HeaderMenuItem("Трекеры", currentScreen is TrackerListScreen) {
                     navigate(TrackerListScreen())
@@ -147,7 +143,7 @@ fun MainTopHeader() {
                             .background(Color.White, shape)
                             .border(2.dp, TrackMePurple, shape)
                     ) {
-                        // Верхняя плашка закрытия (совпадает с твоим дизайном)
+                        // Верхняя плашка закрытия
                         Box(
                             modifier = Modifier
                                 .align(Alignment.End)
@@ -171,7 +167,6 @@ fun MainTopHeader() {
                                         .padding(horizontal = 8.dp, vertical = 2.dp)
                                         .clip(RoundedCornerShape(8.dp))
                                         .background(
-                                            // Если выбран — подсвечиваем. TrackMePurple должен быть доступен.
                                             if (item.isSelected) TrackMePurple.copy(alpha = 0.12f)
                                             else Color.Transparent
                                         )
@@ -197,4 +192,3 @@ fun MainTopHeader() {
         }
     }
 }
-
