@@ -14,26 +14,68 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.*
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+
+@Serializable
+data class TeamFilterDto(
+    val fieldName: String,
+    val type: String,
+    val values: List<String>
+)
+
+@Serializable
+data class TeamSortDto(
+    val field: String,
+    val direction: String
+)
+
+@Serializable
+data class TeamRequestBody(
+    val filters: List<TeamFilterDto>,
+    val sort: List<TeamSortDto>
+)
 
 class TeamRepositoryImpl(
     private val client: HttpClient,
-    private val userInfoHolder: UserInfoHolder  // ← читаем роль из холдера
+    private val userInfoHolder: UserInfoHolder
 ) : TeamRepository {
 
-    override suspend fun getTeamCards(page: Int, size: Int): Result<List<TeamCard>> {
+    override suspend fun getTeamCards(
+        streamId: String?,
+        page: Int,
+        size: Int
+    ): Result<List<TeamCard>> {
         return try {
-
             val role = userInfoHolder.userInfo?.mainRole ?: Role.TRACKER
 
-
-            // Шаг 1: получаем CSRF-токен — он нужен как Bearer для backend
+            // Шаг 1: получаем CSRF-токен
             val csrfResponse = client.get(ApiConstants.CSRF_ENDPOINT) {
                 header(HttpHeaders.Accept, "application/json")
             }
 
             val csrfData = csrfResponse.body<CsrfResponse>()
 
-            // Шаг 2: запрос к backend с токеном как Bearer
+            // Шаг 2: формируем фильтры
+            val filters = mutableListOf<TeamFilterDto>()
+            if (streamId != null) {
+                filters.add(TeamFilterDto(
+                    fieldName = "streams.name",
+                    type = "EQ",
+                    values = listOf(streamId)  // передаём имя потока
+                ))
+            }
+
+            // Шаг 3: сортировка
+            val sort = listOf(
+                TeamSortDto(field = "enabled", direction = "desc"),
+                TeamSortDto(field = "streams.name", direction = "desc"),
+                TeamSortDto(field = "averageGrade", direction = "desc")
+            )
+
+            val requestBody = TeamRequestBody(filters = filters, sort = sort)
+
+            // Шаг 4: запрос к backend
             val endpoint = when (role) {
                 Role.ADMIN, Role.SUPER_ADMIN ->
                     "${ApiConstants.BACKEND_BASE}/api/v1/admin/team-cards?page=$page&size=$size"
@@ -41,26 +83,30 @@ class TeamRepositoryImpl(
                     "${ApiConstants.BACKEND_BASE}/api/v1/team-cards?page=$page&size=$size"
             }
 
+            println("[TEAMS] Request to: $endpoint")
+            println("[TEAMS] Body: ${Json.encodeToString(TeamRequestBody.serializer(), requestBody)}")
+
             val response = client.post(endpoint) {
-                header(HttpHeaders.Accept,       "application/json")
-                header(csrfData.headerName,      csrfData.token)
+                header(HttpHeaders.Accept, "application/json")
+                header(csrfData.headerName, csrfData.token)
                 contentType(ContentType.Application.Json)
-                setBody("""{"filters": []}""")  // ← пустое тело, сервер требует его наличие
+                setBody(requestBody)
             }
 
-            println("[TEAMS] Статус: ${response.status}")
+            println("[TEAMS] Status: ${response.status}")
             val bodyText = response.bodyAsText()
-            println("[TEAMS] Тело (первые 300): ${bodyText.take(300)}")
+            println("[TEAMS] Body (first 300): ${bodyText.take(300)}")
 
             if (response.status != HttpStatusCode.OK) {
-                return Result.failure(Exception("Статус: ${response.status}"))
+                return Result.failure(Exception("Status: ${response.status}"))
             }
 
             val dto = response.body<TeamCardsPageDto>()
             Result.success(dto.content.map { it.toDomain() })
 
         } catch (e: Exception) {
-            println("[TEAMS] ИСКЛЮЧЕНИЕ: ${e::class.simpleName} — ${e.message}")
+            println("[TEAMS] EXCEPTION: ${e::class.simpleName} – ${e.message}")
+            e.printStackTrace()
             Result.failure(e)
         }
     }

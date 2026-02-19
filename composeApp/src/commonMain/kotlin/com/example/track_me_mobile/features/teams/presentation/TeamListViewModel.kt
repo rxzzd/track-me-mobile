@@ -22,20 +22,30 @@ class TeamListViewModel(
     var state by mutableStateOf<TeamListState>(TeamListState.Loading)
         private set
 
-    // Оригинальный список с сервера — нужен для фильтрации без повторных запросов
     private var allTeams: List<TeamCard> = emptyList()
+    private var streamFilter: String? = null
+    private var isInitialized = false
 
     var searchQuery by mutableStateOf("")
         private set
 
-    init {
+    fun initialize(streamId: String?) {
+        if (!isInitialized) {
+            streamFilter = streamId
+            isInitialized = true
+            loadTeams()
+        }
+    }
+
+    fun setStreamFilter(streamId: String) {
+        streamFilter = streamId
         loadTeams()
     }
 
     fun loadTeams() {
         screenModelScope.launch {
             state = TeamListState.Loading
-            repository.getTeamCards()
+            repository.getTeamCards(streamId = streamFilter)
                 .onSuccess { teams ->
                     allTeams = teams
                     applyFilters()

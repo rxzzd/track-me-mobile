@@ -15,11 +15,14 @@ import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.koin.koinScreenModel
 import com.example.track_me_mobile.core.ui.components.MainTopHeader
 // Импортируем ваш компонент хедера.
 
 import com.example.track_me_mobile.features.streams.presentation.components.*
+import com.example.track_me_mobile.features.teams.presentation.TeamListScreen
 
 class StreamListScreen : Screen {
 
@@ -33,6 +36,7 @@ class StreamListScreen : Screen {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun StreamListContent(viewModel: StreamListViewModel) {
+    val navigator = LocalNavigator.currentOrThrow
 
     val filterInfoBlockBounds = remember { mutableStateOf<Rect?>(null) }
     var showFilterPopUp by remember { mutableStateOf(false) }
@@ -148,10 +152,14 @@ private fun StreamListContent(viewModel: StreamListViewModel) {
                         key = { index, stream -> "${index}_${stream.id}" }
                     ) { _, stream ->
                         StreamCard(
+                            streamId = stream.id,
                             title = stream.name,
                             markets = "Рынки НТИ: ${stream.ntiMarkets.joinToString { it.displayName }}",
                             trl = "Дата начала: ${stream.startDate}",
-                            flow = "Дата конца: ${stream.endDate}"
+                            flow = "Дата конца: ${stream.endDate}",
+                            onClick = {
+                                navigator.push(TeamListScreen(streamId = stream.name))
+                            }
                         )
                     }
 

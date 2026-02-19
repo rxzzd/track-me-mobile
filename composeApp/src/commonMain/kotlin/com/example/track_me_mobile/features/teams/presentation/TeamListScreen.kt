@@ -21,6 +21,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.example.track_me_mobile.core.ui.components.MainTopHeader
 import cafe.adriel.voyager.koin.koinScreenModel
 import com.example.track_me_mobile.core.ui.theme.MontserratFontFamily
@@ -55,10 +57,16 @@ val trlOptions = listOf(
 // Screen — точка входа из навигации
 // ─────────────────────────────────────────────
 
-class TeamListScreen : Screen {
+data class TeamListScreen(
+    val streamId: String? = null
+) : Screen {
     @Composable
     override fun Content() {
         val viewModel = koinScreenModel<TeamListViewModel>()
+
+        LaunchedEffect(Unit) {
+            viewModel.initialize(streamId)
+        }
 
         TeamListContent(
             state          = viewModel.state,
@@ -83,6 +91,7 @@ fun TeamListContent(
     onFilterApply: (List<String>, List<IntRange>) -> Unit,
     onRetry: () -> Unit
 ) {
+    val navigator = LocalNavigator.currentOrThrow
     val montserrat = MontserratFontFamily()
 
     var showFilters by remember { mutableStateOf(false) }
@@ -93,145 +102,145 @@ fun TeamListContent(
         containerColor = Color.White
     ) { paddingValues ->
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-            .padding(paddingValues)
-            .padding(horizontal = 20.dp)
-    ) {
-
-        // ── Заголовок ──
-        Row(
-            modifier = Modifier.padding(vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
+                .padding(paddingValues)
+                .padding(horizontal = 20.dp)
         ) {
-            Icon(
-                painter = painterResource(Res.drawable.arrowback),
-                contentDescription = null,
-                tint = PrimaryPurple,
-                modifier = Modifier.size(24.dp).clickable { }
-            )
-            Spacer(Modifier.width(12.dp))
-            Text(
-                text = "Команды",
-                fontFamily = montserrat,
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                color = DarkPurple,
-                modifier = Modifier.weight(1f)
-            )
-        }
 
-        // ── Строка поиска + фильтр + добавить ──
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(width = 49.dp, height = 40.dp)
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(PrimaryPurple)
-                    .clickable { showFilters = true },
-                contentAlignment = Alignment.Center
+            // ── Заголовок ──
+            Row(
+                modifier = Modifier.padding(vertical = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    painter = painterResource(Res.drawable.filter_icon1),
+                    painter = painterResource(Res.drawable.arrowback),
                     contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(22.dp)
+                    tint = PrimaryPurple,
+                    modifier = Modifier.size(24.dp).clickable { navigator.pop() }
+                )
+                Spacer(Modifier.width(12.dp))
+                Text(
+                    text = "Команды",
+                    fontFamily = montserrat,
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = DarkPurple,
+                    modifier = Modifier.weight(1f)
                 )
             }
 
-            Spacer(Modifier.width(12.dp))
-
-            BasicTextField(
-                value = searchQuery,
-                onValueChange = onSearchChange,   // ← идёт в ViewModel
-                modifier = Modifier.weight(1f).height(40.dp),
-                singleLine = true,
-                cursorBrush = SolidColor(DarkPurple),
-                textStyle = TextStyle(
-                    fontSize = 14.sp,
-                    fontFamily = montserrat,
-                    color = Color.White
-                ),
-                decorationBox = { innerTextField ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(SearchBarBg, RoundedCornerShape(20.dp))
-                            .padding(horizontal = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            painter = painterResource(Res.drawable.icon_search),
-                            contentDescription = null,
-                            tint = DarkPurple,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Box(modifier = Modifier.weight(1f)) {
-                            if (searchQuery.isEmpty()) {
-                                Text(
-                                    "Найти",
-                                    fontSize = 14.sp,
-                                    fontFamily = montserrat,
-                                    color = Color.White
-                                )
-                            }
-                            innerTextField()
-                        }
-                    }
-                }
-            )
-
-            Spacer(Modifier.width(12.dp))
-
-            Icon(
-                painter = painterResource(Res.drawable.icon_plus),
-                contentDescription = null,
-                tint = PrimaryPurple,
-                modifier = Modifier.size(25.dp).clickable { }
-            )
-        }
-
-        Spacer(Modifier.height(20.dp))
-
-        // ── Тело — зависит от состояния ──
-        when (val s = state) {
-
-            is TeamListState.Loading -> {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = PrimaryPurple)
-                }
-            }
-
-            is TeamListState.Error -> {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(s.message, color = Color.Gray, fontFamily = montserrat)
-                        Spacer(Modifier.height(12.dp))
-                        Button(onClick = onRetry) {
-                            Text("Повторить", fontFamily = montserrat)
-                        }
-                    }
-                }
-            }
-
-            is TeamListState.Success -> {
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    contentPadding = PaddingValues(bottom = 20.dp)
+            // ── Строка поиска + фильтр + добавить ──
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(width = 49.dp, height = 40.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(PrimaryPurple)
+                        .clickable { showFilters = true },
+                    contentAlignment = Alignment.Center
                 ) {
-                    items(s.teams) { team ->
-                        TeamCard(team)   // ← теперь принимает доменную модель
+                    Icon(
+                        painter = painterResource(Res.drawable.filter_icon1),
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+
+                Spacer(Modifier.width(12.dp))
+
+                BasicTextField(
+                    value = searchQuery,
+                    onValueChange = onSearchChange,   // ← идёт в ViewModel
+                    modifier = Modifier.weight(1f).height(40.dp),
+                    singleLine = true,
+                    cursorBrush = SolidColor(DarkPurple),
+                    textStyle = TextStyle(
+                        fontSize = 14.sp,
+                        fontFamily = montserrat,
+                        color = Color.White
+                    ),
+                    decorationBox = { innerTextField ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(SearchBarBg, RoundedCornerShape(20.dp))
+                                .padding(horizontal = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                painter = painterResource(Res.drawable.icon_search),
+                                contentDescription = null,
+                                tint = DarkPurple,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Box(modifier = Modifier.weight(1f)) {
+                                if (searchQuery.isEmpty()) {
+                                    Text(
+                                        "Найти",
+                                        fontSize = 14.sp,
+                                        fontFamily = montserrat,
+                                        color = Color.White
+                                    )
+                                }
+                                innerTextField()
+                            }
+                        }
+                    }
+                )
+
+                Spacer(Modifier.width(12.dp))
+
+                Icon(
+                    painter = painterResource(Res.drawable.icon_plus),
+                    contentDescription = null,
+                    tint = PrimaryPurple,
+                    modifier = Modifier.size(25.dp).clickable { }
+                )
+            }
+
+            Spacer(Modifier.height(20.dp))
+
+            // ── Тело — зависит от состояния ──
+            when (val s = state) {
+
+                is TeamListState.Loading -> {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = PrimaryPurple)
+                    }
+                }
+
+                is TeamListState.Error -> {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(s.message, color = Color.Gray, fontFamily = montserrat)
+                            Spacer(Modifier.height(12.dp))
+                            Button(onClick = onRetry) {
+                                Text("Повторить", fontFamily = montserrat)
+                            }
+                        }
+                    }
+                }
+
+                is TeamListState.Success -> {
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        contentPadding = PaddingValues(bottom = 20.dp)
+                    ) {
+                        items(s.teams) { team ->
+                            TeamCard(team)   // ← теперь принимает доменную модель
+                        }
                     }
                 }
             }
         }
-    }
     }
 
     // ── Диалог фильтров ──
