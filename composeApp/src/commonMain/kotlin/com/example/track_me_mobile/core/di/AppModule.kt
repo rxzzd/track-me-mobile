@@ -24,7 +24,7 @@ val appModule = module {
     single<StreamRepository> { StreamRepositoryImpl(get()) }
     factory { StreamListViewModel(get()) }
     factory { LoginViewModel(get(), get()) }
-    factory { GlobalHeaderViewModel(get()) }
+    factory { GlobalHeaderViewModel(get(), get()) }
 
     single<ProfileRepository> { ProfileRepositoryImpl(get()) }
     factory { ProfileViewModel(get()) }
