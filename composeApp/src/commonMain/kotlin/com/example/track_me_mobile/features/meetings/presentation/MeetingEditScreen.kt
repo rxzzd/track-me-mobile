@@ -19,9 +19,7 @@ import com.example.track_me_mobile.core.ui.theme.TrackMePurple
 import com.example.track_me_mobile.features.meetings.presentation.components.*
 import com.example.track_me_mobile.features.profile.presentation.components.ProfileTopHeader
 import java.text.SimpleDateFormat
-import java.util.Locale
-import java.util.Calendar
-import java.util.Date
+import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,8 +31,8 @@ fun MeetingEditScreen(
     initialLinkVideo: String,
     initialDate: String,
     initialMeetingResult: String,
-    initialScreenshot: String?, // Добавлено
-    onSave: (String, String, String, String, String, String, String, String?) -> Unit, // Теперь 8 параметров
+    initialScreenshot: String?,
+    onSave: (String, String, String, String, String, String, String, String?) -> Unit,
     onBack: () -> Unit
 ) {
     var tasks by remember { mutableStateOf(initialTasks) }
@@ -43,23 +41,8 @@ fun MeetingEditScreen(
     var linkRecord by remember { mutableStateOf(initialLinkRecord) }
     var linkVideo by remember { mutableStateOf(initialLinkVideo) }
     var selectedDateText by remember { mutableStateOf(initialDate) }
-    var meetingResult by remember { mutableStateOf(initialMeetingResult) }
-    var screenshotUri by remember { mutableStateOf(initialScreenshot) } // Добавлено
+    var screenshotUri by remember { mutableStateOf(initialScreenshot) }
     var isExpanded by remember { mutableStateOf(false) }
-
-    // Твоя оригинальная проверка даты
-    val isDatePassed = remember(selectedDateText) {
-        try {
-            val sdf = SimpleDateFormat("dd.MM", Locale.getDefault())
-            val meetingDate = sdf.parse(selectedDateText)
-            val today = Calendar.getInstance()
-            val todayDate = sdf.parse("${today.get(Calendar.DAY_OF_MONTH)}.${today.get(Calendar.MONTH) + 1}")
-
-            meetingDate != null && !meetingDate.after(todayDate)
-        } catch (e: Exception) {
-            false
-        }
-    }
 
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
@@ -75,53 +58,19 @@ fun MeetingEditScreen(
                     }
                     showDatePicker = false
                 }) { Text("OK", color = TrackMePurple) }
-            }
+            },
+            dismissButton = { TextButton(onClick = { showDatePicker = false }) { Text("Отмена") } }
         ) { DatePicker(state = datePickerState) }
     }
 
     Scaffold(topBar = { ProfileTopHeader() }) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 24.dp)
-                .verticalScroll(rememberScrollState())
-        ) {
+        Column(modifier = Modifier.fillMaxSize().padding(paddingValues).padding(horizontal = 24.dp).verticalScroll(rememberScrollState())) {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 16.dp, bottom = 12.dp)) {
                 IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, null, tint = TrackMePurple) }
                 Text("Редактирование", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = TrackMePurple)
             }
 
-            // Твои кнопки Состоялась / Не состоялась
-            Row(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                val isDoneSelected = meetingResult == "Состоялась"
-                val isFailedSelected = meetingResult == "Не состоялась"
-
-                Button(
-                    onClick = { if (isDatePassed) meetingResult = "Состоялась" },
-                    modifier = Modifier.weight(1f).height(48.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isDatePassed) {
-                            if (isDoneSelected) Color(0xFF6DB371) else Color(0xFF99C9A3)
-                        } else Color.LightGray.copy(alpha = 0.4f),
-                        contentColor = Color.White
-                    ),
-                    shape = RoundedCornerShape(50)
-                ) { Text("Состоялась") }
-
-                Button(
-                    onClick = { if (isDatePassed) meetingResult = "Не состоялась" },
-                    modifier = Modifier.weight(1f).height(48.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isDatePassed) {
-                            if (isFailedSelected) Color(0xFFD36D6D) else Color(0xFFD5938D)
-                        } else Color.LightGray.copy(alpha = 0.4f),
-                        contentColor = Color.White
-                    ),
-                    shape = RoundedCornerShape(50)
-                ) { Text("Не состоялась") }
-            }
-
+            // Выбор даты
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 8.dp)) {
                 Text("Дата: ", color = Color.Black)
                 Surface(onClick = { showDatePicker = true }, color = TrackMePurple, shape = RoundedCornerShape(50)) {
@@ -129,46 +78,28 @@ fun MeetingEditScreen(
                 }
             }
 
-            MeetingInputRow("Задачи к следующей встрече:", tasks, { tasks = it }, isEnabled = true)
-            Spacer(Modifier.height(8.dp))
-            MeetingInputRow("Информация о команде:", teamInfo, { teamInfo = it }, isEnabled = true)
+            MeetingInputRow("Задачи к следующей встрече:", tasks, { tasks = it }, isEnabled = true, isMultiline = true)
+            MeetingInputRow("Информация о команде:", teamInfo, { teamInfo = it }, isEnabled = true, isMultiline = true)
 
-            // Твой выпадающий список статуса
+            // СТАТУС В РЕДАКТИРОВАНИИ (Текст по центру)
             Text("Текущий статус команды:", color = Color.Black, modifier = Modifier.padding(top = 16.dp))
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp)
-                    .border(2.dp, TrackMePurple, RoundedCornerShape(25.dp))
-                    .clip(RoundedCornerShape(25.dp))
-                    .background(Color.White)
-            ) {
+            Column(modifier = Modifier.fillMaxWidth().padding(top = 8.dp).border(2.dp, TrackMePurple, RoundedCornerShape(25.dp)).clip(RoundedCornerShape(25.dp)).background(Color.White)) {
                 val headerBg = if (isExpanded) Color.White else when (status) {
                     "Всё ок" -> Color(0xFF6DB371)
                     "Есть проблемы" -> Color(0xFFE5D170)
-                    else -> Color(0xFFD36D6D)
+                    "Есть большие проблемы" -> Color(0xFFD36D6D)
+                    else -> TrackMePurple
                 }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp)
-                        .background(headerBg)
-                        .clickable { isExpanded = !isExpanded }
-                        .padding(horizontal = 20.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
+                Row(modifier = Modifier.fillMaxWidth().height(48.dp).background(headerBg).clickable { isExpanded = !isExpanded }.padding(horizontal = 20.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
                     Text(
                         text = if (isExpanded) "Выберите статус..." else status,
-                        color = if (isExpanded || status == "Есть проблемы") Color.Black else Color.White
+                        color = if (isExpanded || status == "Есть проблемы") Color.Black else Color.White,
+                        modifier = Modifier.weight(1f),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center // Центрирование
                     )
-                    Icon(
-                        imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                        contentDescription = null,
-                        tint = if (isExpanded) TrackMePurple else Color.White
-                    )
+                    Icon(imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown, contentDescription = null, tint = if (isExpanded) TrackMePurple else Color.White)
                 }
-                AnimatedVisibility(visible = isExpanded, enter = expandVertically(), exit = shrinkVertically()) {
+                AnimatedVisibility(visible = isExpanded) {
                     Column {
                         StatusMenuItem("Всё ок", Color(0xFF6DB371)) { status = "Всё ок"; isExpanded = false }
                         StatusMenuItem("Есть проблемы", Color(0xFFE5D170)) { status = "Есть проблемы"; isExpanded = false }
@@ -177,29 +108,18 @@ fun MeetingEditScreen(
                 }
             }
 
-            // СКРИНШОТ СРАЗУ ПОСЛЕ СТАТУСА
-            ScreenshotPickerBlock(
-                screenshotUri = screenshotUri,
-                isEditing = true,
-                onUploadClick = { screenshotUri = "dummy_path" }
-            )
+            ScreenshotPickerBlock(screenshotUri = screenshotUri, isEditing = true, onUploadClick = { screenshotUri = "dummy" })
 
-            Spacer(modifier = Modifier.height(16.dp))
             MeetingInputRow("Запись встречи (ссылка):", linkRecord, { linkRecord = it }, isEnabled = true)
-            Spacer(Modifier.height(8.dp))
             MeetingInputRow("Ссылка на видеовстречу:", linkVideo, { linkVideo = it }, isEnabled = true)
 
             Spacer(modifier = Modifier.height(32.dp))
-
-            // Твоя кнопка сохранения (теперь передает screenshotUri)
             Button(
-                onClick = { onSave(tasks, teamInfo, linkRecord, linkVideo, status, selectedDateText, meetingResult, screenshotUri) },
-                modifier = Modifier.fillMaxWidth().height(56.dp),
+                onClick = { onSave(tasks, teamInfo, linkRecord, linkVideo, status, selectedDateText, initialMeetingResult, screenshotUri) },
+                modifier = Modifier.fillMaxWidth().height(60.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = TrackMePurple),
                 shape = RoundedCornerShape(16.dp)
-            ) {
-                Text("Сохранить изменения", fontWeight = FontWeight.Bold, color = Color.White)
-            }
+            ) { Text("Сохранить изменения", color = Color.White, fontWeight = FontWeight.Bold) }
             Spacer(modifier = Modifier.height(40.dp))
         }
     }

@@ -6,14 +6,14 @@ import androidx.compose.runtime.*
 fun MeetingNavigation(onBack: () -> Unit) {
     var isEditing by remember { mutableStateOf(false) }
 
+    // Установлен начальный статус "Не указана"
     var tasks by remember { mutableStateOf("Цель проекта — разработать MVP...") }
     var teamInfo by remember { mutableStateOf("Все участники присутствовали.") }
-    var status by remember { mutableStateOf("Всё ок") }
+    var status by remember { mutableStateOf("Не указана") }
     var linkRecord by remember { mutableStateOf("") }
     var linkVideo by remember { mutableStateOf("") }
     var date by remember { mutableStateOf("20.02") }
     var meetingResult by remember { mutableStateOf("") }
-    // 1. Добавляем состояние для скриншота
     var screenshotUri by remember { mutableStateOf<String?>(null) }
 
     if (isEditing) {
@@ -25,8 +25,8 @@ fun MeetingNavigation(onBack: () -> Unit) {
             initialLinkVideo = linkVideo,
             initialDate = date,
             initialMeetingResult = meetingResult,
-            initialScreenshot = screenshotUri, // 2. Передаем скриншот
-            onSave = { t, info, rec, vid, st, d, res, pic -> // 3. Принимаем 8 параметров
+            initialScreenshot = screenshotUri,
+            onSave = { t, info, rec, vid, st, d, res, pic ->
                 tasks = t
                 teamInfo = info
                 linkRecord = rec
@@ -34,7 +34,7 @@ fun MeetingNavigation(onBack: () -> Unit) {
                 status = st
                 date = d
                 meetingResult = res
-                screenshotUri = pic // 4. Сохраняем скриншот
+                screenshotUri = pic
                 isEditing = false
             },
             onBack = { isEditing = false }
@@ -48,9 +48,10 @@ fun MeetingNavigation(onBack: () -> Unit) {
             linkVideo = linkVideo,
             date = date,
             meetingResult = meetingResult,
-            screenshotUri = screenshotUri, // 5. Передаем в экран просмотра
+            screenshotUri = screenshotUri,
             onEditClick = { isEditing = true },
-            onBack = onBack
+            onBack = onBack,
+            onResultChange = { meetingResult = it }
         )
     }
 }

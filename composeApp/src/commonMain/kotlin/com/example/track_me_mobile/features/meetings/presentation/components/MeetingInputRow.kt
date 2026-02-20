@@ -35,14 +35,7 @@ fun MeetingInputRow(
         }
     }
 
-    LaunchedEffect(isEnabled) {
-        if (isEnabled) {
-            textFieldValueState = textFieldValueState.copy(
-                selection = TextRange(textFieldValueState.text.length)
-            )
-            focusRequester.requestFocus()
-        }
-    }
+    // МЫ УДАЛИЛИ LaunchedEffect(isEnabled), который вызывал requestFocus()
 
     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
         Text(text = label, color = Color.Gray, fontSize = 13.sp)
