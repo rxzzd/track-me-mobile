@@ -19,6 +19,7 @@ import com.example.track_me_mobile.features.auth.data.RegistrationRepositoryImpl
 import org.koin.dsl.module
 import com.example.track_me_mobile.features.streams.data.StreamRepositoryImpl
 import com.example.track_me_mobile.features.streams.domain.StreamRepository
+import com.example.track_me_mobile.features.streams.presentation.AddStreamViewModel
 import com.example.track_me_mobile.features.streams.presentation.StreamListViewModel
 
 val appModule = module {
@@ -33,11 +34,12 @@ val appModule = module {
     factory { LoginViewModel(get(), get(), get()) }  // AuthRepository, AuthRepositoryImpl, UserInfoHolder
     factory { GlobalHeaderViewModel(get(), get()) }  // AuthRepository, SessionStorage
 
-    // Registration
-    single<RegistrationRepository> { RegistrationRepositoryImpl(get()) }
-    factory { RegistrationViewModel(get()) }
+    
 
     // Profile
+    single<StreamRepository> { StreamRepositoryImpl(get()) }
+    factory { StreamListViewModel(get()) }
+    factory { AddStreamViewModel(get()) }
     single<ProfileRepository> { ProfileRepositoryImpl(get()) }
     factory { ProfileViewModel(get()) }
 

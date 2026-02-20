@@ -163,7 +163,6 @@ class StreamListViewModel(
     private fun buildFilters(): List<StreamFilter> {
         val result = mutableListOf<StreamFilter>()
 
-        // Поиск убираем — он локальный
         selectedYears.forEach { year ->
             result += StreamFilter(fieldName = "year", type = "EQ", value = year)
         }

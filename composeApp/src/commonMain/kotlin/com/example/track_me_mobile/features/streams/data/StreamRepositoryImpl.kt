@@ -2,6 +2,7 @@ package com.example.track_me_mobile.features.streams.data
 
 import com.example.track_me_mobile.core.network.ApiConstants
 import com.example.track_me_mobile.features.streams.data.model.NtiMarketDto
+import com.example.track_me_mobile.features.streams.data.model.StreamCreateDto
 import com.example.track_me_mobile.features.streams.data.model.StreamFilterDto
 import com.example.track_me_mobile.features.streams.data.model.StreamFilterRequest
 import com.example.track_me_mobile.features.streams.data.model.StreamPageDto
@@ -9,6 +10,7 @@ import com.example.track_me_mobile.features.streams.domain.StreamPage
 import com.example.track_me_mobile.features.streams.domain.StreamRepository
 import com.example.track_me_mobile.features.streams.domain.models.NtiMarket
 import com.example.track_me_mobile.features.streams.domain.models.Stream
+import com.example.track_me_mobile.features.streams.domain.models.StreamCreateRequest
 import com.example.track_me_mobile.features.streams.domain.models.StreamFilter
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -116,4 +118,42 @@ class StreamRepositoryImpl(
         meetingsCount = meetingsCount,
         ntiMarkets = ntiMarkets.map { NtiMarket(it.id, it.name, it.displayName) }
     )
+
+    override suspend fun createStream(request: StreamCreateRequest): Result<Stream> {
+        return try {
+            // 1. Получаем CSRF
+            val csrfResponse = client.get(ApiConstants.CSRF_ENDPOINT) {
+                header(HttpHeaders.Accept, "application/json")
+            }
+            val csrfData = csrfResponse.body<com.example.track_me_mobile.features.auth.data.model.CsrfResponse>()
+
+            // 2. Отправляем POST
+            val response = client.post(ApiConstants.CREATE_STREAM_ENDPOINT) {
+                contentType(ContentType.Application.Json)
+                header(csrfData.headerName, csrfData.token)
+                header("X-Requested-With", "XMLHttpRequest")
+                setBody(
+                    StreamCreateDto(
+                        name = request.name,
+                        startDate = request.startDate,
+                        endDate = request.endDate,
+                        ntiMarketIds = request.ntiMarketIds,
+                        description = request.description,
+                        trackStartDate = request.trackStartDate,
+                        meetingsCount = request.meetingsCount
+                    )
+                )
+            }
+
+            if (response.status == HttpStatusCode.OK || response.status == HttpStatusCode.Created) {
+                val dto = response.body<com.example.track_me_mobile.features.streams.data.model.StreamDto>()
+                Result.success(dto.toDomain())
+            } else {
+                val errorBody = response.bodyAsText()
+                Result.failure(Exception("Ошибка сервера: ${response.status}. $errorBody"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

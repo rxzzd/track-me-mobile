@@ -18,8 +18,9 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.koin.koinScreenModel
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.example.track_me_mobile.core.ui.components.MainTopHeader
-// Импортируем ваш компонент хедера.
 
 import com.example.track_me_mobile.features.streams.presentation.components.*
 import com.example.track_me_mobile.features.teams.presentation.TeamListScreen
@@ -42,12 +43,11 @@ private fun StreamListContent(viewModel: StreamListViewModel) {
     var showFilterPopUp by remember { mutableStateOf(false) }
 
     val listState = rememberLazyListState()
-
+    val navigator = LocalNavigator.currentOrThrow
     val shouldLoadMore by remember {
         derivedStateOf {
             val lastVisible = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
             val total = listState.layoutInfo.totalItemsCount
-            // Подгружаем, когда осталось 3 элемента до конца
             lastVisible >= total - 3 && !viewModel.isLoadingMore && viewModel.hasMore
         }
     }
@@ -58,18 +58,16 @@ private fun StreamListContent(viewModel: StreamListViewModel) {
 
     MaterialTheme {
         Scaffold(
-            // ── ВСТАВЛЯЕМ ВАШ ХЕДЕР ЗДЕСЬ ──
             topBar = {
                 MainTopHeader()
             },
-            // Задаем цвет фона для всего Scaffold, чтобы избежать белых полос при оттягивании списка
             containerColor = Color(0xFFF8F3FF)
         ) { paddingValues ->
 
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues) // Учитываем высоту хедера автоматически
+                    .padding(paddingValues)
                     .background(Color(0xFFF8F3FF))
             ) {
                 LazyColumn(
@@ -78,8 +76,6 @@ private fun StreamListContent(viewModel: StreamListViewModel) {
                         .fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-
-                    // ── Поисковая строка + кнопки
                     item(key = "search_bar") {
                         Spacer(modifier = Modifier.height(16.dp))
                         Row(
@@ -97,12 +93,11 @@ private fun StreamListContent(viewModel: StreamListViewModel) {
                                 onValueChange = { viewModel.onSearchQueryChange(it) },
                                 onSearch = { viewModel.applyFilters() }
                             )
-                            AddBtn(modifier = Modifier.width(24.dp))
+                            AddBtn(modifier = Modifier.width(24.dp),
+                                onClick = {navigator.push(AddStreamScreen())})
                         }
                         Spacer(modifier = Modifier.height(16.dp))
                     }
-
-                    // ── Блоки активных фильтров
                     item(key = "filter_info") {
                         Row(
                             modifier = Modifier
@@ -120,8 +115,6 @@ private fun StreamListContent(viewModel: StreamListViewModel) {
                         }
                         Spacer(modifier = Modifier.height(20.dp))
                     }
-
-                    // ── Состояние загрузки (первая загрузка)
                     if (viewModel.isLoading) {
                         item(key = "loading_indicator") {
                             Box(
@@ -134,8 +127,6 @@ private fun StreamListContent(viewModel: StreamListViewModel) {
                             }
                         }
                     }
-
-                    // ── Ошибка
                     viewModel.errorMessage?.let { error ->
                         item(key = "error_message") {
                             Text(
@@ -145,8 +136,6 @@ private fun StreamListContent(viewModel: StreamListViewModel) {
                             )
                         }
                     }
-
-                    // ── Список карточек
                     itemsIndexed(
                         items = viewModel.streams,
                         key = { index, stream -> "${index}_${stream.id}" }
@@ -162,8 +151,6 @@ private fun StreamListContent(viewModel: StreamListViewModel) {
                             }
                         )
                     }
-
-                    // ── Лоадер внизу при подгрузке следующей страницы
                     if (viewModel.isLoadingMore) {
                         item(key = "loading_more_indicator") {
                             Box(
@@ -184,8 +171,6 @@ private fun StreamListContent(viewModel: StreamListViewModel) {
                         Spacer(modifier = Modifier.height(24.dp))
                     }
                 }
-
-                // ── Попап фильтров
                 FilterPopUp(
                     showWindow = showFilterPopUp,
                     onDismiss = { showFilterPopUp = false },

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -38,7 +37,6 @@ import com.example.track_me_mobile.features.streams.presentation.components.Stre
 @Preview
 fun StreamPage() {
     MaterialTheme {
-//        var showContent by remember { mutableStateOf(false) }
         val filterInfoBlocsBounds = remember { mutableStateOf<Rect?>(null) }
         var showFilterPopUp by remember { mutableStateOf(false) }
 
@@ -58,26 +56,20 @@ fun StreamPage() {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-//                    .padding(paddingValues)
-//                    .padding(top = 31.dp)
                     .background(Color(0xFFF8F3FF))
             )
             {
                 Column(
                     modifier = Modifier
                         .padding(paddingValues)
-//                        .padding(top = 31.dp)
-                        .safeContentPadding()
                         .fillMaxSize()
-                        .background(Color(0xFFF8F3FF))
-                        .verticalScroll(rememberScrollState()),
-//                    .padding(horizontal = 16.dp),
+                        .verticalScroll(rememberScrollState())
+                        .padding(top = 31.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Row(
                         modifier = Modifier
                             .width(328.dp),
-//                        .padding(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {

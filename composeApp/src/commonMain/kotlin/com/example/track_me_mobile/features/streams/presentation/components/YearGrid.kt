@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -29,7 +30,8 @@ fun YearGrid(
             FilterOption(
                 text = year,
                 isSelected = year in selectedYears,
-                onCheckedChange = { onYearToggle(year) }
+                onCheckedChange = { onYearToggle(year) },
+                borderColor = Color.White
             )
         }
     }
