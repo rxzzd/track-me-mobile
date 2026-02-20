@@ -1,8 +1,9 @@
 package com.example.track_me_mobile.features.users.presentation.components
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,6 +25,7 @@ import com.example.track_me_mobile.generated.resources.icon_false
 import com.example.track_me_mobile.generated.resources.icon_true
 import org.jetbrains.compose.resources.painterResource
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AdminItem(
     user: AdminUser,
@@ -44,7 +46,10 @@ fun AdminItem(
             .border(2.dp, purpleColor, RoundedCornerShape(50))
             .background(Color.White, RoundedCornerShape(50))
             .clip(RoundedCornerShape(50))
-            .clickable { isMenuOpen = !isMenuOpen }
+            .combinedClickable(
+                onClick = { onProfileClick() },
+                onLongClick = { isMenuOpen = !isMenuOpen }
+            )
             .padding(horizontal = 8.dp, vertical = 8.dp)
     ) {
         Row(
@@ -61,12 +66,14 @@ fun AdminItem(
             Spacer(modifier = Modifier.width(12.dp))
 
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = user.fullName,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = Color.Black
-                )
+                user.fullName?.let {
+                    Text(
+                        text = it,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color.Black
+                    )
+                }
                 Text(
                     text = "@${user.telegramNick}",
                     fontSize = 12.sp,

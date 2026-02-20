@@ -43,7 +43,7 @@ class TrackerListViewModel(
 
                     val users = pagedResponse.content.map { dto ->
                         TrackerUser(
-                            id          = dto.id,
+                            id          = dto.id ?: dto.username, // fallback to username if id is null
                             fullName    = dto.fullName,
                             telegramNick = dto.username,
                             isConfirmed = dto.enabled
@@ -99,12 +99,10 @@ class TrackerListViewModel(
 
             usersRepository.enableUser(username)
                 .onSuccess {
-                    println("TRACKER_LIST: Пользователь подтвержден")
-                    val index = allUsers.indexOfFirst { it.telegramNick == username }
-                    if (index != -1) {
-                        allUsers[index] = allUsers[index].copy(isConfirmed = true)
-                        onSearchQueryChanged(_state.value.searchQuery)
-                    }
+                    println("TRACKER_LIST: Пользователь подтвержден, удаляем из списка")
+                    // Удаляем из списка сразу после успешного enable
+                    allUsers.removeAll { it.telegramNick == username }
+                    onSearchQueryChanged(_state.value.searchQuery)
                 }
                 .onFailure { error ->
                     println("TRACKER_LIST: Ошибка подтверждения: ${error.message}")
@@ -119,7 +117,8 @@ class TrackerListViewModel(
 
             usersRepository.disableUser(username)
                 .onSuccess {
-                    println("TRACKER_LIST: Пользователь отключен")
+                    println("TRACKER_LIST: Пользователь отключен, удаляем из списка")
+                    // Удаляем из списка сразу после успешного disable
                     allUsers.removeAll { it.telegramNick == username }
                     onSearchQueryChanged(_state.value.searchQuery)
                 }

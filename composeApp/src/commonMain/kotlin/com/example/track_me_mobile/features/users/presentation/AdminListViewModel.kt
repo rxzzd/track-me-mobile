@@ -40,7 +40,7 @@ class AdminListViewModel(
 
                     val users = pagedResponse.content.map { dto ->
                         AdminUser(
-                            id          = dto.id,
+                            id          = dto.id ?: dto.username, // fallback to username if id is null
                             fullName    = dto.fullName,
                             telegramNick = dto.username,
                             isConfirmed = dto.enabled
@@ -96,12 +96,10 @@ class AdminListViewModel(
 
             usersRepository.enableUser(username)
                 .onSuccess {
-                    println("ADMIN_LIST: Пользователь подтвержден")
-                    val index = allUsers.indexOfFirst { it.telegramNick == username }
-                    if (index != -1) {
-                        allUsers[index] = allUsers[index].copy(isConfirmed = true)
-                        onSearchQueryChanged(_state.value.searchQuery)
-                    }
+                    println("ADMIN_LIST: Пользователь подтвержден, удаляем из списка")
+                    // Удаляем из списка сразу после успешного enable
+                    allUsers.removeAll { it.telegramNick == username }
+                    onSearchQueryChanged(_state.value.searchQuery)
                 }
                 .onFailure { error ->
                     println("ADMIN_LIST: Ошибка подтверждения: ${error.message}")
@@ -116,7 +114,8 @@ class AdminListViewModel(
 
             usersRepository.disableUser(username)
                 .onSuccess {
-                    println("ADMIN_LIST: Пользователь отключен")
+                    println("ADMIN_LIST: Пользователь отключен, удаляем из списка")
+                    // Удаляем из списка сразу после успешного disable
                     allUsers.removeAll { it.telegramNick == username }
                     onSearchQueryChanged(_state.value.searchQuery)
                 }

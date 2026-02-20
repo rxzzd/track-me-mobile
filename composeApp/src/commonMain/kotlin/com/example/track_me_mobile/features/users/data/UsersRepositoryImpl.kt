@@ -122,20 +122,24 @@ class UsersRepositoryImpl(
 
     override suspend fun getUserInfo(username: String): Result<UserDto> {
         return try {
-            println("USERS_REPO: GET ${ApiConstants.USERS_INFO}/$username/info")
+            val url = "${ApiConstants.USERS_INFO}/$username/info"
+            println("USERS_REPO: GET $url")
 
-            val response = httpClient.get("${ApiConstants.USERS_INFO}/$username/info")
+            val response = httpClient.get(url)
 
-            println("USERS_REPO: Response status: ${response.status}")
+            println("USERS_REPO: getUserInfo response status: ${response.status}")
 
             if (response.status == HttpStatusCode.OK) {
                 val data = response.body<UserDto>()
+                println("USERS_REPO: getUserInfo успех - загружен профиль: ${data.fullName}")
                 Result.success(data)
             } else {
-                Result.failure(Exception("Сервер вернул статус ${response.status}"))
+                val errorBody = response.bodyAsText()
+                println("USERS_REPO: getUserInfo ошибка: $errorBody")
+                Result.failure(Exception("Сервер вернул статус ${response.status}: $errorBody"))
             }
         } catch (e: Exception) {
-            println("USERS_REPO: Ошибка: ${e.message}")
+            println("USERS_REPO: getUserInfo exception: ${e.message}")
             e.printStackTrace()
             Result.failure(e)
         }

@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 data class UserProfileState(
     val isLoading: Boolean = true,
     val error: String? = null,
-    val id: String = "",
+    val id: String? = null,
     val username: String = "",
     val fullName: String = "",
     val email: String = "",
@@ -43,7 +43,7 @@ class UserProfileViewModel(
                     println("USER_PROFILE: Профиль загружен: ${userDto.fullName}")
                     state = state.copy(
                         isLoading = false,
-                        id = userDto.id,
+                        id = userDto.id ?: userDto.username, // fallback to username if id is null
                         username = userDto.username,
                         fullName = userDto.fullName,
                         email = userDto.email,
