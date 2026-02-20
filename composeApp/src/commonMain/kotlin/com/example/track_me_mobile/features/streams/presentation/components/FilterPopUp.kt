@@ -159,8 +159,6 @@ fun FilterCardContent(
                     modifier = Modifier.size(12.dp)
                 )
             }
-
-            // Кнопки внизу - цвет текста изменен на Black
             Row(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
@@ -195,7 +193,7 @@ fun FilterSectionTitle(title: String, fontFamily: FontFamily) {
     Text(
         text = title,
         fontSize = 20.sp,
-        color = Color.White, // Изменено на Black
+        color = Color.White,
         fontFamily = fontFamily,
         fontWeight = FontWeight.SemiBold,
         modifier = Modifier.padding(bottom = 12.dp)
@@ -264,11 +262,10 @@ fun FilterItem(
             contentAlignment = Alignment.Center
         ) {
             if (isSelected) {
-                // ИСПОЛЬЗУЕМ painterResource для PNG иконки tick_icon
                 Icon(
                     painter = painterResource(Res.drawable.tick_icon),
                     contentDescription = "Selected",
-                    tint = Color.Black, // Цвет галочки теперь черный
+                    tint = Color.Black,
                     modifier = Modifier.size(12.dp)
                 )
             }
@@ -278,7 +275,7 @@ fun FilterItem(
 
         Text(
             text = label,
-            color = Color.Black, // Изменено на Black
+            color = Color.Black,
             fontSize = 14.sp,
             fontFamily = fontFamily,
             maxLines = 1,

@@ -18,7 +18,6 @@ class AddStreamViewModel(
     var startDate by mutableStateOf("")
     var endDate by mutableStateOf("")
 
-    // Для выбора рынков
     var availableMarkets by mutableStateOf<List<NtiMarket>>(emptyList())
     var selectedMarketIds by mutableStateOf<Set<String>>(emptySet())
 

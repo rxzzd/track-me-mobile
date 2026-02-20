@@ -22,14 +22,15 @@ import com.example.track_me_mobile.features.streams.presentation.components.*
 import org.jetbrains.compose.resources.Font
 import com.example.track_me_mobile.generated.resources.Mulish_SemiBold
 import com.example.track_me_mobile.generated.resources.Res
+import com.example.track_me_mobile.generated.resources.edit
+import com.example.track_me_mobile.generated.resources.go_back_icon
+import org.jetbrains.compose.resources.painterResource
 
 class AddStreamScreen : Screen {
 
     @Composable
     override fun Content() {
-        // Получаем ViewModel через Koin
         val viewModel = koinScreenModel<AddStreamViewModel>()
-        // Получаем навигатор для возврата назад
         val navigator = LocalNavigator.currentOrThrow
 
         AddStreamPageContent(
@@ -45,6 +46,7 @@ fun AddStreamPageContent(
     viewModel: AddStreamViewModel,
     onSuccess: () -> Unit
 ) {
+    val navigator = LocalNavigator.currentOrThrow
     val mulishFamily = FontFamily(
         Font(Res.font.Mulish_SemiBold, FontWeight.SemiBold)
     )
@@ -61,6 +63,11 @@ fun AddStreamPageContent(
                     .fillMaxSize()
                     .background(Color(0xFFF8F3FF))
             ) {
+                IconButton(onClick = { navigator.push(StreamListScreen()) }) {
+                    Icon(painter = painterResource(Res.drawable.go_back_icon),
+                        contentDescription = "Go back",
+                        tint = Color(0xFF8338EB))
+                }
                 Column(
                     modifier = Modifier
                         .padding(paddingValues)

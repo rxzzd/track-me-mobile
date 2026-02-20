@@ -19,7 +19,6 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.example.track_me_mobile.core.ui.components.MainTopHeader
-// Импортируем ваш компонент хедера.
 
 import com.example.track_me_mobile.features.streams.presentation.components.*
 
@@ -45,7 +44,6 @@ private fun StreamListContent(viewModel: StreamListViewModel) {
         derivedStateOf {
             val lastVisible = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
             val total = listState.layoutInfo.totalItemsCount
-            // Подгружаем, когда осталось 3 элемента до конца
             lastVisible >= total - 3 && !viewModel.isLoadingMore && viewModel.hasMore
         }
     }
@@ -56,18 +54,16 @@ private fun StreamListContent(viewModel: StreamListViewModel) {
 
     MaterialTheme {
         Scaffold(
-            // ── ВСТАВЛЯЕМ ВАШ ХЕДЕР ЗДЕСЬ ──
             topBar = {
                 MainTopHeader()
             },
-            // Задаем цвет фона для всего Scaffold, чтобы избежать белых полос при оттягивании списка
             containerColor = Color(0xFFF8F3FF)
         ) { paddingValues ->
 
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues) // Учитываем высоту хедера автоматически
+                    .padding(paddingValues)
                     .background(Color(0xFFF8F3FF))
             ) {
                 LazyColumn(
@@ -76,8 +72,6 @@ private fun StreamListContent(viewModel: StreamListViewModel) {
                         .fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-
-                    // ── Поисковая строка + кнопки
                     item(key = "search_bar") {
                         Spacer(modifier = Modifier.height(16.dp))
                         Row(
@@ -100,8 +94,6 @@ private fun StreamListContent(viewModel: StreamListViewModel) {
                         }
                         Spacer(modifier = Modifier.height(16.dp))
                     }
-
-                    // ── Блоки активных фильтров
                     item(key = "filter_info") {
                         Row(
                             modifier = Modifier
@@ -119,8 +111,6 @@ private fun StreamListContent(viewModel: StreamListViewModel) {
                         }
                         Spacer(modifier = Modifier.height(20.dp))
                     }
-
-                    // ── Состояние загрузки (первая загрузка)
                     if (viewModel.isLoading) {
                         item(key = "loading_indicator") {
                             Box(
@@ -133,8 +123,6 @@ private fun StreamListContent(viewModel: StreamListViewModel) {
                             }
                         }
                     }
-
-                    // ── Ошибка
                     viewModel.errorMessage?.let { error ->
                         item(key = "error_message") {
                             Text(
@@ -144,8 +132,6 @@ private fun StreamListContent(viewModel: StreamListViewModel) {
                             )
                         }
                     }
-
-                    // ── Список карточек
                     itemsIndexed(
                         items = viewModel.streams,
                         key = { index, stream -> "${index}_${stream.id}" }
@@ -157,8 +143,6 @@ private fun StreamListContent(viewModel: StreamListViewModel) {
                             flow = "Дата конца: ${stream.endDate}"
                         )
                     }
-
-                    // ── Лоадер внизу при подгрузке следующей страницы
                     if (viewModel.isLoadingMore) {
                         item(key = "loading_more_indicator") {
                             Box(
@@ -179,8 +163,6 @@ private fun StreamListContent(viewModel: StreamListViewModel) {
                         Spacer(modifier = Modifier.height(24.dp))
                     }
                 }
-
-                // ── Попап фильтров
                 FilterPopUp(
                     showWindow = showFilterPopUp,
                     onDismiss = { showFilterPopUp = false },

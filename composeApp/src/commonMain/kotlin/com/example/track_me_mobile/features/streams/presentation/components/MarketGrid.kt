@@ -1,10 +1,9 @@
 package com.example.track_me_mobile.features.streams.presentation.components
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -17,24 +16,40 @@ fun MarketGrid(
     onMarketToggle: (String) -> Unit,
     borderColor: Color
 ) {
-    if (availableMarkets.isEmpty()) {
-        return
-    }
+    if (availableMarkets.isEmpty()) return
 
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        modifier = Modifier.fillMaxWidth().height(200.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+    val halfSize = (availableMarkets.size + 1) / 2
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(83.dp) // Ваше старое расстояние
     ) {
-        items(availableMarkets.size) { index ->
-            val market = availableMarkets[index]
-            FilterOption(
-                text = market,
-                isSelected = market in selectedMarkets,
-                onCheckedChange = { onMarketToggle(market) },
-                borderColor = borderColor
-            )
+        Column(
+            verticalArrangement = Arrangement.spacedBy(15.dp)
+        ) {
+            for (i in 0 until halfSize) {
+                val market = availableMarkets[i]
+                FilterOption(
+                    text = market,
+                    isSelected = market in selectedMarkets,
+                    onCheckedChange = { onMarketToggle(market) },
+                    borderColor = borderColor
+                )
+            }
+        }
+
+        Column(
+            verticalArrangement = Arrangement.spacedBy(15.dp)
+        ) {
+            for (i in halfSize until availableMarkets.size) {
+                val market = availableMarkets[i]
+                FilterOption(
+                    text = market,
+                    isSelected = market in selectedMarkets,
+                    onCheckedChange = { onMarketToggle(market) },
+                    borderColor = borderColor
+                )
+            }
         }
     }
 }
