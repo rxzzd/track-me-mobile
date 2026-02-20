@@ -47,7 +47,8 @@ class TeamRepositoryImpl(
         size: Int
     ): Result<List<TeamCard>> {
         return try {
-            val role = userInfoHolder.userInfo?.mainRole ?: Role.TRACKER
+            val userInfo = userInfoHolder.userInfo
+            val role = userInfo?.mainRole ?: Role.TRACKER
 
             // Шаг 1: получаем CSRF-токен
             val csrfResponse = client.get(ApiConstants.CSRF_ENDPOINT) {
@@ -58,11 +59,22 @@ class TeamRepositoryImpl(
 
             // Шаг 2: формируем фильтры
             val filters = mutableListOf<TeamFilterDto>()
+
+            // Для TRACKER добавляем фильтр по username
+            if (role == Role.TRACKER && userInfo != null) {
+                filters.add(TeamFilterDto(
+                    fieldName = "username",
+                    type = "EQ",
+                    values = listOf(userInfo.username)
+                ))
+            }
+
+            // Фильтр по потоку (если передан)
             if (streamId != null) {
                 filters.add(TeamFilterDto(
                     fieldName = "streams.name",
                     type = "EQ",
-                    values = listOf(streamId)  // передаём имя потока
+                    values = listOf(streamId)
                 ))
             }
 
@@ -83,6 +95,7 @@ class TeamRepositoryImpl(
                     "${ApiConstants.BACKEND_BASE}/api/v1/team-cards?page=$page&size=$size"
             }
 
+            println("[TEAMS] Role: $role, Username: ${userInfo?.username}")
             println("[TEAMS] Request to: $endpoint")
             println("[TEAMS] Body: ${Json.encodeToString(TeamRequestBody.serializer(), requestBody)}")
 
