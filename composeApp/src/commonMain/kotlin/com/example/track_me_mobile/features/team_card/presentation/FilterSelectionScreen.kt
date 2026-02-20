@@ -1,4 +1,4 @@
-package com.example.track_me_mobile.features.teams.presentation
+package com.example.track_me_mobile.features.team_card.presentation
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*

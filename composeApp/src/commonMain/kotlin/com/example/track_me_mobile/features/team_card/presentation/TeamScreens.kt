@@ -1,4 +1,4 @@
-package com.example.track_me_mobile.features.teams.presentation
+package com.example.track_me_mobile.features.team_card.presentation
 
 import androidx.compose.runtime.*
 import cafe.adriel.voyager.core.screen.Screen
