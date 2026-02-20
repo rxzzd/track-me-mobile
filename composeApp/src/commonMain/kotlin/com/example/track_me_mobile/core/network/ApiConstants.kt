@@ -23,4 +23,10 @@ object ApiConstants {
 
     // Backend
     const val BACKEND_BASE = "$GATEWAY_BASE/backend"
+    const val USERS_TRACKERS        = "$GATEWAY_BASE/sso/api/v1/users/trackers"
+    const val USERS_ADMINISTRATORS  = "$GATEWAY_BASE/sso/api/v1/users/administrators"
+    const val USERS_INFO            = "$GATEWAY_BASE/sso/api/v1/users" // + /{username}/info
+    const val USERS_ENABLE          = "$GATEWAY_BASE/sso/api/v1/users/enable"
+    const val USERS_DISABLE         = "$GATEWAY_BASE/sso/api/v1/users/disable"
+
 }

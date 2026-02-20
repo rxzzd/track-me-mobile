@@ -25,6 +25,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.example.track_me_mobile.core.domain.models.Role
 import com.example.track_me_mobile.features.profile.presentation.ProfileScreen
 import com.example.track_me_mobile.core.navigation.TrackerListScreen
+import com.example.track_me_mobile.core.navigation.AdminListScreen
 import com.example.track_me_mobile.core.ui.models.HeaderMenuItem
 import com.example.track_me_mobile.core.ui.theme.TrackMePurple
 import com.example.track_me_mobile.features.auth.presentation.LoginScreen
@@ -60,8 +61,8 @@ fun MainTopHeader() {
 
         when (userRole) {
             Role.SUPER_ADMIN -> {
-                list.add(HeaderMenuItem("Администраторы", currentScreen is TrackerListScreen) {
-                    navigate(TrackerListScreen())
+                list.add(HeaderMenuItem("Администраторы", currentScreen is AdminListScreen) {
+                    navigate(AdminListScreen())
                 })
                 list.add(HeaderMenuItem("Трекеры", currentScreen is TrackerListScreen) {
                     navigate(TrackerListScreen())
@@ -143,6 +144,7 @@ fun MainTopHeader() {
                             .background(Color.White, shape)
                             .border(2.dp, TrackMePurple, shape)
                     ) {
+                        // Верхняя плашка закрытия
                         Box(
                             modifier = Modifier
                                 .align(Alignment.End)
