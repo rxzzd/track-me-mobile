@@ -1,12 +1,13 @@
 package com.example.track_me_mobile.features.users.presentation
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Circle
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,8 +21,10 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.example.track_me_mobile.features.profile.presentation.UserProfileScreen
 import com.example.track_me_mobile.core.ui.components.MainTopHeader
 import com.example.track_me_mobile.features.streams.presentation.components.SearchBar
-import com.example.track_me_mobile.features.tracker_list.presentation.components.SearchBar
 import com.example.track_me_mobile.features.users.presentation.components.TrackerItem
+import com.example.track_me_mobile.core.ui.theme.TrackMePurple
+import com.example.track_me_mobile.core.ui.theme.TrackMePurpleLight
+import com.example.track_me_mobile.features.tracker_list.presentation.components.SearchBar
 import org.koin.compose.koinInject
 
 @Composable
@@ -59,7 +62,6 @@ fun TrackerListContent(
                 .padding(horizontal = 16.dp)
         ) {
             Spacer(Modifier.height(80.dp))
-
             Spacer(Modifier.height(20.dp))
 
             Row(
@@ -71,22 +73,24 @@ fun TrackerListContent(
                     text = "← Трекеры",
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF44069A)
+                    color = TrackMePurple
                 )
 
-                // Кнопка переключения фильтра
-                Button(
+                // ЗАМЕНЕНО: Кнопка с иконками Человек / Круг
+                IconButton(
                     onClick = onToggleBlocked,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (state.showBlocked) Color(0xFFD50000) else Color(0xFF00C853)
-                    ),
-                    shape = RoundedCornerShape(20.dp),
-                    modifier = Modifier.height(36.dp)
+                    modifier = Modifier
+                        .size(42.dp)
+                        .background(
+                            color = if (state.showBlocked) TrackMePurple else TrackMePurpleLight.copy(alpha = 0.2f),
+                            shape = RoundedCornerShape(12.dp)
+                        )
                 ) {
-                    Text(
-                        text = if (state.showBlocked) "Заблокированные" else "Активные",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold
+                    Icon(
+                        imageVector = if (state.showBlocked) Icons.Default.Circle else Icons.Default.Person,
+                        contentDescription = "Фильтр",
+                        tint = if (state.showBlocked) Color.White else TrackMePurple,
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }
@@ -102,27 +106,16 @@ fun TrackerListContent(
 
             when {
                 state.isLoading -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(color = Color(0xFF44069A))
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = TrackMePurple)
                     }
                 }
                 state.error != null -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                text = state.error,
-                                color = MaterialTheme.colorScheme.error
-                            )
+                            Text(text = state.error, color = MaterialTheme.colorScheme.error)
                             Spacer(modifier = Modifier.height(16.dp))
-                            Button(onClick = { /* viewModel.loadUsers() */ }) {
-                                Text("Повторить")
-                            }
+                            Button(onClick = { onToggleBlocked() }) { Text("Повторить") }
                         }
                     }
                 }
@@ -146,7 +139,6 @@ fun TrackerListContent(
                 }
             }
         }
-
         MainTopHeader()
     }
 }
