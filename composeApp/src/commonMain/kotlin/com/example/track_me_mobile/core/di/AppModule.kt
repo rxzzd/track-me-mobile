@@ -48,7 +48,6 @@ val appModule = module {
     factory { AddStreamViewModel(get()) }
     single<ProfileRepository> { ProfileRepositoryImpl(get()) }
     factory { ProfileViewModel(get()) }
-    factory { LoginViewModel(get(), get()) }
 
     // Profile
     single<ProfileRepository> { ProfileRepositoryImpl(get()) }
@@ -67,6 +66,4 @@ val appModule = module {
     // Teams
     single<TeamRepository> { TeamRepositoryImpl(get(), get()) }  // HttpClient, UserInfoHolder
     factory { TeamListViewModel(get()) }
-    // Global Header
-    factory { GlobalHeaderViewModel(get()) }
 }
