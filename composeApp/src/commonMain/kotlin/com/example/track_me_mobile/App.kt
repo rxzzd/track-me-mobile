@@ -7,7 +7,6 @@ import androidx.compose.ui.graphics.Color
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.transitions.SlideTransition
 import org.koin.compose.KoinApplication
-import org.koin.compose.KoinContext
 
 // Импорты твоих настроек и ресурсов
 import com.example.track_me_mobile.core.di.appModule

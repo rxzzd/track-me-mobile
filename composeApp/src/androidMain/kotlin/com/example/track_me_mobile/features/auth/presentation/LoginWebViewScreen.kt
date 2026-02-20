@@ -93,8 +93,8 @@ class LoginWebViewScreen : Screen {
                             isLoginHandled = true
                             viewModel.loginFromWebView(gatewayCookies) { role ->
                                 when (role) {
-                                    Role.ADMIN, Role.SUPER_ADMIN -> navigator.replaceAll(TeamListScreen())
-                                    Role.TRACKER                -> navigator.replaceAll(StreamListScreen())
+                                    Role.ADMIN, Role.SUPER_ADMIN -> navigator.replaceAll(StreamListScreen())
+                                    Role.TRACKER                -> navigator.replaceAll(TeamListScreen())
                                     else                        -> navigator.pop()
                                 }
                             }

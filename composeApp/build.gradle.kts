@@ -48,9 +48,10 @@ kotlin {
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
 
-
+            implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.1")
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
+            implementation("org.jetbrains.compose.material:material-icons-extended:1.6.11")
             val voyagerVersion = "1.1.0-beta02"
             // Multiplatform
             // Navigator
@@ -67,6 +68,12 @@ kotlin {
             implementation("cafe.adriel.voyager:voyager-koin:$voyagerVersion")
 
             //implementation(compose.materialIconsExtended)
+            implementation("network.chaintech:kmp-date-time-picker:1.0.6")
+            // Android
+            // Hilt integration
+            implementation("cafe.adriel.voyager:voyager-hilt:$voyagerVersion")
+            // LiveData integration
+            implementation("cafe.adriel.voyager:voyager-livedata:$voyagerVersion")
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)
             implementation(libs.compose.material3)
@@ -75,6 +82,8 @@ kotlin {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
+            implementation(compose.materialIconsExtended)
+            implementation("org.jetbrains.compose.material:material-icons-extended:1.7.0")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
