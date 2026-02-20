@@ -43,7 +43,6 @@ private fun StreamListContent(viewModel: StreamListViewModel) {
     var showFilterPopUp by remember { mutableStateOf(false) }
 
     val listState = rememberLazyListState()
-    val navigator = LocalNavigator.currentOrThrow
     val shouldLoadMore by remember {
         derivedStateOf {
             val lastVisible = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
