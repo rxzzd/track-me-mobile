@@ -1,21 +1,24 @@
 package com.example.track_me_mobile.features.profile.presentation
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
-import com.example.track_me_mobile.core.ui.theme.TrackMePurple
+import com.example.track_me_mobile.core.ui.components.MainTopHeader
+import com.example.track_me_mobile.core.ui.theme.*
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 
@@ -52,16 +55,72 @@ data class UserProfileScreen(val username: String) : Screen {
                 }
             }
             else -> {
-                // Используем существующий ProfileScreenContent но без кнопки редактирования
-                ProfileScreenContent(
+                UserProfileContent(
                     name = state.fullName,
                     email = state.email,
                     phone = state.phoneNumber,
                     telegram = "@${state.username}",
-                    role = state.roles.firstOrNull() ?: "Пользователь",
-                    onNavigateToEdit = { /* Нельзя редактировать чужой профиль */ }
+                    role = state.roles.firstOrNull() ?: "Пользователь"
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun UserProfileContent(
+    name: String,
+    email: String,
+    phone: String,
+    telegram: String,
+    role: String
+) {
+    Scaffold(
+        topBar = { MainTopHeader() },
+        containerColor = BackgroundWhite
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 34.dp, vertical = 35.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Профиль пользователя",
+                textAlign = TextAlign.Center,
+                fontSize = 32.sp,
+                color = TrackMePurple,
+                modifier = Modifier.padding(bottom = 35.dp)
+            )
+
+            Box(
+                modifier = Modifier
+                    .size(180.dp)
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(TrackMePurpleLight.copy(alpha = 0.3f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = null,
+                    modifier = Modifier.size(120.dp),
+                    tint = TrackMePurple
+                )
+            }
+
+            Spacer(modifier = Modifier.height(15.dp))
+            Text(role, color = TrackMePurple, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Spacer(modifier = Modifier.height(25.dp))
+
+            ProfileStaticRow(name)
+            ProfileStaticRow(email)
+            ProfileStaticRow(phone)
+            ProfileStaticRow(telegram)
+
+            Spacer(modifier = Modifier.height(35.dp))
+            
         }
     }
 }
