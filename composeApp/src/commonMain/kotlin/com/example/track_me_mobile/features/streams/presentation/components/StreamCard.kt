@@ -2,6 +2,7 @@ package com.example.track_me_mobile.features.streams.presentation.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -19,7 +20,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.track_me_mobile.core.ui.theme.*
-
 import org.jetbrains.compose.resources.Font
 import org.jetbrains.compose.resources.painterResource
 import com.example.track_me_mobile.generated.resources.Res
@@ -30,10 +30,12 @@ import com.example.track_me_mobile.generated.resources.base_stream_photo
 
 @Composable
 fun StreamCard(
+    streamId: String = "",
     title: String = "Заголовок",
     markets: String = "Рынки НТИ:",
     trl: String = "TRL:",
     flow: String = "Поток:",
+    onClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val montserratFamily = FontFamily(
@@ -55,26 +57,25 @@ fun StreamCard(
                 spotColor = Color(0xFF7A00E5)
             )
             .width(328.dp)
-            .heightIn(min = 165.dp),
+            .heightIn(min = 165.dp)
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color.White
         )
     ) {
-
         Box(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
             Row(
                 modifier = Modifier
-                    .fillMaxWidth() // Растягиваем по ширине
-                    .wrapContentHeight() // Растем по высоте контента
+                    .fillMaxWidth()
+                    .wrapContentHeight()
                     .padding(20.dp),
                 verticalAlignment = Alignment.Top,
                 horizontalArrangement = Arrangement.Start
             ) {
-                // Картинка (оставляем фиксированной, как в дизайне)
                 Box(
                     modifier = Modifier
-                        .size(width = 110.dp, height = 110.dp) // Немного уменьшил, чтобы текст влез
+                        .size(width = 110.dp, height = 110.dp)
                         .clip(RoundedCornerShape(12.dp))
                         .background(Color(0xFFF5F5F5))
                 ) {
@@ -90,8 +91,8 @@ fun StreamCard(
 
                 Column(
                     modifier = Modifier
-                        .weight(1f) // Занимает всё оставшееся пространство в ширину
-                        .wrapContentHeight(), // Растет вниз по тексту
+                        .weight(1f)
+                        .wrapContentHeight(),
                     verticalArrangement = Arrangement.Top
                 ) {
                     Text(
@@ -101,7 +102,7 @@ fun StreamCard(
                         fontFamily = montserratFamily,
                         fontWeight = FontWeight.ExtraBold,
                         maxLines = 2,
-                        lineHeight = 16.sp, // Увеличил межстрочный интервал для читаемости
+                        lineHeight = 16.sp,
                         letterSpacing = 0.sp,
                     )
 
@@ -113,7 +114,7 @@ fun StreamCard(
                         color = TextBlack,
                         fontFamily = montserratFamily,
                         fontWeight = FontWeight.Normal,
-                        maxLines = 3, // Увеличил, если список рынков длинный
+                        maxLines = 3,
                         lineHeight = 14.sp
                     )
 
@@ -125,7 +126,6 @@ fun StreamCard(
                         color = TextBlack,
                         fontFamily = montserratFamily,
                         fontWeight = FontWeight.Normal,
-
                         maxLines = 2,
                         lineHeight = 14.sp
                     )
@@ -140,7 +140,6 @@ fun StreamCard(
                         lineHeight = 14.sp
                     )
 
-                    // Добавим отступ снизу, чтобы текст не наезжал на кнопку "Отчет"
                     Spacer(modifier = Modifier.height(25.dp))
                 }
             }

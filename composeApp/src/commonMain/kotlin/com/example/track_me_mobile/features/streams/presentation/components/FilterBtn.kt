@@ -15,7 +15,7 @@ import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 
 import com.example.track_me_mobile.generated.resources.Res
-import com.example.track_me_mobile.generated.resources.filter_icon
+import com.example.track_me_mobile.generated.resources.filter_icon1
 
 @OptIn(ExperimentalResourceApi::class)
 @Composable
@@ -33,7 +33,7 @@ fun FilterBtn(
         contentAlignment = Alignment.Center
     ) {
         Icon(
-            painter = painterResource(Res.drawable.filter_icon),
+            painter = painterResource(Res.drawable.filter_icon1),
             contentDescription = "Filter",
             tint = Color.Unspecified,
             modifier = Modifier

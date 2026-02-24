@@ -8,14 +8,25 @@ object ApiConstants {
     val STREAMS_ENDPOINT = "https://$GATEWAY_HOST/backend/api/v1/admin/streams"
     val CREATE_STREAM_ENDPOINT = "https://$GATEWAY_HOST/backend/api/v1/admin/streams"
     val NTI_MARKETS_ENDPOINT = "https://$GATEWAY_HOST/backend/api/v1/streams/nti-markets"
+
+    // Auth
     const val AUTH_TRIGGER_URL =
         "$GATEWAY_BASE/oauth2/authorization/track-me-client" +
                 "?redirect_uri=$GATEWAY_BASE/login/oauth2/code/track-me-client"
+    const val CSRF_ENDPOINT   = "$GATEWAY_BASE/csrf"
+    const val ACCOUNT_INFO    = "$GATEWAY_BASE/sso/api/v1/account/info"
 
-    const val CSRF_ENDPOINT = "$GATEWAY_BASE/csrf"
+    const val REGISTRATION_INIT = "$GATEWAY_BASE/sso/api/v1/registration/init"
 
-    // Профиль идёт через шлюз с префиксом /sso/
-    const val ACCOUNT_INFO = "$GATEWAY_BASE/sso/api/v1/account/info"
+
     const val ACCOUNT_UPDATE = "$GATEWAY_BASE/sso/api/v1/account/update"
+
+    // Backend
+    const val BACKEND_BASE = "$GATEWAY_BASE/backend"
+    const val USERS_TRACKERS        = "$GATEWAY_BASE/sso/api/v1/users/trackers"
+    const val USERS_ADMINISTRATORS  = "$GATEWAY_BASE/sso/api/v1/users/administrators"
+    const val USERS_INFO            = "$GATEWAY_BASE/sso/api/v1/users" // + /{username}/info
+    const val USERS_ENABLE          = "$GATEWAY_BASE/sso/api/v1/users/enable"
+    const val USERS_DISABLE         = "$GATEWAY_BASE/sso/api/v1/users/disable"
 
 }

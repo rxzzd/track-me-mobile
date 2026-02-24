@@ -18,7 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.track_me_mobile.features.users.domain.models.TrackerUser
+import com.example.track_me_mobile.features.users.domain.models.AdminUser
 import com.example.track_me_mobile.generated.resources.Res
 import com.example.track_me_mobile.generated.resources.edit
 import com.example.track_me_mobile.generated.resources.icon_false
@@ -27,8 +27,8 @@ import org.jetbrains.compose.resources.painterResource
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun TrackerItem(
-    user: TrackerUser,
+fun AdminItem(
+    user: AdminUser,
     onConfirm: () -> Unit,
     onDelete: () -> Unit,
     onProfileClick: () -> Unit
