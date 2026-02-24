@@ -23,10 +23,17 @@ object ApiConstants {
 
     // Backend
     const val BACKEND_BASE = "$GATEWAY_BASE/backend"
+
+    // Users
     const val USERS_TRACKERS        = "$GATEWAY_BASE/sso/api/v1/users/trackers"
     const val USERS_ADMINISTRATORS  = "$GATEWAY_BASE/sso/api/v1/users/administrators"
-    const val USERS_INFO            = "$GATEWAY_BASE/sso/api/v1/users" // + /{username}/info
+    // Базовый префикс без {username} в конце: дальше добавляем "/$username/info"
+    const val USERS_INFO            = "$GATEWAY_BASE/sso/api/v1/users"
     const val USERS_ENABLE          = "$GATEWAY_BASE/sso/api/v1/users/enable"
     const val USERS_DISABLE         = "$GATEWAY_BASE/sso/api/v1/users/disable"
+
+    // Team card
+    const val TEAM_CARD        = "$BACKEND_BASE/api/v1/team-card"
+    const val TEAM_CARD_COUNT  = "$BACKEND_BASE/api/v1/team-card/count"
 
 }

@@ -26,6 +26,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.example.track_me_mobile.core.ui.components.MainTopHeader
 import cafe.adriel.voyager.koin.koinScreenModel
 import com.example.track_me_mobile.core.ui.theme.MontserratFontFamily
+import com.example.track_me_mobile.features.team_card.presentation.InfoTeamLevel
 import com.example.track_me_mobile.features.teams.domain.models.TeamCard
 import com.example.track_me_mobile.generated.resources.*
 import org.jetbrains.compose.resources.painterResource
@@ -365,19 +366,20 @@ fun FilterDialogContent(
 @Composable
 fun TeamCard(team: TeamCard) {
     val montserrat = MontserratFontFamily()
+    val navigator  = LocalNavigator.currentOrThrow
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
             .background(LightPurpleBg)
+            .clickable { navigator.push(InfoTeamLevel(team.id)) }
             .padding(12.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Фото команды (пока заглушка — аватар придёт позже)
             Box(contentAlignment = Alignment.BottomCenter) {
                 Box(
                     modifier = Modifier
@@ -385,7 +387,6 @@ fun TeamCard(team: TeamCard) {
                         .clip(RoundedCornerShape(12.dp))
                         .background(Color(0xFFD9D9D9))
                 )
-                // Статус enabled → "Активна" / "Неактивна"
                 Box(
                     modifier = Modifier
                         .padding(bottom = 8.dp)
@@ -434,7 +435,7 @@ fun TeamCard(team: TeamCard) {
                     Icon(
                         painter = painterResource(Res.drawable.first_pencil),
                         contentDescription = null,
-                        modifier = Modifier.size(15.dp).clickable { },
+                        modifier = Modifier.size(15.dp),
                         tint = DarkPurple
                     )
                 }
@@ -446,7 +447,7 @@ fun TeamCard(team: TeamCard) {
                     fontFamily = montserrat,
                     fontSize = 11.sp,
                     lineHeight = 15.sp,
-                    color = Color.Black,
+                    color = Color.Black
                 )
 
                 Spacer(Modifier.height(12.dp))
@@ -457,10 +458,9 @@ fun TeamCard(team: TeamCard) {
                         fontSize = 11.sp,
                         color = ProjectLabelColor
                     )
-                    val marketsText = team.ntiMarkets.joinToString(", ") { it.displayName }
-                    Text(text = "Рынки НТИ: $marketsText", style = labelStyle)
-                    Text(text = "TRL: ${team.readinessLevel}", style = labelStyle)
-                    Text(text = "Поток: ${team.stream?.name ?: "—"}", style = labelStyle)
+                    Text("Рынки НТИ: ${team.ntiMarkets.joinToString(", ") { it.displayName }}", style = labelStyle)
+                    Text("TRL: ${team.readinessLevel}", style = labelStyle)
+                    Text("Поток: ${team.stream?.name ?: "—"}", style = labelStyle)
                 }
             }
         }

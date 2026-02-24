@@ -1,75 +1,81 @@
 package com.example.track_me_mobile.features.team_card.presentation
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.lifecycle.viewmodel.compose.viewModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import androidx.lifecycle.viewmodel.compose.viewModel
+import org.koin.core.component.KoinComponent
+import org.koin.core.parameter.parametersOf
 
+// ─── Просмотр карточки (данные с бэка) ───────────────────────────────────────
+data class InfoTeamLevel(val teamId: String) : Screen {
+    @Composable
+    override fun Content() {
+        val navigator = LocalNavigator.currentOrThrow
+        val viewModel = remember(teamId) {
+            object : KoinComponent {}.getKoin().get<TeamCardViewModel> { parametersOf(teamId) }
+        }
+        TeamInfoScreen(
+            viewModel       = viewModel,
+            onBackClick     = { navigator.pop() },
+            onEditClick     = { /* TODO */ },
+            onMeetingsClick = { /* TODO */ }
+        )
+    }
+}
+
+// ─── Создание команды ─────────────────────────────────────────────────────────
 class CreateTeamLevel : Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val viewModel: TeamViewModel = viewModel()
-
         TeamCreateScreen(
-            viewModel = viewModel,
-            onBackClick = { navigator.pop() },
-            onNavigateToInfo = { navigator.push(InfoTeamLevel(viewModel)) }
+            viewModel        = viewModel,
+            onBackClick      = { navigator.pop() },
+            onNavigateToInfo = { navigator.push(InfoTeamLevel("")) }
         )
     }
 }
 
-class InfoTeamLevel(private val viewModel: TeamViewModel) : Screen {
-    @Composable
-    override fun Content() {
-        val navigator = LocalNavigator.currentOrThrow
-
-        TeamInfoScreen(
-            viewModel = viewModel,
-            onBackClick = { navigator.pop() },
-            onEditClick = { navigator.push(EditTeamLevel(viewModel)) },
-            onMeetingsClick = { navigator.push(MeetingsTeamLevel(listOf())) },
-            onFilterClick = { navigator.push(FilterTeamLevel(viewModel)) }  // ← добавить
-        )
-    }
-}
-
+// ─── Редактирование команды ───────────────────────────────────────────────────
 class EditTeamLevel(private val viewModel: TeamViewModel) : Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-
         TeamEditScreen(
-            viewModel = viewModel,
-            onBackClick = { navigator.pop() },
-            onSaveClick = { navigator.pop() },
+            viewModel         = viewModel,
+            onBackClick       = { navigator.pop() },
+            onSaveClick       = { navigator.pop() },
             onDeactivateClick = { navigator.popUntilRoot() },
-            onFilterClick = { navigator.push(FilterTeamLevel(viewModel)) }  // ← добавить
+            onFilterClick     = { navigator.push(FilterTeamLevel(viewModel)) }
         )
     }
 }
 
+// ─── Встречи ──────────────────────────────────────────────────────────────────
 data class MeetingsTeamLevel(val meetings: List<MeetingData>) : Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-
         TeamMeetingsScreen(
-            meetings = meetings,
-            onBackClick = { navigator.pop() },
+            meetings           = meetings,
+            onBackClick        = { navigator.pop() },
             onPlanMeetingClick = { }
         )
     }
 }
+
+// ─── Фильтр ───────────────────────────────────────────────────────────────────
 class FilterTeamLevel(private val viewModel: TeamViewModel) : Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-
         TeamFilterScreen(
             viewModel = viewModel,
-            onClose = { navigator.pop() }
+            onClose   = { navigator.pop() }
         )
     }
 }
