@@ -22,7 +22,6 @@ import com.example.track_me_mobile.features.streams.presentation.components.*
 import org.jetbrains.compose.resources.Font
 import com.example.track_me_mobile.generated.resources.Mulish_SemiBold
 import com.example.track_me_mobile.generated.resources.Res
-import com.example.track_me_mobile.generated.resources.edit
 import com.example.track_me_mobile.generated.resources.go_back_icon
 import org.jetbrains.compose.resources.painterResource
 
@@ -64,9 +63,11 @@ fun AddStreamPageContent(
                     .background(Color(0xFFF8F3FF))
             ) {
                 IconButton(onClick = { navigator.push(StreamListScreen()) }) {
-                    Icon(painter = painterResource(Res.drawable.go_back_icon),
+                    Icon(
+                        painter = painterResource(Res.drawable.go_back_icon),
                         contentDescription = "Go back",
-                        tint = Color(0xFF8338EB))
+                        tint = Color(0xFF8338EB)
+                    )
                 }
                 Column(
                     modifier = Modifier
@@ -98,6 +99,7 @@ fun AddStreamPageContent(
 
                     Spacer(modifier = Modifier.height(14.dp))
 
+                    // НАЧАЛО ПОТОКА
                     Row(
                         modifier = Modifier.width(220.dp).wrapContentHeight(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -118,6 +120,7 @@ fun AddStreamPageContent(
 
                     Spacer(modifier = Modifier.height(14.dp))
 
+                    // КОНЕЦ ПОТОКА
                     Row(
                         modifier = Modifier.width(220.dp).wrapContentHeight(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -136,9 +139,62 @@ fun AddStreamPageContent(
                         )
                     }
 
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    // НОВОЕ ПОЛЕ: ДАТА НАЧАЛА ТРЕКШЕН-МИТИНГА
+                    Row(
+                        modifier = Modifier.width(220.dp).wrapContentHeight(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                text = "Дата начала",
+                                color = Color(0xFF8338EB),
+                                fontFamily = mulishFamily,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 14.sp,
+                                lineHeight = 14.sp
+                            )
+                            Text(
+                                text = "трекшен-митинга:",
+                                color = Color(0xFF8338EB),
+                                fontFamily = mulishFamily,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 14.sp,
+                                lineHeight = 14.sp
+                            )
+                        }
+                        DateInputField(
+                            value = viewModel.trackStartDate,
+                            onValueChange = { viewModel.trackStartDate = it }
+                        )
+                    }
+
                     Spacer(modifier = Modifier.height(9.dp))
 
-                    AddStreamMarket()
+                    AddStreamMarket(viewModel = viewModel)
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    // НОВОЕ ПОЛЕ: КОЛИЧЕСТВО ВСТРЕЧ
+                    Column(
+                        modifier = Modifier.width(220.dp),
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        Text(
+                            text = "Количество встреч:",
+                            color = Color(0xFF8338EB),
+                            fontFamily = mulishFamily,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 14.sp,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                        MeetingsCountDropdown(
+                            value = viewModel.meetingsCount,
+                            onValueChange = { viewModel.meetingsCount = it }
+                        )
+                    }
 
                     Spacer(modifier = Modifier.height(20.dp))
 
@@ -155,8 +211,7 @@ fun AddStreamPageContent(
                         text = if (viewModel.isLoading) "Создание..." else "Создать поток",
                         onClick = {
                             viewModel.createStream(onSuccess = onSuccess)
-                        },
-                        // Можно добавить enabled = !viewModel.isLoading, если компонент поддерживает
+                        }
                     )
 
                     Spacer(modifier = Modifier.height(40.dp))
