@@ -43,18 +43,18 @@ fun DateInputField(
             .clip(RoundedCornerShape(50.dp))
             .background(color = Color(0xFFE6D7FB))
             .clickable { showDatePicker = true }
-            .padding(horizontal = 16.dp), // Чуть уменьшил отступ для длинных дат
+            .padding(horizontal = 16.dp),
         contentAlignment = Alignment.CenterStart
     ) {
         Text(
-            // Если значение пустое - показываем маску, иначе - саму дату
             text = value.ifEmpty { "__.__.____" },
             style = TextStyle(
                 fontSize = 14.sp,
                 color = Color(0xFF44069A),
                 fontFamily = mulishFamily,
                 fontWeight = FontWeight.SemiBold
-            )
+            ),
+            modifier = Modifier.align(Alignment.Center)
         )
     }
 
@@ -65,7 +65,7 @@ fun DateInputField(
                 TextButton(onClick = {
                     datePickerState.selectedDateMillis?.let { millis ->
                         val formattedDate = formatMillisToDate(millis)
-                        onValueChange(formattedDate) // Передаем дату наверх в ViewModel
+                        onValueChange(formattedDate)
                     }
                     showDatePicker = false
                 }) {
@@ -90,15 +90,13 @@ fun DateInputField(
     }
 }
 
-// Функция-помощник для форматирования
 private fun formatMillisToDate(millis: Long): String {
     val instant = Instant.fromEpochMilliseconds(millis)
-    val dateTime = instant.toLocalDateTime(TimeZone.UTC) // Используем UTC, чтобы избежать сдвига дат
+    val dateTime = instant.toLocalDateTime(TimeZone.UTC)
 
     val year = dateTime.year
     val month = dateTime.monthNumber.toString().padStart(2, '0')
     val day = dateTime.dayOfMonth.toString().padStart(2, '0')
 
-    // Возвращаем в формате YYYY-MM-DD для сервера
     return "$year-$month-$day"
 }
