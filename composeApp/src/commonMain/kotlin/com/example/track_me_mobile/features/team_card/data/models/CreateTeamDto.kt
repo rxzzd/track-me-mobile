@@ -24,8 +24,6 @@ data class NtiMarketDto(
 data class CreateTeamRequestDto(
     val name: String,
     val description: String,
-    val trackerUsername: String,
-    val streamId: String,
     val ntiMarketIds: List<String>,
     val readinessLevel: String
 )

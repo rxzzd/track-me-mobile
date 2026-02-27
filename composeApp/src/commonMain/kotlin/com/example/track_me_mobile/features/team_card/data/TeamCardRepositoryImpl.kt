@@ -9,9 +9,11 @@ import com.example.track_me_mobile.features.team_card.data.models.CreateTeamRequ
 import com.example.track_me_mobile.features.team_card.data.models.NtiMarketDto
 import com.example.track_me_mobile.features.team_card.data.models.TrackerUserDto
 import com.example.track_me_mobile.features.team_card.data.models.TrackersPageDto
+import com.example.track_me_mobile.features.team_card.data.models.UpdateTeamRequestDto
 import com.example.track_me_mobile.features.team_card.domain.TeamCardRepository
 import com.example.track_me_mobile.features.team_card.domain.models.CreateTeamRequest
 import com.example.track_me_mobile.features.team_card.domain.models.TrackerUser
+import com.example.track_me_mobile.features.team_card.domain.models.UpdateTeamRequest
 import com.example.track_me_mobile.features.teams.domain.models.NtiMarket
 import com.example.track_me_mobile.features.teams.domain.models.Stream
 import com.example.track_me_mobile.features.teams.domain.models.TeamCard
@@ -188,9 +190,11 @@ class TeamCardRepositoryImpl(
             println("[TEAM_CARD_REPO] createTeam: isAdmin=$isAdmin, role=$role")
 
             val csrf = fetchCsrf()
-            // /backend/api/v1/team-card — для обеих ролей (трекер и админ)
-            val url = ApiConstants.TEAM_CARD
-            println("[TEAM_CARD_REPO] createTeam: POST $url?streamId=${request.streamId}")
+            // ADMIN → /api/v1/admin/team-card (принимает username как query param)
+            // TRACKER → /api/v1/team-card (username берётся из сессии, передавать не нужно)
+            val url = if (isAdmin) ApiConstants.TEAM_CARD_ADMIN else ApiConstants.TEAM_CARD
+            println("[TEAM_CARD_REPO] createTeam: POST $url?streamId=${request.streamId}" +
+                    if (isAdmin) "&username=${request.trackerUsername}" else "")
 
             val response = client.post(url) {
                 header(HttpHeaders.Accept, "application/json")
@@ -198,14 +202,13 @@ class TeamCardRepositoryImpl(
                 header("X-Requested-With", "XMLHttpRequest")
                 contentType(ContentType.Application.Json)
                 parameter("streamId", request.streamId)
+                if (isAdmin) parameter("username", request.trackerUsername)
                 setBody(
                     CreateTeamRequestDto(
-                        name            = request.name,
-                        description     = request.description,
-                        trackerUsername = request.trackerUsername,
-                        streamId        = request.streamId,
-                        ntiMarketIds    = request.ntiMarketIds,
-                        readinessLevel  = request.readinessLevel
+                        name           = request.name,
+                        description    = request.description,
+                        ntiMarketIds   = request.ntiMarketIds,
+                        readinessLevel = request.readinessLevel
                     )
                 )
             }
@@ -223,7 +226,73 @@ class TeamCardRepositoryImpl(
         }
     }
 
-    // ── Private helpers ────────────────────────────────────────────────────
+    // ── Редактирование ────────────────────────────────────────────────────
+
+    override suspend fun updateTeam(request: UpdateTeamRequest): Result<Unit> {
+        return try {
+            println("[TEAM_CARD_REPO] updateTeam: teamId=${request.teamId}, name=${request.name}")
+            println("[TEAM_CARD_REPO] updateTeam: trackerUsername=${request.trackerUsername}, streamId=${request.streamId}")
+            val csrf = fetchCsrf()
+            // Трекер → PATCH /api/v1/team-card
+            // Админ  → PATCH /api/v1/admin/team-card
+            val url = if (isAdmin) ApiConstants.TEAM_CARD_ADMIN else ApiConstants.TEAM_CARD
+            println("[TEAM_CARD_REPO] updateTeam: PATCH $url?teamCardId=${request.teamId}")
+            val response = client.patch(url) {
+                header(HttpHeaders.Accept, "application/json")
+                header(csrf.headerName, csrf.token)
+                header("X-Requested-With", "XMLHttpRequest")
+                contentType(ContentType.Application.Json)
+                parameter("teamCardId", request.teamId)
+                // streamId и trackerUsername — query params (как в createTeam)
+                if (request.streamId != null) parameter("streamId", request.streamId)
+                if (request.trackerUsername != null) parameter("username", request.trackerUsername)
+                setBody(
+                    UpdateTeamRequestDto(
+                        name           = request.name,
+                        description    = request.description,
+                        ntiMarketIds   = request.ntiMarketIds,
+                        readinessLevel = request.readinessLevel
+                    )
+                )
+            }
+            println("[TEAM_CARD_REPO] updateTeam: status=${response.status}")
+            if (response.status != HttpStatusCode.OK) {
+                val body = response.bodyAsText()
+                println("[TEAM_CARD_REPO] updateTeam: error body=$body")
+                return Result.failure(Exception("Status: ${response.status}\n$body"))
+            }
+            Result.success(Unit)
+        } catch (e: Exception) {
+            println("[TEAM_CARD_REPO] updateTeam exception: ${e.message}")
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun deleteTeam(teamId: String, trackerUsername: String): Result<Unit> {
+        return try {
+            println("[TEAM_CARD_REPO] deleteTeam: teamId=$teamId, username=$trackerUsername, isAdmin=$isAdmin")
+            val csrf = fetchCsrf()
+            val url = if (isAdmin) ApiConstants.TEAM_CARD_ADMIN else ApiConstants.TEAM_CARD
+            println("[TEAM_CARD_REPO] deleteTeam: DELETE $url?id=$teamId&username=$trackerUsername")
+            val response = client.delete(url) {
+                header(HttpHeaders.Accept, "application/json")
+                header(csrf.headerName, csrf.token)
+                header("X-Requested-With", "XMLHttpRequest")
+                parameter("id", teamId)
+                parameter("username", trackerUsername)
+            }
+            println("[TEAM_CARD_REPO] deleteTeam: status=${response.status}")
+            if (response.status != HttpStatusCode.OK && response.status != HttpStatusCode.NoContent) {
+                val body = response.bodyAsText()
+                println("[TEAM_CARD_REPO] deleteTeam: error body=$body")
+                return Result.failure(Exception("Status: ${response.status}\n$body"))
+            }
+            Result.success(Unit)
+        } catch (e: Exception) {
+            println("[TEAM_CARD_REPO] deleteTeam exception: ${e.message}")
+            Result.failure(e)
+        }
+    }
 
     private suspend fun fetchTeamsCount(streamId: String): Int? {
         return try {

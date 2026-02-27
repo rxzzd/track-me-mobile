@@ -7,10 +7,8 @@ object ApiConstants {
     private const val GATEWAY_BASE = "https://$GATEWAY_HOST"
 
     // Streams
-    // POST, только для ADMIN/SUPER_ADMIN
-    val STREAMS_ENDPOINT         = "https://$GATEWAY_HOST/backend/api/v1/admin/streams"
-    // POST, для TRACKER — /backend/api/v1/streams (как на веб-клиенте: ${backendHost}/api/v1/streams)
-    val STREAMS_PUBLIC_ENDPOINT  = "https://$GATEWAY_HOST/backend/api/v1/streams"
+    val STREAMS_ENDPOINT         = "https://$GATEWAY_HOST/backend/api/v1/admin/streams"  // POST, ADMIN
+    val STREAMS_PUBLIC_ENDPOINT  = "https://$GATEWAY_HOST/backend/api/v1/streams"         // POST, TRACKER
     val CREATE_STREAM_ENDPOINT   = "https://$GATEWAY_HOST/backend/api/v1/admin/streams"
     val NTI_MARKETS_ENDPOINT     = "https://$GATEWAY_HOST/backend/api/v1/streams/nti-markets"
 
@@ -35,6 +33,7 @@ object ApiConstants {
     const val USERS_DISABLE         = "$GATEWAY_BASE/sso/api/v1/users/disable"
 
     // Team card
-    const val TEAM_CARD       = "$BACKEND_BASE/api/v1/team-card"
-    const val TEAM_CARD_COUNT = "$BACKEND_BASE/api/v1/team-card/count"
+    const val TEAM_CARD        = "$BACKEND_BASE/api/v1/team-card"        // TRACKER: PATCH/DELETE
+    const val TEAM_CARD_ADMIN  = "$BACKEND_BASE/api/v1/admin/team-card"  // ADMIN: PATCH/DELETE
+    const val TEAM_CARD_COUNT  = "$BACKEND_BASE/api/v1/team-card/count"
 }

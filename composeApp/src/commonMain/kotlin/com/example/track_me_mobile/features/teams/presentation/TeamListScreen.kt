@@ -29,6 +29,7 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import com.example.track_me_mobile.core.ui.theme.MontserratFontFamily
 import com.example.track_me_mobile.core.ui.utils.NavigationRefreshEffect
 import com.example.track_me_mobile.features.team_card.presentation.CreateTeamLevel
+import com.example.track_me_mobile.features.team_card.presentation.EditTeamLevel
 import com.example.track_me_mobile.features.team_card.presentation.InfoTeamLevel
 import com.example.track_me_mobile.features.teams.domain.models.TeamCard
 import com.example.track_me_mobile.generated.resources.*
@@ -459,7 +460,9 @@ fun TeamCard(team: TeamCard) {
                     Icon(
                         painter = painterResource(Res.drawable.first_pencil),
                         contentDescription = null,
-                        modifier = Modifier.size(15.dp),
+                        modifier = Modifier
+                            .size(15.dp)
+                            .clickable { navigator.push(EditTeamLevel(team.id)) },
                         tint = DarkPurple
                     )
                 }
