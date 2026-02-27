@@ -2,8 +2,8 @@ package com.example.track_me_mobile.features.team_card.presentation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.lifecycle.viewmodel.compose.viewModel
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import org.koin.core.component.KoinComponent
@@ -31,11 +31,11 @@ class CreateTeamLevel : Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-        val viewModel: TeamViewModel = viewModel()
+        val viewModel = koinScreenModel<TeamCreateViewModel>()
         TeamCreateScreen(
-            viewModel        = viewModel,
-            onBackClick      = { navigator.pop() },
-            onNavigateToInfo = { navigator.push(InfoTeamLevel("")) }
+            viewModel   = viewModel,
+            onBackClick = { navigator.pop() },
+            onCreated   = { navigator.pop() }   // после создания — назад к списку
         )
     }
 }

@@ -20,6 +20,7 @@ import com.example.track_me_mobile.features.streams.presentation.StreamListViewM
 import com.example.track_me_mobile.features.team_card.data.TeamCardRepositoryImpl
 import com.example.track_me_mobile.features.team_card.domain.TeamCardRepository
 import com.example.track_me_mobile.features.team_card.presentation.TeamCardViewModel
+import com.example.track_me_mobile.features.team_card.presentation.TeamCreateViewModel
 import com.example.track_me_mobile.features.teams.data.TeamRepositoryImpl
 import com.example.track_me_mobile.features.teams.domain.TeamRepository
 import com.example.track_me_mobile.features.teams.presentation.TeamListViewModel
@@ -67,4 +68,7 @@ val appModule = module {
     // ── Team Card ────────────────────────────────────────────────────────────
     single<TeamCardRepository> { TeamCardRepositoryImpl(get(), get()) }
     factory { (teamId: String) -> TeamCardViewModel(teamId, get()) }
+
+    // ── Team Create ──────────────────────────────────────────────────────────
+    factory { TeamCreateViewModel(get(), get()) }
 }

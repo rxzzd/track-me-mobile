@@ -84,12 +84,12 @@ fun TeamEditScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            MultiDropdownSectionRow(
-                label = "Рынки НТИ:",
-                options = markets,
-                selectedValues = localData.markets,
-                onValuesChanged = { localData = localData.copy(markets = it) }
-            )
+            //MultiDropdownSectionRow(
+             //   label = "Рынки НТИ:",
+             //   options = markets,
+             //   selectedValues = localData.markets,
+             //   onValuesChanged = { localData = localData.copy(markets = it) }
+            //)
 
             Spacer(modifier = Modifier.height(16.dp))
 
