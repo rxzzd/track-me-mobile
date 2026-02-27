@@ -20,6 +20,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.example.track_me_mobile.features.profile.presentation.UserProfileScreen
 import com.example.track_me_mobile.core.ui.components.MainTopHeader
+import com.example.track_me_mobile.core.ui.utils.NavigationRefreshEffect
 import com.example.track_me_mobile.features.users.presentation.components.AdminItem
 import com.example.track_me_mobile.features.streams.presentation.components.SearchBar
 import com.example.track_me_mobile.core.ui.theme.TrackMePurple
@@ -31,6 +32,9 @@ import org.koin.compose.koinInject
 fun AdminListScreen() {
     val viewModel: AdminListViewModel = koinInject()
     val state by viewModel.state.collectAsState()
+
+    // ↓ Перезагружаем при каждом возврате на этот экран
+    NavigationRefreshEffect { viewModel.loadUsers() }
 
     AdminListContent(
         state = state,
@@ -75,8 +79,6 @@ fun AdminListContent(
                     fontWeight = FontWeight.Bold,
                     color = TrackMePurple
                 )
-
-                // ЗАМЕНЕНО: Кнопка с иконками Человек / Круг
                 IconButton(
                     onClick = onToggleBlocked,
                     modifier = Modifier

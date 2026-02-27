@@ -53,7 +53,7 @@ class StreamListViewModel(
 
     // ─── Пагинация ──────────────────────────────────────────────────────────
     private var currentPage = 0
-    private val pageSize = 10
+    private val pageSize = 1000
 
     init {
         loadStreams(reset = true)

@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
@@ -26,6 +27,9 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.example.track_me_mobile.core.ui.components.MainTopHeader
 import cafe.adriel.voyager.koin.koinScreenModel
 import com.example.track_me_mobile.core.ui.theme.MontserratFontFamily
+import com.example.track_me_mobile.core.ui.utils.NavigationRefreshEffect
+import com.example.track_me_mobile.features.team_card.presentation.CreateTeamLevel
+import com.example.track_me_mobile.features.team_card.presentation.EditTeamLevel
 import com.example.track_me_mobile.features.team_card.presentation.InfoTeamLevel
 import com.example.track_me_mobile.features.teams.domain.models.TeamCard
 import com.example.track_me_mobile.generated.resources.*
@@ -35,13 +39,13 @@ import org.jetbrains.compose.resources.painterResource
 // Цвета перенести в core/ui/theme/Color.kt !
 // Здесь оставлены временно, чтобы не сломать превью
 // ─────────────────────────────────────────────
-val PrimaryPurple    = Color(0xFF8338EB)
-val DarkPurple       = Color(0xFF44069A)
-val LightPurpleBg    = Color(0xFFF0E5FF)
-val SearchBarBg      = Color(0xFFCDAFF7)
-val StatusGreen      = Color(0xFF0DB862)
-val StatusGray       = Color(0xFF878685)
-val FilterModalBg    = Color(0xFFD7C7FF)
+val PrimaryPurple     = Color(0xFF8338EB)
+val DarkPurple        = Color(0xFF44069A)
+val LightPurpleBg     = Color(0xFFF0E5FF)
+val SearchBarBg       = Color(0xFFCDAFF7)
+val StatusGreen       = Color(0xFF0DB862)
+val StatusGray        = Color(0xFF878685)
+val FilterModalBg     = Color(0xFFD7C7FF)
 val ProjectLabelColor = Color(0xFF8338EB)
 
 // TRL-опции для фильтра — оставляем локально, они не приходят с сервера
@@ -64,9 +68,17 @@ data class TeamListScreen(
     @Composable
     override fun Content() {
         val viewModel = koinScreenModel<TeamListViewModel>()
+        val navigator = LocalNavigator.currentOrThrow
 
-        LaunchedEffect(Unit) {
-            viewModel.initialize(streamId)
+        // Первый запуск — устанавливает streamFilter
+        LaunchedEffect(Unit) { viewModel.initialize(streamId) }
+
+        // Перезагружаем каждый раз когда экран становится верхним.
+        // isTopScreen = false когда открыт дочерний экран, true когда вернулись назад.
+        // LaunchedEffect(isTopScreen) перезапускается при смене false → true.
+        val isTopScreen = navigator.lastItem == this
+        LaunchedEffect(isTopScreen) {
+            if (isTopScreen) viewModel.loadTeams()
         }
 
         TeamListContent(
@@ -74,23 +86,25 @@ data class TeamListScreen(
             searchQuery    = viewModel.searchQuery,
             onSearchChange = viewModel::onSearchQueryChange,
             onFilterApply  = viewModel::onFilterApply,
-            onRetry        = viewModel::loadTeams
+            onRetry        = viewModel::loadTeams,
+            onRefresh      = viewModel::loadTeams
         )
     }
 }
 
 // ─────────────────────────────────────────────
-// Главный composable — принимает данные из ViewModel
-// Разметка не изменилась, только источник данных
+// Главный composable
 // ─────────────────────────────────────────────
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TeamListContent(
     state: TeamListState,
     searchQuery: String,
     onSearchChange: (String) -> Unit,
     onFilterApply: (List<String>, List<IntRange>) -> Unit,
-    onRetry: () -> Unit
+    onRetry: () -> Unit,
+    onRefresh: () -> Unit = {}
 ) {
     val navigator = LocalNavigator.currentOrThrow
     val montserrat = MontserratFontFamily()
@@ -98,150 +112,162 @@ fun TeamListContent(
     var showFilters by remember { mutableStateOf(false) }
     val selectedMarkets = remember { mutableStateListOf<String>() }
     val selectedTrls    = remember { mutableStateListOf<TrlOption>() }
+    val isRefreshing    = state is TeamListState.Loading
+
     Scaffold(
         topBar = { MainTopHeader() },
         containerColor = Color.White
     ) { paddingValues ->
 
-        Column(
-            modifier = Modifier
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh    = onRefresh,
+            modifier     = Modifier
                 .fillMaxSize()
-                .background(Color.White)
                 .padding(paddingValues)
-                .padding(horizontal = 20.dp)
         ) {
-
-            // ── Заголовок ──
-            Row(
-                modifier = Modifier.padding(vertical = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.White)
+                    .padding(horizontal = 20.dp)
             ) {
-                Icon(
-                    painter = painterResource(Res.drawable.arrowback),
-                    contentDescription = null,
-                    tint = PrimaryPurple,
-                    modifier = Modifier.size(24.dp).clickable { navigator.pop() }
-                )
-                Spacer(Modifier.width(12.dp))
-                Text(
-                    text = "Команды",
-                    fontFamily = montserrat,
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = DarkPurple,
-                    modifier = Modifier.weight(1f)
-                )
-            }
 
-            // ── Строка поиска + фильтр + добавить ──
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(width = 49.dp, height = 40.dp)
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(PrimaryPurple)
-                        .clickable { showFilters = true },
-                    contentAlignment = Alignment.Center
+                // ── Заголовок ──
+                Row(
+                    modifier = Modifier.padding(vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        painter = painterResource(Res.drawable.filter_icon1),
+                        painter = painterResource(Res.drawable.arrowback),
                         contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(22.dp)
+                        tint = PrimaryPurple,
+                        modifier = Modifier.size(24.dp).clickable { navigator.pop() }
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    Text(
+                        text = "Команды",
+                        fontFamily = montserrat,
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = DarkPurple,
+                        modifier = Modifier.weight(1f)
                     )
                 }
 
-                Spacer(Modifier.width(12.dp))
-
-                BasicTextField(
-                    value = searchQuery,
-                    onValueChange = onSearchChange,   // ← идёт в ViewModel
-                    modifier = Modifier.weight(1f).height(40.dp),
-                    singleLine = true,
-                    cursorBrush = SolidColor(DarkPurple),
-                    textStyle = TextStyle(
-                        fontSize = 14.sp,
-                        fontFamily = montserrat,
-                        color = Color.White
-                    ),
-                    decorationBox = { innerTextField ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(SearchBarBg, RoundedCornerShape(20.dp))
-                                .padding(horizontal = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                painter = painterResource(Res.drawable.icon_search),
-                                contentDescription = null,
-                                tint = DarkPurple,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Box(modifier = Modifier.weight(1f)) {
-                                if (searchQuery.isEmpty()) {
-                                    Text(
-                                        "Найти",
-                                        fontSize = 14.sp,
-                                        fontFamily = montserrat,
-                                        color = Color.White
-                                    )
-                                }
-                                innerTextField()
-                            }
-                        }
-                    }
-                )
-
-                Spacer(Modifier.width(12.dp))
-
-                Icon(
-                    painter = painterResource(Res.drawable.icon_plus),
-                    contentDescription = null,
-                    tint = PrimaryPurple,
-                    modifier = Modifier.size(25.dp).clickable { }
-                )
-            }
-
-            Spacer(Modifier.height(20.dp))
-
-            // ── Тело — зависит от состояния ──
-            when (val s = state) {
-
-                is TeamListState.Loading -> {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(color = PrimaryPurple)
-                    }
-                }
-
-                is TeamListState.Error -> {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(s.message, color = Color.Gray, fontFamily = montserrat)
-                            Spacer(Modifier.height(12.dp))
-                            Button(onClick = onRetry) {
-                                Text("Повторить", fontFamily = montserrat)
-                            }
-                        }
-                    }
-                }
-
-                is TeamListState.Success -> {
-                    LazyColumn(
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        contentPadding = PaddingValues(bottom = 20.dp)
+                // ── Строка поиска + фильтр + добавить ──
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(width = 49.dp, height = 40.dp)
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(PrimaryPurple)
+                            .clickable { showFilters = true },
+                        contentAlignment = Alignment.Center
                     ) {
-                        items(s.teams) { team ->
-                            TeamCard(team)   // ← теперь принимает доменную модель
+                        Icon(
+                            painter = painterResource(Res.drawable.filter_icon1),
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+
+                    Spacer(Modifier.width(12.dp))
+
+                    BasicTextField(
+                        value = searchQuery,
+                        onValueChange = onSearchChange,
+                        modifier = Modifier.weight(1f).height(40.dp),
+                        singleLine = true,
+                        cursorBrush = SolidColor(DarkPurple),
+                        textStyle = TextStyle(
+                            fontSize = 14.sp,
+                            fontFamily = montserrat,
+                            color = Color.White
+                        ),
+                        decorationBox = { innerTextField ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(SearchBarBg, RoundedCornerShape(20.dp))
+                                    .padding(horizontal = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    painter = painterResource(Res.drawable.icon_search),
+                                    contentDescription = null,
+                                    tint = DarkPurple,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Box(modifier = Modifier.weight(1f)) {
+                                    if (searchQuery.isEmpty()) {
+                                        Text(
+                                            "Найти",
+                                            fontSize = 14.sp,
+                                            fontFamily = montserrat,
+                                            color = Color.White
+                                        )
+                                    }
+                                    innerTextField()
+                                }
+                            }
+                        }
+                    )
+
+                    Spacer(Modifier.width(12.dp))
+
+                    // ── ПЛЮСИК → открывает экран создания команды ──
+                    Icon(
+                        painter = painterResource(Res.drawable.icon_plus),
+                        contentDescription = "Создать команду",
+                        tint = PrimaryPurple,
+                        modifier = Modifier
+                            .size(25.dp)
+                            .clickable { navigator.push(CreateTeamLevel()) }
+                    )
+                }
+
+                Spacer(Modifier.height(20.dp))
+
+                // ── Тело — зависит от состояния ──
+                when (val s = state) {
+
+                    is TeamListState.Loading -> {
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator(color = PrimaryPurple)
+                        }
+                    }
+
+                    is TeamListState.Error -> {
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(s.message, color = Color.Gray, fontFamily = montserrat)
+                                Spacer(Modifier.height(12.dp))
+                                Button(onClick = onRetry) {
+                                    Text("Повторить", fontFamily = montserrat)
+                                }
+                            }
+                        }
+                    }
+
+                    is TeamListState.Success -> {
+                        LazyColumn(
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                            contentPadding = PaddingValues(bottom = 20.dp)
+                        ) {
+                            items(s.teams) { team ->
+                                TeamCard(team)
+                            }
                         }
                     }
                 }
             }
-        }
+        } // end PullToRefreshBox
     }
 
     // ── Диалог фильтров ──
@@ -257,7 +283,6 @@ fun TeamListContent(
                     selectedTrls    = selectedTrls,
                     onDismiss = {
                         showFilters = false
-                        // Передаём выбранные фильтры в ViewModel
                         onFilterApply(
                             selectedMarkets.toList(),
                             selectedTrls.map { it.range }
@@ -270,7 +295,7 @@ fun TeamListContent(
 }
 
 // ─────────────────────────────────────────────
-// Диалог фильтров — разметка не изменилась
+// Диалог фильтров
 // ─────────────────────────────────────────────
 @Composable
 fun FilterDialogContent(
@@ -361,7 +386,7 @@ fun FilterDialogContent(
 }
 
 // ─────────────────────────────────────────────
-// Карточка команды — теперь принимает TeamCard из domain
+// Карточка команды
 // ─────────────────────────────────────────────
 @Composable
 fun TeamCard(team: TeamCard) {
@@ -435,7 +460,9 @@ fun TeamCard(team: TeamCard) {
                     Icon(
                         painter = painterResource(Res.drawable.first_pencil),
                         contentDescription = null,
-                        modifier = Modifier.size(15.dp),
+                        modifier = Modifier
+                            .size(15.dp)
+                            .clickable { navigator.push(EditTeamLevel(team.id)) },
                         tint = DarkPurple
                     )
                 }
@@ -468,7 +495,7 @@ fun TeamCard(team: TeamCard) {
 }
 
 // ─────────────────────────────────────────────
-// Checkbox — без изменений
+// Checkbox
 // ─────────────────────────────────────────────
 @Composable
 fun CustomCheckbox(
