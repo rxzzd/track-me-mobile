@@ -10,7 +10,9 @@ data class Stream(
     val id: String,
     val name: String,
     val description: String,
-    val active: Boolean
+    val active: Boolean,
+    val startDate: String? = null,
+    val endDate: String? = null
 )
 
 // Доменная модель — только то что нужно UI, без лишних полей с сервера
@@ -27,5 +29,6 @@ data class TeamCard(
     val stream: Stream?,
     val meetingsCount: Int,
     val meetingsCompletedCount: Int,
-    val meetingsNotHappenedCount: Int
+    val meetingsNotHappenedCount: Int,
+    val teamsCount: Int? = null
 )
