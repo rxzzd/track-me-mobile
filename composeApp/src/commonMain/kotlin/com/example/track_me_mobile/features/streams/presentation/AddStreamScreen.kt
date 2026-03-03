@@ -22,9 +22,6 @@ import com.example.track_me_mobile.features.streams.presentation.components.*
 import org.jetbrains.compose.resources.Font
 import com.example.track_me_mobile.generated.resources.Mulish_SemiBold
 import com.example.track_me_mobile.generated.resources.Res
-import com.example.track_me_mobile.generated.resources.edit
-import com.example.track_me_mobile.generated.resources.go_back_icon
-import org.jetbrains.compose.resources.painterResource
 
 class AddStreamScreen : Screen {
 
@@ -46,10 +43,13 @@ fun AddStreamPageContent(
     viewModel: AddStreamViewModel,
     onSuccess: () -> Unit
 ) {
-    val navigator = LocalNavigator.currentOrThrow
     val mulishFamily = FontFamily(
         Font(Res.font.Mulish_SemiBold, FontWeight.SemiBold)
     )
+
+    // Параметры для выравнивания блока контента
+    val rowWidth = 300.dp
+    val labelWidth = 150.dp
 
     MaterialTheme {
         Scaffold(
@@ -58,53 +58,52 @@ fun AddStreamPageContent(
             },
             containerColor = Color(0xFFF8F3FF)
         ) { paddingValues ->
-            Box(
+            Column(
                 modifier = Modifier
+                    .padding(paddingValues)
                     .fillMaxSize()
                     .background(Color(0xFFF8F3FF))
+                    .verticalScroll(rememberScrollState())
+                    .padding(top = 18.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                IconButton(onClick = { navigator.push(StreamListScreen()) }) {
-                    Icon(painter = painterResource(Res.drawable.go_back_icon),
-                        contentDescription = "Go back",
-                        tint = Color(0xFF8338EB))
-                }
+                Text(
+                    text = "Создание потока",
+                    fontSize = 32.sp,
+                    color = Color(0xFF44069A),
+                    fontFamily = mulishFamily,
+                    fontWeight = FontWeight.Bold,
+                    lineHeight = 32.sp,
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                AddStreamPhoto()
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                StreamNameInput(
+                    value = viewModel.name,
+                    onValueChange = { viewModel.name = it }
+                )
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                // --- КОНТЕЙНЕР ПАРАМЕТРОВ ---
                 Column(
                     modifier = Modifier
-                        .padding(paddingValues)
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        .padding(top = 18.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
+                        .width(rowWidth)
+                        .padding(start = 20.dp),
+                    horizontalAlignment = Alignment.Start
                 ) {
-                    Text(
-                        text = "Создание потока",
-                        fontSize = 32.sp,
-                        color = Color(0xFF44069A),
-                        fontFamily = mulishFamily,
-                        fontWeight = FontWeight.SemiBold,
-                        lineHeight = 32.sp,
-                    )
-
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    AddStreamPhoto()
-
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    StreamNameInput(
-                        value = viewModel.name,
-                        onValueChange = { viewModel.name = it }
-                    )
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
+                    // НАЧАЛО ПОТОКА
                     Row(
-                        modifier = Modifier.width(220.dp).wrapContentHeight(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth().wrapContentHeight(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
                             text = "Начало:",
+                            modifier = Modifier.width(labelWidth),
                             color = Color(0xFF8338EB),
                             fontFamily = mulishFamily,
                             fontWeight = FontWeight.SemiBold,
@@ -118,13 +117,14 @@ fun AddStreamPageContent(
 
                     Spacer(modifier = Modifier.height(14.dp))
 
+                    // КОНЕЦ ПОТОКА
                     Row(
-                        modifier = Modifier.width(220.dp).wrapContentHeight(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth().wrapContentHeight(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
                             text = "Конец:",
+                            modifier = Modifier.width(labelWidth),
                             color = Color(0xFF8338EB),
                             fontFamily = mulishFamily,
                             fontWeight = FontWeight.SemiBold,
@@ -136,31 +136,84 @@ fun AddStreamPageContent(
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(9.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
 
-                    AddStreamMarket()
-
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    viewModel.errorMessage?.let { error ->
-                        Text(
-                            text = error,
-                            color = Color.Red,
-                            fontSize = 12.sp,
-                            modifier = Modifier.padding(bottom = 8.dp)
+                    // ТРЕКШЕН-МИТИНГ
+                    Row(
+                        modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.width(labelWidth)) {
+                            Text(
+                                text = "Дата начала",
+                                color = Color(0xFF8338EB),
+                                fontFamily = mulishFamily,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 14.sp,
+                                lineHeight = 14.sp
+                            )
+                            Text(
+                                text = "трекшен-митинга:",
+                                color = Color(0xFF8338EB),
+                                fontFamily = mulishFamily,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 14.sp,
+                                lineHeight = 14.sp
+                            )
+                        }
+                        DateInputField(
+                            value = viewModel.trackStartDate,
+                            onValueChange = { viewModel.trackStartDate = it }
                         )
                     }
 
-                    StreamButton(
-                        text = if (viewModel.isLoading) "Создание..." else "Создать поток",
-                        onClick = {
-                            viewModel.createStream(onSuccess = onSuccess)
-                        },
-                        // Можно добавить enabled = !viewModel.isLoading, если компонент поддерживает
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    // КОЛИЧЕСТВО ВСТРЕЧ (Заголовок выровнен по списку выше)
+                    Text(
+                        text = "Количество встреч:",
+                        color = Color(0xFF8338EB),
+                        fontFamily = mulishFamily,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 14.sp,
+                        modifier = Modifier.padding(bottom = 8.dp)
                     )
 
-                    Spacer(modifier = Modifier.height(40.dp))
+                    // Кнопка выбора расположена по центру отведенной ширины блока
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        MeetingsCountDropdown(
+                            value = viewModel.meetingsCount,
+                            onValueChange = { viewModel.meetingsCount = it }
+                        )
+                    }
                 }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                AddStreamMarket(viewModel = viewModel)
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                viewModel.errorMessage?.let { error ->
+                    Text(
+                        text = error,
+                        color = Color.Red,
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
+
+                StreamButton(
+                    text = if (viewModel.isLoading) "Создание..." else "Создать поток",
+                    onClick = {
+                        viewModel.createStream(onSuccess = onSuccess)
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(40.dp))
             }
         }
     }

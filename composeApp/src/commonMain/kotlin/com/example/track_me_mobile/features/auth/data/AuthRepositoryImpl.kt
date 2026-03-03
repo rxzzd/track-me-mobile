@@ -70,7 +70,7 @@ class AuthRepositoryImpl(
 
             Result.success(
                 UserInfo(
-                    id       = dto.id,
+                    id       = dto.id.orEmpty(),
                     username = dto.username,
                     fullName = dto.fullName,
                     roles    = dto.roles.map { mapRole(it) }

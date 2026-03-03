@@ -18,10 +18,8 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.koin.koinScreenModel
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import com.example.track_me_mobile.core.ui.components.MainTopHeader
-
+import com.example.track_me_mobile.core.ui.utils.NavigationRefreshEffect
 import com.example.track_me_mobile.features.streams.presentation.components.*
 import com.example.track_me_mobile.features.teams.presentation.TeamListScreen
 
@@ -30,6 +28,10 @@ class StreamListScreen : Screen {
     @Composable
     override fun Content() {
         val viewModel = koinScreenModel<StreamListViewModel>()
+
+        // ↓ Перезагружаем при каждом возврате на этот экран
+        NavigationRefreshEffect { viewModel.applyFilters() }
+
         StreamListContent(viewModel = viewModel)
     }
 }
@@ -57,9 +59,7 @@ private fun StreamListContent(viewModel: StreamListViewModel) {
 
     MaterialTheme {
         Scaffold(
-            topBar = {
-                MainTopHeader()
-            },
+            topBar = { MainTopHeader() },
             containerColor = Color(0xFFF8F3FF)
         ) { paddingValues ->
 
@@ -71,8 +71,7 @@ private fun StreamListContent(viewModel: StreamListViewModel) {
             ) {
                 LazyColumn(
                     state = listState,
-                    modifier = Modifier
-                        .fillMaxSize(),
+                    modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     item(key = "search_bar") {
@@ -92,8 +91,10 @@ private fun StreamListContent(viewModel: StreamListViewModel) {
                                 onValueChange = { viewModel.onSearchQueryChange(it) },
                                 onSearch = { viewModel.applyFilters() }
                             )
-                            AddBtn(modifier = Modifier.width(24.dp),
-                                onClick = {navigator.push(AddStreamScreen())})
+                            AddBtn(
+                                modifier = Modifier.width(24.dp),
+                                onClick = { navigator.push(AddStreamScreen()) }
+                            )
                         }
                         Spacer(modifier = Modifier.height(16.dp))
                     }
@@ -117,9 +118,7 @@ private fun StreamListContent(viewModel: StreamListViewModel) {
                     if (viewModel.isLoading) {
                         item(key = "loading_indicator") {
                             Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(300.dp),
+                                modifier = Modifier.fillMaxWidth().height(300.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 CircularProgressIndicator(color = Color(0xFF8338EB))
@@ -145,17 +144,13 @@ private fun StreamListContent(viewModel: StreamListViewModel) {
                             markets = "Рынки НТИ: ${stream.ntiMarkets.joinToString { it.displayName }}",
                             trl = "Дата начала: ${stream.startDate}",
                             flow = "Дата конца: ${stream.endDate}",
-                            onClick = {
-                                navigator.push(TeamListScreen(streamId = stream.name))
-                            }
+                            onClick = { navigator.push(TeamListScreen(streamId = stream.name)) }
                         )
                     }
                     if (viewModel.isLoadingMore) {
                         item(key = "loading_more_indicator") {
                             Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
+                                modifier = Modifier.fillMaxWidth().padding(16.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 CircularProgressIndicator(
@@ -165,7 +160,6 @@ private fun StreamListContent(viewModel: StreamListViewModel) {
                             }
                         }
                     }
-
                     item(key = "bottom_spacer") {
                         Spacer(modifier = Modifier.height(24.dp))
                     }

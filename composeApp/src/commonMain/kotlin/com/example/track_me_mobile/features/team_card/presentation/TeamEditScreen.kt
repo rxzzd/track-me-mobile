@@ -4,8 +4,7 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,283 +15,296 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.DialogProperties
+import com.example.track_me_mobile.core.ui.components.MainTopHeader
 import com.example.track_me_mobile.core.ui.theme.*
-import androidx.compose.foundation.text.BasicTextField
+import com.example.track_me_mobile.features.team_card.domain.models.TrackerUser
+import com.example.track_me_mobile.features.teams.domain.models.NtiMarket
+import com.example.track_me_mobile.features.teams.domain.models.Stream
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TeamEditScreen(
-    viewModel: TeamViewModel,
+    viewModel: TeamEditViewModel,
     onBackClick: () -> Unit,
-    onSaveClick: () -> Unit,
-    onDeactivateClick: () -> Unit,
-    onFilterClick: () -> Unit
+    onSaved: () -> Unit,
+    onDeactivated: () -> Unit
 ) {
-    val currentData by viewModel.teamData.collectAsState()
-
-    var localData by remember(currentData) { mutableStateOf(currentData) }
-    var showDeleteDialog by remember { mutableStateOf(false) }
-
-    val streams = listOf("Название потока 1", "Название потока 2", "Название потока 3")
-    val markets = listOf("AutoNet", "HealthNet", "MariNet", "NeuroNet", "SafeNet", "FoodNet", "TechNet", "WearNet")
-    val trlList = listOf("0-2", "3-5", "6-8", "9-10")
+    val state by viewModel.state.collectAsState()
+    var showDeactivateDialog by remember { mutableStateOf(false) }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("TrackMe", color = Color.White, fontWeight = FontWeight.Bold) },
-                actions = {
-                    IconButton(onClick = onFilterClick) {
-                        Icon(Icons.Default.Menu, contentDescription = null, tint = Color.White)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = TrackMePurple)
-            )
-        },
+        topBar = { MainTopHeader() },
         containerColor = BackgroundWhite
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState())
-        ) {
-            Text(
-                text = "←",
-                color = TrackMePurple,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.clickable { onBackClick() }
-            )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            TrackerRow(
-                name = localData.trackerName,
-                onNameChanged = { localData = localData.copy(trackerName = it) }
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            DropdownSectionRow(
-                label = "Поток:",
-                options = streams,
-                selectedValue = localData.stream,
-                onValueSelected = { localData = localData.copy(stream = it) }
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            MultiDropdownSectionRow(
-                label = "Рынки НТИ:",
-                options = markets,
-                selectedValues = localData.markets,
-                onValuesChanged = { localData = localData.copy(markets = it) }
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                DropdownSectionRow(
-                    label = "TRL:",
-                    options = trlList,
-                    selectedValue = localData.trl,
-                    onValueSelected = { localData = localData.copy(trl = it) }
-                )
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                Button(
-                    onClick = onFilterClick,
-                    colors = ButtonDefaults.buttonColors(containerColor = TrackMePurple),
-                    shape = RoundedCornerShape(50),
-                    modifier = Modifier.height(36.dp)
-                ) {
-                    Text("Фильтр", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+        when {
+            state.isLoading -> {
+                Box(Modifier.padding(padding).fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = TrackMePurple)
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
-
-            val descriptionScrollState = rememberScrollState()
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(150.dp)
-                    .border(1.5.dp, TrackMePurple.copy(alpha = 0.5f), RoundedCornerShape(16.dp))  // рамка всегда чёткая
-            ) {
-                BasicTextField(
-                    value = localData.description,
-                    onValueChange = { localData = localData.copy(description = it) },
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(start = 16.dp, top = 12.dp, bottom = 12.dp, end = 20.dp)
-                        .verticalScroll(descriptionScrollState),
-                    textStyle = TextStyle(color = Color.Black, fontSize = 14.sp),
-                    maxLines = Int.MAX_VALUE,
-                    decorationBox = { innerTextField ->
-                        if (localData.description.isEmpty()) {
-                            Text("Описание карточки команды...", color = Color.Gray, fontSize = 14.sp)
+            state.loadError != null -> {
+                Box(Modifier.padding(padding).fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(24.dp)) {
+                        Text(state.loadError!!, color = Color.Gray, fontSize = 14.sp, textAlign = TextAlign.Center)
+                        Spacer(Modifier.height(16.dp))
+                        Button(onClick = viewModel::retry,
+                            colors = ButtonDefaults.buttonColors(containerColor = TrackMePurple)) {
+                            Text("Повторить", color = Color.White)
                         }
-                        innerTextField()
                     }
-                )
+                }
+            }
 
-                val maxScroll = descriptionScrollState.maxValue
-                val currentScroll = descriptionScrollState.value
+            else -> {
+                Column(
+                    modifier = Modifier
+                        .padding(padding)
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .imePadding()
+                        .padding(16.dp)
+                ) {
+                    // ── Назад ──
+                    Text("←", color = TrackMePurple, fontSize = 24.sp, fontWeight = FontWeight.Bold,
+                        modifier = Modifier.clickable { onBackClick() })
 
-                if (maxScroll > 0) {
-                    val thumbHeightFraction = 150f / (150f + maxScroll)
-                    val thumbTopFraction = currentScroll.toFloat() / maxScroll * (1f - thumbHeightFraction)
+                    Spacer(Modifier.height(20.dp))
 
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.CenterEnd)
-                            .padding(end = 6.dp)
-                            .width(6.dp)
-                            .fillMaxHeight()
-                            .padding(vertical = 12.dp)
-                            .background(TrackMePurple, RoundedCornerShape(3.dp))
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.TopCenter)
-                                .width(4.dp)
-                                .fillMaxHeight(thumbHeightFraction)
-                                .offset(y = (126.dp * thumbTopFraction))
-                                .background(Color.White, RoundedCornerShape(2.dp))
+                    // ── ТРЕКЕР ──
+                    if (state.isAdminRole) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            DropdownObjectRow(
+                                label           = "Трекер:",
+                                options         = state.availableTrackers,
+                                selectedValue   = state.selectedTracker,
+                                displayName     = { it.fullName },
+                                onValueSelected = viewModel::onTrackerSelected,
+                                error           = state.trackerError
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Icon(Icons.Default.Edit, contentDescription = null,
+                                tint = if (state.trackerError != null) Color.Red else TrackMePurple.copy(alpha = 0.6f),
+                                modifier = Modifier.size(18.dp))
+                        }
+                    } else {
+                        ReadonlyRow(label = "Трекер:", value = state.originalTeam?.username ?: "")
+                    }
+
+                    Spacer(Modifier.height(16.dp))
+
+                    // ── НАЗВАНИЕ — карандашик всегда ──
+                    Text("Название команды:", fontSize = 14.sp, color = Color.Black, modifier = Modifier.padding(bottom = 6.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        OutlinedTextField(
+                            value         = state.name,
+                            onValueChange = viewModel::onNameChange,
+                            singleLine    = true,
+                            isError       = state.nameError != null,
+                            modifier      = Modifier.weight(1f),
+                            shape         = RoundedCornerShape(12.dp),
+                            colors        = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor   = TrackMePurple,
+                                unfocusedBorderColor = TrackMePurple.copy(alpha = 0.4f),
+                                errorBorderColor     = Color.Red
+                            ),
+                            textStyle = TextStyle(fontSize = 14.sp, color = Color.Black),
+                            trailingIcon  = {
+                                Icon(Icons.Default.Edit, contentDescription = null,
+                                    tint = TrackMePurple.copy(alpha = 0.6f), modifier = Modifier.size(18.dp))
+                            }
                         )
                     }
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.CenterEnd)
-                            .padding(end = 6.dp)
-                            .width(6.dp)
-                            .fillMaxHeight()
-                            .padding(vertical = 12.dp)
-                            .border(1.dp, TrackMePurple.copy(alpha = 0.5f), RoundedCornerShape(3.dp))
-                            .background(Color.White, RoundedCornerShape(3.dp))
+                    if (state.nameError != null) {
+                        Text(state.nameError!!, color = Color.Red, fontSize = 11.sp,
+                            modifier = Modifier.padding(start = 4.dp, top = 2.dp))
+                    }
+
+                    Spacer(Modifier.height(16.dp))
+
+                    // ── ПОТОК ──
+                    if (state.isAdminRole) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            DropdownObjectRow(
+                                label           = "Поток:",
+                                options         = state.availableStreams,
+                                selectedValue   = state.selectedStream,
+                                displayName     = { it.name },
+                                onValueSelected = viewModel::onStreamSelected,
+                                error           = state.streamError
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Icon(Icons.Default.Edit, contentDescription = null,
+                                tint = if (state.streamError != null) Color.Red else TrackMePurple.copy(alpha = 0.6f),
+                                modifier = Modifier.size(18.dp))
+                        }
+                    } else {
+                        ReadonlyRow(label = "Поток:", value = state.originalTeam?.stream?.name ?: "")
+                    }
+
+                    Spacer(Modifier.height(16.dp))
+
+                    // ── РЫНКИ НТИ — карандашик ──
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        MultiDropdownObjectRow(
+                            label           = "Рынки НТИ:",
+                            options         = state.availableMarkets,
+                            selectedValues  = state.selectedMarkets,
+                            displayName     = { it.displayName },
+                            onValuesChanged = viewModel::onMarketsChanged,
+                            error           = state.marketsError
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Icon(Icons.Default.Edit, contentDescription = null,
+                            tint = TrackMePurple.copy(alpha = 0.6f), modifier = Modifier.size(18.dp))
+                    }
+
+                    Spacer(Modifier.height(16.dp))
+
+                    // ── TRL — карандашик ──
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        DropdownSectionRow(
+                            label           = "TRL:",
+                            options         = TRL_OPTIONS,
+                            selectedValue   = state.selectedTrl,
+                            onValueSelected = viewModel::onTrlSelected,
+                            error           = state.trlError
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Icon(Icons.Default.Edit, contentDescription = null,
+                            tint = TrackMePurple.copy(alpha = 0.6f), modifier = Modifier.size(18.dp))
+                    }
+
+                    Spacer(Modifier.height(20.dp))
+
+                    // ── ОПИСАНИЕ — карандашик ──
+                    Text("Описание:", fontSize = 14.sp, color = Color.Black, modifier = Modifier.padding(bottom = 6.dp))
+                    OutlinedTextField(
+                        value         = state.description,
+                        onValueChange = viewModel::onDescriptionChange,
+                        isError       = state.descriptionError != null,
+                        placeholder   = { Text("Описание карточки команды...", color = TextGray, fontSize = 14.sp) },
+                        modifier      = Modifier.fillMaxWidth().heightIn(min = 120.dp),
+                        shape         = RoundedCornerShape(12.dp),
+                        colors        = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor   = TrackMePurple,
+                            unfocusedBorderColor = TrackMePurple.copy(alpha = 0.4f),
+                            errorBorderColor     = Color.Red
+                        ),
+                        textStyle    = TextStyle(fontSize = 14.sp, color = Color.Black),
+                        maxLines     = 10,
+                        trailingIcon = {
+                            Icon(Icons.Default.Edit, contentDescription = null,
+                                tint = TrackMePurple.copy(alpha = 0.6f), modifier = Modifier.size(18.dp))
+                        }
                     )
-                }
-            }
+                    if (state.descriptionError != null) {
+                        Text(state.descriptionError!!, color = Color.Red, fontSize = 11.sp,
+                            modifier = Modifier.padding(start = 4.dp, top = 2.dp))
+                    }
 
-            Spacer(modifier = Modifier.height(32.dp))
+                    if (state.submitError != null) {
+                        Spacer(Modifier.height(12.dp))
+                        Text(state.submitError!!, color = Color.Red, fontSize = 13.sp,
+                            modifier = Modifier.fillMaxWidth()
+                                .background(Color.Red.copy(alpha = 0.08f), RoundedCornerShape(8.dp))
+                                .padding(12.dp))
+                    }
 
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Button(
-                    onClick = {
-                        viewModel.applyEdit(localData)
-                        onSaveClick()
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = TrackMePurple),
-                    modifier = Modifier
-                        .fillMaxWidth(0.8f)
-                        .height(48.dp),
-                    shape = RoundedCornerShape(50)
-                ) {
-                    Text("Сохранить", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                }
+                    Spacer(Modifier.height(32.dp))
 
-                Spacer(modifier = Modifier.height(12.dp))
+                    // ── Кнопки ──
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                        Button(
+                            onClick  = { viewModel.save(onSuccess = onSaved) },
+                            enabled  = !state.isSubmitting,
+                            modifier = Modifier.fillMaxWidth(0.8f).height(48.dp),
+                            colors   = ButtonDefaults.buttonColors(containerColor = TrackMePurple),
+                            shape    = RoundedCornerShape(50)
+                        ) {
+                            if (state.isSubmitting) {
+                                CircularProgressIndicator(color = Color.White, modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                            } else {
+                                Text("Сохранить", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                            }
+                        }
 
-                Button(
-                    onClick = { showDeleteDialog = true },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD3524E)),
-                    modifier = Modifier
-                        .fillMaxWidth(0.8f)
-                        .height(48.dp),
-                    shape = RoundedCornerShape(50)
-                ) {
-                    Text("Деактивировать", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        Spacer(Modifier.height(12.dp))
+
+                        Button(
+                            onClick  = { showDeactivateDialog = true },
+                            modifier = Modifier.fillMaxWidth(0.8f).height(48.dp),
+                            colors   = ButtonDefaults.buttonColors(containerColor = Color(0xFFD3524E)),
+                            shape    = RoundedCornerShape(50)
+                        ) {
+                            Text("Деактивировать", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        }
+                    }
+
+                    Spacer(Modifier.height(24.dp))
                 }
             }
         }
     }
 
-    if (showDeleteDialog) {
+    // ── Диалог деактивации ────────────────────────────────────────────────
+    if (showDeactivateDialog) {
         AlertDialog(
-            onDismissRequest = { showDeleteDialog = false },
-            properties = DialogProperties(usePlatformDefaultWidth = false),
-            content = {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth(0.9f)
-                        .border(4.dp, Color(0xFFD3524E), RoundedCornerShape(28.dp)),
-                    shape = RoundedCornerShape(28.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White)
+            onDismissRequest = { showDeactivateDialog = false },
+            shape            = RoundedCornerShape(28.dp),
+            containerColor   = Color.White,
+            title = {
+                Text(
+                    "Вы уверены, что хотите остановить работу данной команды?",
+                    fontSize = 18.sp, fontWeight = FontWeight.Bold,
+                    color = Color.Black, textAlign = TextAlign.Center
+                )
+            },
+            text = if (state.deleteError != null) {
+                { Text(state.deleteError!!, color = Color.Red, fontSize = 12.sp, textAlign = TextAlign.Center) }
+            } else null,
+            dismissButton = {
+                Button(
+                    onClick  = { showDeactivateDialog = false },
+                    modifier = Modifier.height(50.dp),
+                    colors   = ButtonDefaults.buttonColors(containerColor = Color(0xFFD3524E)),
+                    shape    = RoundedCornerShape(50)
+                ) { Text("Нет", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold) }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDeactivateDialog = false
+                        viewModel.deactivate(onSuccess = onDeactivated)
+                    },
+                    modifier = Modifier.height(50.dp),
+                    enabled  = !state.isDeleting,
+                    colors   = ButtonDefaults.buttonColors(containerColor = Color(0xFF1DB954)),
+                    shape    = RoundedCornerShape(50)
                 ) {
-                    Column(
-                        modifier = Modifier.padding(20.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Box(
-                            modifier = Modifier.fillMaxWidth(),
-                            contentAlignment = Alignment.TopEnd
-                        ) {
-                            IconButton(onClick = { showDeleteDialog = false }) {
-                                Icon(
-                                    Icons.Default.Close,
-                                    contentDescription = null,
-                                    tint = Color(0xFFD3524E)
-                                )
-                            }
-                        }
-
-                        Text(
-                            text = "Вы уверены, что хотите остановить работу данной команды?",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Black,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(vertical = 16.dp)
-                        )
-
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 16.dp),
-                            horizontalArrangement = Arrangement.SpaceEvenly
-                        ) {
-                            Button(
-                                onClick = { showDeleteDialog = false },
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD3524E)),
-                                shape = RoundedCornerShape(50),
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(50.dp)
-                                    .padding(horizontal = 8.dp)
-                            ) {
-                                Text("Нет", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                            }
-
-                            Button(
-                                onClick = {
-                                    showDeleteDialog = false
-                                    viewModel.reset()
-                                    onDeactivateClick()
-                                },
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1DB954)),
-                                shape = RoundedCornerShape(50),
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(50.dp)
-                                    .padding(horizontal = 8.dp)
-                            ) {
-                                Text("Да", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                            }
-                        }
+                    if (state.isDeleting) {
+                        CircularProgressIndicator(color = Color.White, modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                    } else {
+                        Text("Да", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }
         )
+    }
+}
+
+// ── Поле только для чтения (трекер/поток у роли TRACKER) ─────────────────────
+@Composable
+private fun ReadonlyRow(label: String, value: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(label, fontSize = 14.sp, color = Color.Black)
+        Spacer(Modifier.width(16.dp))
+        Box(
+            modifier = Modifier
+                .background(TrackMePurple.copy(alpha = 0.12f), RoundedCornerShape(50))
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            Text(value, color = TrackMePurple, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+        }
     }
 }

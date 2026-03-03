@@ -17,6 +17,8 @@ class AddStreamViewModel(
     var name by mutableStateOf("")
     var startDate by mutableStateOf("")
     var endDate by mutableStateOf("")
+    var trackStartDate by mutableStateOf("") // НОВОЕ ПОЛЕ
+    var meetingsCount by mutableStateOf(0)   // НОВОЕ ПОЛЕ
 
     var availableMarkets by mutableStateOf<List<NtiMarket>>(emptyList())
     var selectedMarketIds by mutableStateOf<Set<String>>(emptySet())
@@ -31,7 +33,16 @@ class AddStreamViewModel(
 
     private fun loadMarkets() {
         screenModelScope.launch {
-            repository.getNtiMarkets().onSuccess { availableMarkets = it }
+            println("### VM_DEBUG: Начинаю загрузку рынков...")
+            repository.getNtiMarkets()
+                .onSuccess {
+                    println("### VM_DEBUG: Успешно получено ${it.size} рынков")
+                    availableMarkets = it
+                }
+                .onFailure {
+                    println("### VM_DEBUG: ОШИБКА загрузки: ${it.message}")
+                    errorMessage = it.message
+                }
         }
     }
 
@@ -40,8 +51,13 @@ class AddStreamViewModel(
     }
 
     fun createStream(onSuccess: () -> Unit) {
-        if (name.isBlank() || startDate.isBlank() || endDate.isBlank()) {
+        if (name.isBlank() || startDate.isBlank() || endDate.isBlank() || trackStartDate.isBlank()) {
             errorMessage = "Заполните обязательные поля"
+            return
+        }
+
+        if (meetingsCount == 0) {
+            errorMessage = "Выберите количество встреч"
             return
         }
 
@@ -55,8 +71,8 @@ class AddStreamViewModel(
                 endDate = endDate,
                 ntiMarketIds = selectedMarketIds.toList(),
                 description = "Новый поток",
-                trackStartDate = startDate,
-                meetingsCount = 0
+                trackStartDate = trackStartDate,
+                meetingsCount = meetingsCount
             )
 
             repository.createStream(request)

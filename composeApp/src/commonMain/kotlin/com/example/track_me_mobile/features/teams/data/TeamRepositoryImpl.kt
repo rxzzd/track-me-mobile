@@ -134,9 +134,10 @@ class TeamRepositoryImpl(
         ntiMarkets               = ntiMarkets.map { NtiMarket(it.id, it.name, it.displayName) },
         readinessLevel           = readinessLevel,
         averageGrade             = averageGrade,
-        stream                   = streams.firstOrNull()?.let { Stream(it.id, it.name, it.description, it.active) },
+        stream                   = streams.firstOrNull()?.let { Stream(it.id, it.name, it.description, it.active, it.startDate, it.endDate) },
         meetingsCount            = meetingsCount,
         meetingsCompletedCount   = meetingsCompletedCount,
-        meetingsNotHappenedCount = meetingsNotHappenedCount
+        meetingsNotHappenedCount = meetingsNotHappenedCount,
+        teamsCount               = null
     )
 }

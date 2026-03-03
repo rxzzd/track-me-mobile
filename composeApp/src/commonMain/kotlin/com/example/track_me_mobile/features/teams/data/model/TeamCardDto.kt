@@ -13,6 +13,8 @@ data class NtiMarketDto(
 data class StreamDto(
     val id: String,
     val name: String,
+    val startDate: String? = null,
+    val endDate: String? = null,
     val description: String,
     val active: Boolean
 )
