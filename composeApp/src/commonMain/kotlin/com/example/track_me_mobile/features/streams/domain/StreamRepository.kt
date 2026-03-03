@@ -15,6 +15,13 @@ interface StreamRepository {
     suspend fun getNtiMarkets(): Result<List<NtiMarket>>
 
     suspend fun createStream(request: StreamCreateRequest): Result<Stream>
+
+    suspend fun getStream(id: String): Result<Stream>
+
+    suspend fun updateStream(id: String, request: StreamCreateRequest): Result<Stream>
+
+    suspend fun uploadStreamImage(id: String, bytes: ByteArray): Result<Unit>
+    suspend fun deleteStream(streamId: String): Result<Unit>
 }
 
 data class StreamPage(

@@ -35,7 +35,8 @@ fun StreamCard(
     markets: String = "Рынки НТИ:",
     trl: String = "TRL:",
     flow: String = "Поток:",
-    onClick: () -> Unit = {},
+    onCardClick: () -> Unit = {},
+    onEditClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val montserratFamily = FontFamily(
@@ -58,7 +59,7 @@ fun StreamCard(
             )
             .width(328.dp)
             .heightIn(min = 165.dp)
-            .clickable(onClick = onClick),
+            .clickable(onClick = onCardClick),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color.White
@@ -145,7 +146,7 @@ fun StreamCard(
             }
 
             Text(
-                text = "Отчет",
+                text = "Редактировать",
                 fontSize = 12.sp,
                 color = Color(0xFF8338EB),
                 fontFamily = interFamily,
@@ -153,6 +154,7 @@ fun StreamCard(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(bottom = 13.dp, end = 20.dp)
+                    .clickable(onClick = onEditClick)
             )
         }
     }

@@ -20,7 +20,6 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.example.track_me_mobile.features.profile.presentation.UserProfileScreen
 import com.example.track_me_mobile.core.ui.components.MainTopHeader
-import com.example.track_me_mobile.features.streams.presentation.components.SearchBar
 import com.example.track_me_mobile.features.users.presentation.components.TrackerItem
 import com.example.track_me_mobile.core.ui.theme.TrackMePurple
 import com.example.track_me_mobile.core.ui.theme.TrackMePurpleLight

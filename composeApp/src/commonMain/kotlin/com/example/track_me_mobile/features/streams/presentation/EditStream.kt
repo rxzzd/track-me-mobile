@@ -38,6 +38,7 @@ import com.example.track_me_mobile.features.streams.presentation.components.AddS
 import com.example.track_me_mobile.features.streams.presentation.components.DateInputField
 import com.example.track_me_mobile.features.streams.presentation.components.StreamButton
 import com.example.track_me_mobile.features.streams.presentation.components.StreamNameInput
+import com.example.track_me_mobile.features.streams.domain.models.NtiMarket
 import org.jetbrains.compose.resources.Font
 import com.example.track_me_mobile.generated.resources.Mulish_SemiBold
 import com.example.track_me_mobile.generated.resources.Res
@@ -195,7 +196,13 @@ fun EditStreamPage() {
 
                     Spacer(modifier = Modifier.height(9.dp))
 
-                    AddStreamMarket()
+                    AddStreamMarket(
+                        viewModel = object : StreamMarketState {
+                            override var availableMarkets: List<NtiMarket> = emptyList()
+                            override var selectedMarketIds: Set<String> = emptySet()
+                            override fun toggleMarket(id: String) {}
+                        }
+                    )
 
                     Spacer(modifier = Modifier.height(20.dp))
 

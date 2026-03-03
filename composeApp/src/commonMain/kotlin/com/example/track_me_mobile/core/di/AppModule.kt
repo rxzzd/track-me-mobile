@@ -22,6 +22,7 @@ import com.example.track_me_mobile.features.profile.presentation.UserProfileView
 import com.example.track_me_mobile.features.streams.data.StreamRepositoryImpl
 import com.example.track_me_mobile.features.streams.domain.StreamRepository
 import com.example.track_me_mobile.features.streams.presentation.AddStreamViewModel
+import com.example.track_me_mobile.features.streams.presentation.EditStreamViewModel
 import com.example.track_me_mobile.features.streams.presentation.StreamListViewModel
 import com.example.track_me_mobile.features.users.presentation.TrackerListViewModel
 import com.example.track_me_mobile.features.users.data.UsersRepositoryImpl
@@ -42,10 +43,11 @@ val appModule = module {
 
     
 
-    // Profile
+    // Streams
     single<StreamRepository> { StreamRepositoryImpl(get()) }
     factory { StreamListViewModel(get()) }
     factory { AddStreamViewModel(get()) }
+    factory { (streamId: String) -> EditStreamViewModel(get(), streamId) }
     single<ProfileRepository> { ProfileRepositoryImpl(get()) }
     factory { ProfileViewModel(get()) }
 
@@ -58,10 +60,6 @@ val appModule = module {
     single<UsersRepository> { UsersRepositoryImpl(get()) }
     factory { TrackerListViewModel(get()) }
     factory { AdminListViewModel(get()) }
-
-    // Streams
-    single<StreamRepository> { StreamRepositoryImpl(get()) }
-    factory { StreamListViewModel(get()) }
 
     // Teams
     single<TeamRepository> { TeamRepositoryImpl(get(), get()) }  // HttpClient, UserInfoHolder
