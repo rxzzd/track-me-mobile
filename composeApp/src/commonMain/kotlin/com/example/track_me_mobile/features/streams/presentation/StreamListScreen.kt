@@ -21,6 +21,7 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import com.example.track_me_mobile.core.ui.components.MainTopHeader
 import com.example.track_me_mobile.core.ui.utils.NavigationRefreshEffect
 import com.example.track_me_mobile.features.streams.presentation.components.*
+import com.example.track_me_mobile.features.teams.presentation.TeamListScreen
 
 class StreamListScreen : Screen {
 
@@ -143,11 +144,10 @@ private fun StreamListContent(viewModel: StreamListViewModel) {
                             markets = "Рынки НТИ: ${stream.ntiMarkets.joinToString { it.displayName }}",
                             trl = "Дата начала: ${stream.startDate}",
                             flow = "Дата конца: ${stream.endDate}",
-                            onCardClick = {},
+                            onClick = { navigator.push(TeamListScreen(streamId = stream.name)) },
                             onEditClick = {
                                 navigator.push(EditStreamScreen(streamId = stream.id))
                             }
-                            onClick = { navigator.push(TeamListScreen(streamId = stream.name)) }
                         )
                     }
                     if (viewModel.isLoadingMore) {

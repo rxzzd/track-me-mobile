@@ -37,7 +37,8 @@ fun StreamCard(
     flow: String = "Поток:",
     onCardClick: () -> Unit = {},
     onEditClick: () -> Unit = {},
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: Any
 ) {
     val montserratFamily = FontFamily(
         Font(Res.font.Montserrat_Regular, FontWeight.Normal),

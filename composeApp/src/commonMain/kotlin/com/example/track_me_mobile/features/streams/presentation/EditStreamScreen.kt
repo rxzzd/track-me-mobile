@@ -9,7 +9,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -48,7 +47,13 @@ class EditStreamScreen(
 
         EditStreamPageContent(
             viewModel = viewModel,
-            onBack = { navigator.pop() }
+            onBack = { navigator.pop() },
+            onTeamClick = { teamId ->
+                // Навигация на экран команды через InfoTeamLevel
+                navigator.push(
+                    com.example.track_me_mobile.features.team_card.presentation.InfoTeamLevel(teamId)
+                )
+            }
         )
     }
 }
@@ -56,7 +61,8 @@ class EditStreamScreen(
 @Composable
 fun EditStreamPageContent(
     viewModel: EditStreamViewModel,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onTeamClick: (String) -> Unit
 ) {
     val mulishFamily = FontFamily(
         Font(Res.font.Mulish_SemiBold, FontWeight.SemiBold)
@@ -233,7 +239,7 @@ fun EditStreamPageContent(
                 viewModel.errorMessage?.let { error ->
                     Text(
                         text = error,
-                        color = Color(0xFFD32F2F), // Красный цвет для ошибки
+                        color = Color(0xFFD32F2F),
                         fontSize = 14.sp,
                         fontFamily = mulishFamily,
                         fontWeight = FontWeight.SemiBold,
@@ -258,9 +264,9 @@ fun EditStreamPageContent(
                         .width(140.dp)
                         .height(35.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFE57373) // Тот самый красный из Swagger
+                        containerColor = Color(0xFFE57373)
                     ),
-                    shape = RoundedCornerShape(20.dp) // Тот же радиус, что у сохранения
+                    shape = RoundedCornerShape(20.dp)
                 ) {
                     Text(
                         text = "Удалить",
@@ -275,6 +281,7 @@ fun EditStreamPageContent(
             }
         }
 
+        // Диалог подтверждения удаления
         if (showDeleteDialog) {
             DeleteConfirmationDialog(
                 onDismiss = { showDeleteDialog = false },
@@ -283,6 +290,18 @@ fun EditStreamPageContent(
                     viewModel.deleteStream(onSuccess = onBack)
                 },
                 mulishFamily = mulishFamily
+            )
+        }
+
+        // НОВЫЙ ДИАЛОГ: Ошибка с командами
+        if (viewModel.showTeamsConflictDialog) {
+            StreamWithTeamsErrorDialog(
+                teams = viewModel.teamsInStream,
+                onDismiss = { viewModel.dismissTeamsDialog() },
+                onTeamClick = { teamId ->
+                    viewModel.dismissTeamsDialog()
+                    onTeamClick(teamId)
+                }
             )
         }
     }

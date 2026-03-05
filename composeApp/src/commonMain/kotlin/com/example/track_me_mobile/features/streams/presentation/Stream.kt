@@ -99,31 +99,6 @@ fun StreamPage() {
                     }
                     Spacer(modifier = Modifier.height(31.dp))
 
-
-                    StreamCard(
-                        title = "Название потока",
-                        markets = "Рынки НТИ:",
-                        trl = "TRL:",
-                        flow = "Поток:"
-                    )
-                    StreamCard(
-                        title = "Название потока",
-                        markets = "Рынки НТИ:",
-                        trl = "TRL:",
-                        flow = "Поток:"
-                    )
-                    StreamCard(
-                        title = "Название потока",
-                        markets = "Рынки НТИ:",
-                        trl = "TRL:",
-                        flow = "Поток:"
-                    )
-                    StreamCard(
-                        title = "Название потока",
-                        markets = "Рынки НТИ:",
-                        trl = "TRL:",
-                        flow = "Поток:"
-                    )
                 }
                 FilterPopUp(
                     showWindow = showFilterPopUp,

@@ -21,7 +21,10 @@ interface StreamRepository {
     suspend fun updateStream(id: String, request: StreamCreateRequest): Result<Stream>
 
     suspend fun uploadStreamImage(id: String, bytes: ByteArray): Result<Unit>
+
     suspend fun deleteStream(streamId: String): Result<Unit>
+
+    suspend fun getTeamsByStream(streamId: String): Result<List<com.example.track_me_mobile.features.teams.domain.models.TeamCard>>
 }
 
 data class StreamPage(

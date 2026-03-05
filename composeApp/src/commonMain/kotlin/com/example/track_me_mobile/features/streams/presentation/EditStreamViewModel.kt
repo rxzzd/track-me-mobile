@@ -5,9 +5,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import com.example.track_me_mobile.features.streams.data.StreamHasTeamsException
 import com.example.track_me_mobile.features.streams.domain.StreamRepository
 import com.example.track_me_mobile.features.streams.domain.models.NtiMarket
 import com.example.track_me_mobile.features.streams.domain.models.StreamCreateRequest
+import com.example.track_me_mobile.features.teams.domain.models.TeamCard
 import kotlinx.coroutines.launch
 
 class EditStreamViewModel(
@@ -28,6 +30,13 @@ class EditStreamViewModel(
         private set
 
     var errorMessage by mutableStateOf<String?>(null)
+        private set
+
+    // НОВОЕ: Состояние для диалога с командами
+    var showTeamsConflictDialog by mutableStateOf(false)
+        private set
+
+    var teamsInStream by mutableStateOf<List<TeamCard>>(emptyList())
         private set
 
     init {
@@ -104,7 +113,6 @@ class EditStreamViewModel(
                 .onFailure { exception ->
                     val rawError = exception.message ?: ""
 
-                    // Проверяем текст ошибки от сервера и выводим понятную фразу
                     errorMessage = if (rawError.contains("trackStartDate: Дата начала трека должна быть в будущем")) {
                         "Дата начала трека должна быть в будущем"
                     } else {
@@ -116,7 +124,6 @@ class EditStreamViewModel(
         }
     }
 
-    // НОВЫЙ МЕТОД: Удаление потока
     fun deleteStream(onSuccess: () -> Unit) {
         screenModelScope.launch {
             isLoading = true
@@ -126,11 +133,34 @@ class EditStreamViewModel(
                 .onSuccess {
                     onSuccess()
                 }
-                .onFailure {
-                    errorMessage = it.message ?: "Не удалось удалить поток"
+                .onFailure { exception ->
+                    if (exception is StreamHasTeamsException) {
+                        // Поток содержит команды - загружаем их и показываем диалог
+                        loadTeamsAndShowDialog()
+                    } else {
+                        errorMessage = exception.message ?: "Не удалось удалить поток"
+                    }
                 }
 
             isLoading = false
         }
+    }
+
+    private fun loadTeamsAndShowDialog() {
+        screenModelScope.launch {
+            repository.getTeamsByStream(streamId)
+                .onSuccess { teams ->
+                    teamsInStream = teams
+                    showTeamsConflictDialog = true
+                }
+                .onFailure {
+                    // Если не удалось загрузить команды, показываем общую ошибку
+                    errorMessage = "В потоке есть команды. Удалите команды перед удалением потока."
+                }
+        }
+    }
+
+    fun dismissTeamsDialog() {
+        showTeamsConflictDialog = false
     }
 }

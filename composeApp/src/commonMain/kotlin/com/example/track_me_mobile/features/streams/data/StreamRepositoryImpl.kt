@@ -5,6 +5,8 @@ import com.example.track_me_mobile.features.streams.data.model.*
 import com.example.track_me_mobile.features.streams.domain.StreamPage
 import com.example.track_me_mobile.features.streams.domain.StreamRepository
 import com.example.track_me_mobile.features.streams.domain.models.*
+import com.example.track_me_mobile.features.teams.data.model.TeamCardDto
+import com.example.track_me_mobile.features.teams.data.model.TeamCardsPageDto
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -51,6 +53,53 @@ class StreamRepositoryImpl(
         } catch (e: Exception) { Result.failure(e) }
     }
 
+    override suspend fun getTeamsByStream(streamId: String): Result<List<com.example.track_me_mobile.features.teams.domain.models.TeamCard>> {
+        return try {
+            val endpoint = "${ApiConstants.BACKEND_BASE}/api/v1/admin/team-cards"
+            println("### TEAMS_BY_STREAM -> URL: $endpoint")
+            println("### TEAMS_BY_STREAM -> Looking for streamId: $streamId")
+
+            val csrfData = getCsrf()
+
+            val response = client.post(endpoint) {
+                contentType(ContentType.Application.Json)
+                header(csrfData.headerName, csrfData.token)
+                header("X-Requested-With", "XMLHttpRequest")
+                setBody(mapOf("filters" to emptyList<Any>()))
+            }
+
+            println("### TEAMS_BY_STREAM <- Status: ${response.status}")
+
+            if (response.status == HttpStatusCode.OK) {
+                val dto = response.body<TeamCardsPageDto>()
+                println("### TEAMS_BY_STREAM <- Total teams: ${dto.content.size}")
+
+                // Детальное логирование для отладки
+                dto.content.forEachIndexed { index, team ->
+                    println("### TEAMS_BY_STREAM Team[$index]: name=${team.name}, streams=${team.streams.map { it.id }}")
+                }
+
+                // Фильтруем команды, которые принадлежат данному потоку
+                val teamsInStream = dto.content
+                    .filter { team ->
+                        val hasStream = team.streams.any { stream -> stream.id == streamId }
+                        println("### TEAMS_BY_STREAM Team '${team.name}' has streamId=$streamId? $hasStream")
+                        hasStream
+                    }
+                    .map { it.toDomainTeamCard() }
+
+                println("### TEAMS_BY_STREAM <- Teams in stream $streamId: ${teamsInStream.size}")
+                Result.success(teamsInStream)
+            } else {
+                Result.failure(Exception("Failed to fetch teams"))
+            }
+        } catch (e: Exception) {
+            println("### TEAMS_BY_STREAM ERROR: ${e.message}")
+            e.printStackTrace()
+            Result.failure(e)
+        }
+    }
+
     override suspend fun deleteStream(streamId: String): Result<Unit> {
         return try {
             val csrfData = getCsrf()
@@ -65,12 +114,29 @@ class StreamRepositoryImpl(
 
             println("### API_LOG (DELETE) <- Status: ${response.status}")
 
-            if (response.status == HttpStatusCode.OK || response.status == HttpStatusCode.NoContent) {
-                Result.success(Unit)
-            } else {
-                val errorBody = response.bodyAsText()
-                println("### API_LOG (DELETE) ERROR BODY: $errorBody")
-                Result.failure(Exception("Delete failed: ${response.status}"))
+            when (response.status) {
+                HttpStatusCode.OK, HttpStatusCode.NoContent -> {
+                    Result.success(Unit)
+                }
+                HttpStatusCode.BadRequest, HttpStatusCode.Conflict -> {
+                    // 400 или 409 - проверяем сообщение об ошибке
+                    val errorBody = response.bodyAsText()
+                    println("### API_LOG (DELETE) ERROR BODY: $errorBody")
+
+                    // Проверяем есть ли foreign key constraint в ошибке
+                    if (errorBody.contains("foreign key constraint", ignoreCase = true) ||
+                        errorBody.contains("fk_streams_team_cards_stream", ignoreCase = true) ||
+                        errorBody.contains("stream_team_card", ignoreCase = true)) {
+                        Result.failure(StreamHasTeamsException("Невозможно удалить поток: в потоке есть команды"))
+                    } else {
+                        Result.failure(Exception("Delete failed: ${response.status}"))
+                    }
+                }
+                else -> {
+                    val errorBody = response.bodyAsText()
+                    println("### API_LOG (DELETE) ERROR BODY: $errorBody")
+                    Result.failure(Exception("Delete failed: ${response.status}"))
+                }
             }
         } catch (e: Exception) {
             println("### API_LOG (DELETE) CRASH: ${e.message}")
@@ -146,4 +212,32 @@ class StreamRepositoryImpl(
     private fun StreamDto.toDomain() = Stream(id, name, startDate, endDate, description, active, trackStartDate, meetingsCount, ntiMarkets.map { NtiMarket(it.id, it.name, it.displayName) })
     private fun StreamPageDto.toDomain() = StreamPage(content.map { it.toDomain() }, page.totalPages, page.totalElements, page.number)
     private fun StreamCreateRequest.toDto() = StreamCreateDto(name, startDate, endDate, ntiMarketIds, description, trackStartDate, meetingsCount)
+
+    private fun TeamCardDto.toDomainTeamCard() = com.example.track_me_mobile.features.teams.domain.models.TeamCard(
+        id = id,
+        name = name,
+        description = description,
+        status = status,
+        username = username,
+        enabled = enabled,
+        ntiMarkets = ntiMarkets.map { com.example.track_me_mobile.features.teams.domain.models.NtiMarket(it.id, it.name, it.displayName) },
+        readinessLevel = readinessLevel,
+        averageGrade = averageGrade,
+        stream = streams.firstOrNull()?.let {
+            com.example.track_me_mobile.features.teams.domain.models.Stream(
+                id = it.id,
+                name = it.name,
+                description = it.description,
+                active = it.active,
+                startDate = it.startDate,
+                endDate = it.endDate
+            )
+        },
+        meetingsCount = meetingsCount,
+        meetingsCompletedCount = meetingsCompletedCount,
+        meetingsNotHappenedCount = meetingsNotHappenedCount
+    )
 }
+
+// Custom exception для случая когда поток содержит команды
+class StreamHasTeamsException(message: String) : Exception(message)
