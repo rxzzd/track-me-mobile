@@ -36,4 +36,14 @@ object ApiConstants {
     const val TEAM_CARD        = "$BACKEND_BASE/api/v1/team-card"        // TRACKER: PATCH/DELETE
     const val TEAM_CARD_ADMIN  = "$BACKEND_BASE/api/v1/admin/team-card"  // ADMIN: PATCH/DELETE
     const val TEAM_CARD_COUNT  = "$BACKEND_BASE/api/v1/team-card/count"
+    // Meeting
+    const val MEETING_BASE_URL = "https://api.trackme.test.startup-poligon.com/meeting/api/v1"
+
+    const val MEETINGS_LIST = "$MEETING_BASE_URL/meetings"
+    const val CREATE_MEETING = "$MEETING_BASE_URL/create-meeting"
+    fun updateMeeting(id: String) = "$MEETING_BASE_URL/update-meeting/$id"
+
+    fun deleteMeeting(id: String) = "$MEETING_BASE_URL/delete-meeting/$id"
+    fun meetingImage(id: String) = "$MEETING_BASE_URL/image/$id"
+
 }

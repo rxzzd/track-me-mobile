@@ -38,7 +38,8 @@ fun App() {
         }
     }
 
-@Composable
-fun StreamsListScreen() {
-    TODO("Not yet implemented")
+    @Composable
+    fun StreamsListScreen() {
+        TODO("Not yet implemented")
+    }
 }

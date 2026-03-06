@@ -22,6 +22,7 @@ import com.example.track_me_mobile.features.team_card.domain.TeamCardRepository
 import com.example.track_me_mobile.features.team_card.presentation.TeamCardViewModel
 import com.example.track_me_mobile.features.team_card.presentation.TeamCreateViewModel
 import com.example.track_me_mobile.features.team_card.presentation.TeamEditViewModel
+import com.example.track_me_mobile.features.team_card.presentation.TeamMeetingsViewModel
 import com.example.track_me_mobile.features.teams.data.TeamRepositoryImpl
 import com.example.track_me_mobile.features.teams.domain.TeamRepository
 import com.example.track_me_mobile.features.teams.presentation.TeamListViewModel
@@ -29,6 +30,9 @@ import com.example.track_me_mobile.features.users.data.UsersRepositoryImpl
 import com.example.track_me_mobile.features.users.domain.UsersRepository
 import com.example.track_me_mobile.features.users.presentation.AdminListViewModel
 import com.example.track_me_mobile.features.users.presentation.TrackerListViewModel
+import com.example.track_me_mobile.features.meetings.data.MeetingRepositoryImpl
+import com.example.track_me_mobile.features.meetings.domain.MeetingRepository
+import com.example.track_me_mobile.features.meetings.presentation.MeetingViewModel
 import org.koin.dsl.module
 
 val appModule = module {
@@ -69,6 +73,19 @@ val appModule = module {
     // ── Team Card ────────────────────────────────────────────────────────────
     single<TeamCardRepository> { TeamCardRepositoryImpl(get(), get()) }
     factory { (teamId: String) -> TeamCardViewModel(teamId, get()) }
-    factory { TeamCreateViewModel(get(), get()) }                          // создание
-    factory { (teamId: String) -> TeamEditViewModel(teamId, get(), get()) } // редактирование
+    factory { TeamCreateViewModel(get(), get()) }
+    factory { (teamId: String) -> TeamEditViewModel(teamId, get(), get()) }
+
+    // ── Meetings ─────────────────────────────────────────────────────────────
+    single<MeetingRepository> { MeetingRepositoryImpl(get()) }
+
+    // TeamMeetingsViewModel - для списка встреч команды (с teamId)
+    factory { (teamId: String) ->
+        TeamMeetingsViewModel(teamId, get())
+    }
+
+    // MeetingViewModel - для конкретной встречи (с meetingId)
+    factory { (meetingId: String, teamCardId: String) ->  // ← ДВА ПАРАМЕТРА
+        MeetingViewModel(get(), meetingId, teamCardId)
+    }
 }

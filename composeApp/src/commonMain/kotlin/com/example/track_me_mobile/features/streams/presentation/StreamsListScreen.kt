@@ -19,8 +19,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import androidx.compose.ui.zIndex
+import com.example.track_me_mobile.core.ui.components.MainTopHeader
 import com.example.track_me_mobile.core.ui.theme.TrackMePurple
-import com.example.track_me_mobile.features.profile.presentation.components.ProfileTopHeader
 import com.example.track_me_mobile.features.streams.presentation.components.*
 
 data class StreamData(val id: Int, val name: String, val tracker: String, val date: String)
@@ -48,7 +48,7 @@ fun StreamsListScreen() {
                 (selectedStreamName == "Все" || stream.name == selectedStreamName)
     }
 
-    Scaffold(topBar = { ProfileTopHeader() }) { paddingValues ->
+    Scaffold(topBar = { MainTopHeader() }) { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues).padding(horizontal = 16.dp)) {
             OutlinedButton(
                 onClick = { },

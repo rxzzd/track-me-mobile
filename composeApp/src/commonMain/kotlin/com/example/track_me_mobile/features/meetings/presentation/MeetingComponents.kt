@@ -16,13 +16,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.track_me_mobile.core.ui.theme.TrackMePurple
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.ImageNotSupported
+import androidx.compose.ui.layout.ContentScale
+import coil3.compose.AsyncImage
 
 @Composable
 fun MeetingInputRow(
     label: String,
     value: String,
     onValueChange: (String) -> Unit,
-    isEnabled: Boolean = true
+    isEnabled: Boolean = true,
+    isMultiline: Boolean = false
 ) {
     Column(modifier = Modifier.padding(vertical = 8.dp)) {
         Text(text = label, color = Color.Gray, fontSize = 13.sp)
@@ -31,10 +36,14 @@ fun MeetingInputRow(
             onValueChange = onValueChange,
             modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
             enabled = isEnabled,
+            singleLine = !isMultiline,
+            minLines = if (isMultiline) 3 else 1,
+            maxLines = if (isMultiline) 5 else 1,
             shape = RoundedCornerShape(15.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = TrackMePurple,
-                unfocusedBorderColor = TrackMePurple
+                unfocusedBorderColor = TrackMePurple,
+                disabledBorderColor = TrackMePurple.copy(alpha = 0.5f)
             )
         )
     }
@@ -77,34 +86,60 @@ fun ScreenshotPickerBlock(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(200.dp) // Чуть увеличил высоту самого окна для баланса
+                .height(200.dp)
                 .clip(RoundedCornerShape(25.dp))
-                .background(Color(0xFFE0E0E0)) // Серое окно
-                .then(if (isEditing) Modifier.clickable { onUploadClick() } else Modifier),
+                .background(Color(0xFFE0E0E0))
+                .then(
+                    if (isEditing) Modifier.clickable { onUploadClick() }
+                    else Modifier
+                ),
             contentAlignment = Alignment.Center
         ) {
-            if (screenshotUri == null) {
+            // ИСПРАВЛЕННАЯ ПРОВЕРКА: проверяем что URL не содержит "null" и не пустой
+            val hasImage = !screenshotUri.isNullOrEmpty() &&
+                    !screenshotUri.contains("/null") &&
+                    screenshotUri.length > 50
+
+            if (hasImage) {
+                // TODO: Отображаем реальное изображение
+                AsyncImage(
+                    model = screenshotUri,
+                    contentDescription = "Скриншот встречи",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Fit,
+                )
+            } else {
+                // Скриншота нет - показываем placeholder
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     if (isEditing) {
                         Icon(
                             imageVector = Icons.Default.AddAPhoto,
                             contentDescription = null,
                             tint = TrackMePurple,
-                            modifier = Modifier.size(100.dp) // ВОТ ТУТ СДЕЛАЛ БОЛЬШЕ (было 40, стало 100)
+                            modifier = Modifier.size(100.dp)
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = "Нажмите, чтобы загрузить",
                             color = TrackMePurple,
-                            fontSize = 15.sp, // Немного увеличил текст
+                            fontSize = 15.sp,
                             fontWeight = FontWeight.Normal
                         )
                     } else {
-                        Text("Скриншот не загружен", color = Color.Gray)
+                        Icon(
+                            imageVector = Icons.Default.Image,
+                            contentDescription = null,
+                            tint = Color.Gray,
+                            modifier = Modifier.size(64.dp)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            "Прикрепить скриншот",
+                            color = Color.Gray,
+                            fontSize = 14.sp
+                        )
                     }
                 }
-            } else {
-                Text("Скриншот прикреплен", color = Color(0xFF6DB371), fontWeight = FontWeight.Bold)
             }
         }
     }
