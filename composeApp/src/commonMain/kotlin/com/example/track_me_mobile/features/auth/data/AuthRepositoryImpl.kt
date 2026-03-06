@@ -73,6 +73,7 @@ class AuthRepositoryImpl(
                     id       = dto.id.orEmpty(),
                     username = dto.username,
                     fullName = dto.fullName,
+                    email = dto.email,
                     roles    = dto.roles.map { mapRole(it) }
                 )
             )

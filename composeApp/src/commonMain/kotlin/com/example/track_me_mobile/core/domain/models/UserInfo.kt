@@ -4,6 +4,7 @@ data class UserInfo(
     val id: String,
     val username: String,
     val fullName: String?,
+    val email: String?,
     val roles: List<Role>
 ) {
     val mainRole: Role

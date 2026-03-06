@@ -96,7 +96,6 @@ fun MainTopHeader() {
 
         list.add(HeaderMenuItem("Выйти", false) {
             viewModel.logout {
-                // Очищаем весь стек и переходим на логин
                 navigator.replaceAll(LoginScreen())
             }
             expanded = false
@@ -112,12 +111,33 @@ fun MainTopHeader() {
             .statusBarsPadding()
             .padding(horizontal = 16.dp)
     ) {
+        // Логотип с обработкой клика
         Row(
-            modifier = Modifier.align(Alignment.BottomStart).padding(bottom = 10.dp),
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(bottom = 10.dp)
+                .clickable {
+                    when (userRole) {
+                        Role.SUPER_ADMIN, Role.ADMIN -> {
+                            // Если текущий экран уже StreamListScreen — ничего не делаем
+                            if (currentScreen !is StreamListScreen) {
+                                navigator.push(StreamListScreen())
+                            }
+                        }
+                        Role.TRACKER -> {
+                            if (currentScreen !is TeamListScreen) {
+                                navigator.push(TeamListScreen())
+                            }
+                        }
+                        else -> { /* Игнорируем для других ролей */ }
+                    }
+                },
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
-                modifier = Modifier.size(32.dp).background(Color.White.copy(alpha = 0.2f), RoundedCornerShape(8.dp)),
+                modifier = Modifier
+                    .size(32.dp)
+                    .background(Color.White.copy(alpha = 0.2f), RoundedCornerShape(8.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Text("T", color = Color.White, fontWeight = FontWeight.Bold)
@@ -126,6 +146,7 @@ fun MainTopHeader() {
             Text("TrackMe", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 22.sp)
         }
 
+        // Кнопка меню (без изменений)
         Box(modifier = Modifier.align(Alignment.BottomEnd).padding(bottom = 4.dp)) {
             IconButton(onClick = { expanded = true }) {
                 Icon(Icons.Default.Menu, null, tint = Color.White, modifier = Modifier.size(32.dp))
@@ -170,9 +191,7 @@ fun MainTopHeader() {
                                             if (item.isSelected) TrackMePurple.copy(alpha = 0.12f)
                                             else Color.Transparent
                                         )
-                                        .clickable {
-                                            item.action()
-                                        }
+                                        .clickable { item.action() }
                                         .padding(vertical = 10.dp),
                                     contentAlignment = Alignment.Center
                                 ) {

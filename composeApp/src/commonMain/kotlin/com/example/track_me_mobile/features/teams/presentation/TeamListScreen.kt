@@ -28,6 +28,7 @@ import com.example.track_me_mobile.core.ui.components.MainTopHeader
 import cafe.adriel.voyager.koin.koinScreenModel
 import com.example.track_me_mobile.core.ui.theme.MontserratFontFamily
 import com.example.track_me_mobile.core.ui.utils.NavigationRefreshEffect
+import com.example.track_me_mobile.features.streams.presentation.components.FeedbackFab
 import com.example.track_me_mobile.features.team_card.presentation.CreateTeamLevel
 import com.example.track_me_mobile.features.team_card.presentation.EditTeamLevel
 import com.example.track_me_mobile.features.team_card.presentation.InfoTeamLevel
@@ -116,7 +117,9 @@ fun TeamListContent(
 
     Scaffold(
         topBar = { MainTopHeader() },
-        containerColor = Color.White
+        containerColor = Color.White,
+        floatingActionButton = { FeedbackFab() },
+        floatingActionButtonPosition = FabPosition.End
     ) { paddingValues ->
 
         PullToRefreshBox(

@@ -22,6 +22,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.example.track_me_mobile.features.streams.presentation.components.FeedbackFab
 
 
 class ProfileScreen : Screen {
@@ -80,7 +81,9 @@ fun ProfileScreenContent(
 ) {
     Scaffold(
         topBar = { MainTopHeader() },
-        containerColor = BackgroundWhite
+        containerColor = BackgroundWhite,
+        floatingActionButton = { FeedbackFab() },
+        floatingActionButtonPosition = FabPosition.End
     ) { paddingValues ->
         Column(
             modifier = Modifier

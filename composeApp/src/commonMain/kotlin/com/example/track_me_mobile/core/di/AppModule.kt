@@ -71,4 +71,12 @@ val appModule = module {
     factory { (teamId: String) -> TeamCardViewModel(teamId, get()) }
     factory { TeamCreateViewModel(get(), get()) }                          // создание
     factory { (teamId: String) -> TeamEditViewModel(teamId, get(), get()) } // редактирование
+
+    // Feedback
+    single<com.example.track_me_mobile.core.feedback.domain.FeedbackRepository> {
+        com.example.track_me_mobile.core.feedback.data.FeedbackRepositoryImpl(get())
+    }
+    factory {
+        com.example.track_me_mobile.core.feedback.presentation.FeedbackViewModel(get(), get())
+    }
 }
