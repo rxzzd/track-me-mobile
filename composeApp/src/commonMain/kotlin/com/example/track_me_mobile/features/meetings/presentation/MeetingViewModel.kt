@@ -150,4 +150,35 @@ class MeetingViewModel(
         }
         return oldIso
     }
+
+    fun uploadImage(imageBytes: ByteArray) {
+        val currentMeeting = meeting ?: run {
+            println("[MeetingVM] Cannot upload image - meeting is null")
+            return
+        }
+
+        screenModelScope.launch {
+            isLoading = true
+            println("[MeetingVM] Uploading image for meeting: $meetingId, size: ${imageBytes.size} bytes")
+
+            repository.uploadImage(meetingId, imageBytes)
+                .onSuccess {
+                    println("[MeetingVM] Image uploaded successfully")
+                    println("[MeetingVM] OLD imageUrl: ${meeting?.imageUrl}")  // ← ДОБАВИТЬ
+
+                    // Перезагружаем встречу чтобы получить новый imageUrl
+                    loadMeetings()
+
+                    // ДОБАВИТЬ: Логируем после перезагрузки
+                    kotlinx.coroutines.delay(500) // Ждем загрузки
+                    println("[MeetingVM] NEW imageUrl: ${meeting?.imageUrl}")  // ← ДОБАВИТЬ
+                }
+                .onFailure { e ->
+                    println("[MeetingVM] Image upload failed: ${e.message}")
+                    errorMessage = "Ошибка загрузки изображения: ${e.message}"
+                }
+
+            isLoading = false
+        }
+    }
 }

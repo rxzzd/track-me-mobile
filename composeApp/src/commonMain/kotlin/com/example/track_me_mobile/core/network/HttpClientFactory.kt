@@ -6,6 +6,7 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.http.ContentType
 import kotlinx.serialization.json.Json
+import io.ktor.client.plugins.logging.*
 
 object HttpClientFactory {
 
@@ -21,6 +22,17 @@ object HttpClientFactory {
                     ignoreUnknownKeys = true
                     isLenient = true
                 }, contentType = ContentType.Any)
+            }
+
+            install(Logging) {
+                logger = object : Logger {
+                    override fun log(message: String) {
+                        if (message.contains("/image/")) {
+                            println("[HTTP-Image] $message")
+                        }
+                    }
+                }
+                level = LogLevel.HEADERS
             }
 
             followRedirects = false

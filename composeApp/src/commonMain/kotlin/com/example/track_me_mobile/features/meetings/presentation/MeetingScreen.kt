@@ -84,6 +84,7 @@ class MeetingScreen(
 
             if (isEditing) {
                 MeetingEditView(
+                    viewModel = viewModel,  // ← ДОБАВИТЬ
                     initialData = data,
                     initialDisplayDate = displayDate,
                     initialTeamStatusUi = teamStatusUi,
@@ -316,6 +317,7 @@ fun MeetingDetailField(label: String, text: String) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MeetingEditView(
+    viewModel: MeetingViewModel,
     initialData: Meeting,
     initialDisplayDate: String,
     initialTeamStatusUi: String,
@@ -323,9 +325,8 @@ fun MeetingEditView(
     onBack: () -> Unit
 ) {
     val imagePicker = rememberImagePicker { imageBytes ->
-        // TODO: Загрузить изображение на сервер
         println("[MeetingEdit] Image selected, size: ${imageBytes.size} bytes")
-        var screenshotUri = "uploaded" // Временно
+        viewModel.uploadImage(imageBytes)
     }
 
     var tasksNext by remember { mutableStateOf(initialData.tasksNextMeeting) }
@@ -333,7 +334,7 @@ fun MeetingEditView(
     var teamStatusUi by remember { mutableStateOf(initialTeamStatusUi) }
     var link by remember { mutableStateOf(initialData.link) }
     var selectedDateText by remember { mutableStateOf(initialDisplayDate) }
-    var screenshotUri by remember { mutableStateOf(initialData.imageUrl) }
+    val screenshotUri = viewModel.meeting?.imageUrl
     var isExpanded by remember { mutableStateOf(false) }
 
     var showDatePicker by remember { mutableStateOf(false) }

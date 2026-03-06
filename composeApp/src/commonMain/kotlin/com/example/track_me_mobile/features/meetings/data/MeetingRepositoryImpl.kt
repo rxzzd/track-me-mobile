@@ -3,6 +3,7 @@ package com.example.track_me_mobile.features.meetings.data
 import com.example.track_me_mobile.core.network.ApiConstants
 import com.example.track_me_mobile.features.auth.data.model.CsrfResponse
 import com.example.track_me_mobile.features.meetings.data.models.MeetingPageDto
+import com.example.track_me_mobile.features.meetings.data.models.MeetingDto
 import com.example.track_me_mobile.features.meetings.data.models.MeetingUpdateRequestDto
 import com.example.track_me_mobile.features.meetings.domain.MeetingRepository
 import com.example.track_me_mobile.features.meetings.domain.models.Meeting
@@ -161,18 +162,23 @@ class MeetingRepositoryImpl(
         currentPage = page.number
     )
 
-    private fun com.example.track_me_mobile.features.meetings.data.models.MeetingDto.toDomain() = Meeting(
-        id = id,
-        teamCardId = teamCardId ?: "",
-        number = number ?: "1",
-        link = link ?: "",
-        startDate = startDate ?: "",
-        teamStatus = teamStatus ?: "OK",
-        status = status ?: "SCHEDULED",
-        tasksCurrentMeeting = tasksCurrentMeeting ?: "",
-        tasksNextMeeting = tasksNextMeeting ?: "",
-        imageUrl = ApiConstants.meetingImage(id) // Формируем URL для загрузки картинки
-    )
+    private fun MeetingDto.toDomain() : Meeting {
+        val imageUrl = ApiConstants.meetingImage(id)
+        println("[MeetingRepo] Mapping meeting ${number}, imageUrl: $imageUrl")
+
+        return Meeting(
+            id = id,
+            teamCardId = teamCardId ?: "",
+            number = number ?: "1",
+            link = link ?: "",
+            startDate = startDate ?: "",
+            teamStatus = teamStatus ?: "OK",
+            status = status ?: "SCHEDULED",
+            tasksCurrentMeeting = tasksCurrentMeeting ?: "",
+            tasksNextMeeting = tasksNextMeeting ?: "",
+            imageUrl = imageUrl
+        )
+}
 
     override suspend fun createMeeting(teamCardId: String, startDateIso: String, number: String): Result<Unit> {
         return try {

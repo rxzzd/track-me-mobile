@@ -7,8 +7,6 @@ import androidx.compose.ui.graphics.Color
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.transitions.SlideTransition
 import org.koin.compose.KoinApplication
-
-// Импорты твоих настроек и ресурсов
 import com.example.track_me_mobile.core.di.appModule
 import com.example.track_me_mobile.core.ui.theme.TrackMeTypography
 import com.example.track_me_mobile.core.ui.theme.TrackMeDeepPurple
@@ -19,27 +17,29 @@ fun App() {
     KoinApplication(application = {
         modules(appModule)
     }) {
-        val trackMeColorScheme = lightColorScheme(
-            primary = TrackMeDeepPurple,
-            background = Color.White,
-            surface = Color.White,
-            onPrimary = Color.White,
-            onBackground = Color.Black,
-            error = Color(0xFFBA1A1A)
-        )
-
-        MaterialTheme(
-            typography = TrackMeTypography(),
-            colorScheme = trackMeColorScheme
-        ) {
-            Navigator(screen = LoginScreen()) { navigator ->
-                SlideTransition(navigator)
-            }
-        }
+        AppContent()
     }
+}
 
-    @Composable
-    fun StreamsListScreen() {
-        TODO("Not yet implemented")
+@Composable
+private fun AppContent() {
+    // Получаем HttpClient из Koi
+
+    val trackMeColorScheme = lightColorScheme(
+        primary = TrackMeDeepPurple,
+        background = Color.White,
+        surface = Color.White,
+        onPrimary = Color.White,
+        onBackground = Color.Black,
+        error = Color(0xFFBA1A1A)
+    )
+
+    MaterialTheme(
+        typography = TrackMeTypography(),
+        colorScheme = trackMeColorScheme
+    ) {
+        Navigator(screen = LoginScreen()) { navigator ->
+            SlideTransition(navigator)
+        }
     }
 }
