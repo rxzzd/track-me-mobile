@@ -62,6 +62,8 @@ class StreamRepositoryImpl(
             val csrfData = getCsrf()
 
             val response = client.post(endpoint) {
+                parameter("page", 0)
+                parameter("size", 100) // Получаем больше команд
                 contentType(ContentType.Application.Json)
                 header(csrfData.headerName, csrfData.token)
                 header("X-Requested-With", "XMLHttpRequest")
@@ -89,6 +91,9 @@ class StreamRepositoryImpl(
                     .map { it.toDomainTeamCard() }
 
                 println("### TEAMS_BY_STREAM <- Teams in stream $streamId: ${teamsInStream.size}")
+
+                // Если не нашли команды через фильтрацию, всё равно возвращаем пустой список
+                // (диалог покажет общее сообщение)
                 Result.success(teamsInStream)
             } else {
                 Result.failure(Exception("Failed to fetch teams"))

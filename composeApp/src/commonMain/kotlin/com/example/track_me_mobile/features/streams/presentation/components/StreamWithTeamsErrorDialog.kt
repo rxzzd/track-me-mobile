@@ -146,12 +146,5 @@ private fun TeamListItem(
                 color = Color.Gray
             )
         }
-
-        Icon(
-            imageVector = Icons.Default.Close,
-            contentDescription = "Go to team",
-            tint = Color(0xFF44069A),
-            modifier = Modifier.size(20.dp)
-        )
     }
 }

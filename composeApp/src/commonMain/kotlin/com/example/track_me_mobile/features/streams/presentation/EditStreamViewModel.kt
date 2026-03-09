@@ -150,11 +150,17 @@ class EditStreamViewModel(
         screenModelScope.launch {
             repository.getTeamsByStream(streamId)
                 .onSuccess { teams ->
-                    teamsInStream = teams
-                    showTeamsConflictDialog = true
+                    if (teams.isEmpty()) {
+                        // Команды есть в БД, но не загрузились через API - показываем общее сообщение
+                        errorMessage = "В потоке есть команды. Удалите команды перед удалением потока."
+                    } else {
+                        // Команды загружены - показываем диалог со списком
+                        teamsInStream = teams
+                        showTeamsConflictDialog = true
+                    }
                 }
                 .onFailure {
-                    // Если не удалось загрузить команды, показываем общую ошибку
+                    // Ошибка загрузки - показываем общее сообщение
                     errorMessage = "В потоке есть команды. Удалите команды перед удалением потока."
                 }
         }

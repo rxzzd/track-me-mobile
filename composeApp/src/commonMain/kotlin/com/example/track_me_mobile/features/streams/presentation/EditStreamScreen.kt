@@ -30,6 +30,7 @@ import org.jetbrains.compose.resources.Font
 import com.example.track_me_mobile.generated.resources.Mulish_SemiBold
 import com.example.track_me_mobile.generated.resources.Res
 import com.example.track_me_mobile.generated.resources.first_pencil
+import com.example.track_me_mobile.generated.resources.arrowback
 import com.example.track_me_mobile.features.streams.domain.StreamRepository
 import com.example.track_me_mobile.generated.resources.montserrat_bold
 import org.koin.compose.koinInject
@@ -78,206 +79,234 @@ fun EditStreamPageContent(
 
     MaterialTheme {
         Scaffold(
-            topBar = { MainTopHeader(onBackClick = onBack) },
+            topBar = { MainTopHeader() },
             containerColor = Color(0xFFF8F3FF)
         ) { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize()
-                    .background(Color(0xFFF8F3FF))
-                    .verticalScroll(rememberScrollState())
-                    .padding(top = 18.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
+            Box(
+                modifier = Modifier.fillMaxSize()
             ) {
-                Text(
-                    text = "Редактирование потока",
-                    fontSize = 32.sp,
-                    color = Color(0xFF44069A),
-                    fontFamily = mulishFamily,
-                    fontWeight = FontWeight.Bold,
-                    lineHeight = 32.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(modifier = Modifier.height(20.dp))
-                AddStreamPhoto()
-                Spacer(modifier = Modifier.height(20.dp))
-
-                // Поле НАЗВАНИЕ
-                Row(
-                    modifier = Modifier.width(rowWidth),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Spacer(modifier = Modifier.width(20.dp))
-
-                    StreamNameInput(
-                        value = viewModel.name,
-                        onValueChange = { viewModel.name = it }
-                    )
-                    EditPencilIcon(isActive = viewModel.name.isNotBlank(), size = globalIconSize)
-                }
-
-                Spacer(modifier = Modifier.height(14.dp))
-
+                // Скроллируемый контент
                 Column(
-                    modifier = Modifier.width(rowWidth),
-                    horizontalAlignment = Alignment.Start
+                    modifier = Modifier
+                        .padding(paddingValues)
+                        .fillMaxSize()
+                        .background(Color(0xFFF8F3FF))
+                        .verticalScroll(rememberScrollState())
+                        .padding(top = 18.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    // Поле НАЧАЛО
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
+                    // Заголовок со стрелкой назад
+                    Box(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                        contentAlignment = Alignment.Center
                     ) {
+                        // Текст по центру
                         Text(
-                            text = "Начало:",
-                            modifier = Modifier.width(labelWidth),
-                            color = Color(0xFF8338EB),
+                            text = "Редактирование потока",
+                            fontSize = 32.sp,
+                            color = Color(0xFF44069A),
                             fontFamily = mulishFamily,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 14.sp
+                            fontWeight = FontWeight.Bold,
+                            lineHeight = 32.sp,
+                            textAlign = TextAlign.Center
                         )
-                        DateInputField(
-                            value = viewModel.startDate,
-                            onValueChange = { viewModel.startDate = it }
-                        )
-                        EditPencilIcon(isActive = viewModel.startDate.isNotBlank(), size = globalIconSize)
-                    }
 
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    // Поле КОНЕЦ
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "Конец:",
-                            modifier = Modifier.width(labelWidth),
-                            color = Color(0xFF8338EB),
-                            fontFamily = mulishFamily,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 14.sp
-                        )
-                        DateInputField(
-                            value = viewModel.endDate,
-                            onValueChange = { viewModel.endDate = it }
-                        )
-                        EditPencilIcon(isActive = viewModel.endDate.isNotBlank(), size = globalIconSize)
-                    }
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    // Поле ТРЕКШЕН-МИТИНГ
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Column(modifier = Modifier.width(labelWidth)) {
-                            Text(
-                                text = "Дата начала",
-                                color = Color(0xFF8338EB),
-                                fontFamily = mulishFamily,
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 14.sp,
-                                lineHeight = 14.sp
-                            )
-                            Text(
-                                text = "трекшен-митинга:",
-                                color = Color(0xFF8338EB),
-                                fontFamily = mulishFamily,
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 14.sp,
-                                lineHeight = 14.sp
-                            )
-                        }
-                        DateInputField(
-                            value = viewModel.trackStartDate,
-                            onValueChange = { viewModel.trackStartDate = it }
-                        )
-                        EditPencilIcon(isActive = viewModel.trackStartDate.isNotBlank(), size = globalIconSize)
+                        // Стрелка слева от текста
+//                        Row(
+//                            modifier = Modifier
+//                                .fillMaxWidth(),
+//                            horizontalArrangement = Arrangement.Start,
+//                            verticalAlignment = Alignment.CenterVertically
+//                        ) {
+//                            IconButton(onClick = onBack) {
+//                                Icon(
+//                                    painter = painterResource(Res.drawable.arrowback),
+//                                    contentDescription = "Back",
+//                                    tint = Color(0xFF8338EB),
+//                                    modifier = Modifier.size(24.dp)
+//                                )
+//                            }
+//                        }
                     }
 
                     Spacer(modifier = Modifier.height(20.dp))
+                    AddStreamPhoto()
+                    Spacer(modifier = Modifier.height(20.dp))
 
-                    Text(
-                        text = "Количество встреч:",
-                        color = Color(0xFF8338EB),
-                        fontFamily = mulishFamily,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 14.sp,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-
+                    // Поле НАЗВАНИЕ
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
+                        modifier = Modifier.width(rowWidth),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Spacer(modifier = Modifier.size(globalIconSize))
+                        Spacer(modifier = Modifier.width(20.dp))
 
-                        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                            MeetingsCountDropdown(
-                                value = viewModel.meetingsCount,
-                                onValueChange = { viewModel.meetingsCount = it }
+                        StreamNameInput(
+                            value = viewModel.name,
+                            onValueChange = { viewModel.name = it }
+                        )
+                        EditPencilIcon(isActive = viewModel.name.isNotBlank(), size = globalIconSize)
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    Column(
+                        modifier = Modifier.width(rowWidth),
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        // Поле НАЧАЛО
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = "Начало:",
+                                modifier = Modifier.width(labelWidth),
+                                color = Color(0xFF8338EB),
+                                fontFamily = mulishFamily,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 14.sp
                             )
+                            DateInputField(
+                                value = viewModel.startDate,
+                                onValueChange = { viewModel.startDate = it }
+                            )
+                            EditPencilIcon(isActive = viewModel.startDate.isNotBlank(), size = globalIconSize)
                         }
 
-                        EditPencilIcon(isActive = viewModel.meetingsCount > 0, size = globalIconSize)
+                        Spacer(modifier = Modifier.height(14.dp))
+
+                        // Поле КОНЕЦ
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = "Конец:",
+                                modifier = Modifier.width(labelWidth),
+                                color = Color(0xFF8338EB),
+                                fontFamily = mulishFamily,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 14.sp
+                            )
+                            DateInputField(
+                                value = viewModel.endDate,
+                                onValueChange = { viewModel.endDate = it }
+                            )
+                            EditPencilIcon(isActive = viewModel.endDate.isNotBlank(), size = globalIconSize)
+                        }
+
+                        Spacer(modifier = Modifier.height(14.dp))
+
+                        // Поле ТРЕКШЕН-МИТИНГ
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column(modifier = Modifier.width(labelWidth)) {
+                                Text(
+                                    text = "Дата начала",
+                                    color = Color(0xFF8338EB),
+                                    fontFamily = mulishFamily,
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 14.sp,
+                                    lineHeight = 14.sp
+                                )
+                                Text(
+                                    text = "трекшен-митинга:",
+                                    color = Color(0xFF8338EB),
+                                    fontFamily = mulishFamily,
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 14.sp,
+                                    lineHeight = 14.sp
+                                )
+                            }
+                            DateInputField(
+                                value = viewModel.trackStartDate,
+                                onValueChange = { viewModel.trackStartDate = it }
+                            )
+                            EditPencilIcon(isActive = viewModel.trackStartDate.isNotBlank(), size = globalIconSize)
+                        }
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        Text(
+                            text = "Количество встреч:",
+                            color = Color(0xFF8338EB),
+                            fontFamily = mulishFamily,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 14.sp,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Spacer(modifier = Modifier.size(globalIconSize))
+
+                            Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                                MeetingsCountDropdown(
+                                    value = viewModel.meetingsCount,
+                                    onValueChange = { viewModel.meetingsCount = it }
+                                )
+                            }
+
+                            EditPencilIcon(isActive = viewModel.meetingsCount > 0, size = globalIconSize)
+                        }
                     }
-                }
 
-                Spacer(modifier = Modifier.height(24.dp))
-                AddStreamMarket(viewModel = viewModel)
-                Spacer(modifier = Modifier.height(14.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
+                    AddStreamMarket(viewModel = viewModel)
+                    Spacer(modifier = Modifier.height(14.dp))
 
-                viewModel.errorMessage?.let { error ->
-                    Text(
-                        text = error,
-                        color = Color(0xFFD32F2F),
-                        fontSize = 14.sp,
-                        fontFamily = mulishFamily,
-                        fontWeight = FontWeight.SemiBold,
-                        textAlign = TextAlign.Center,
+                    viewModel.errorMessage?.let { error ->
+                        Text(
+                            text = error,
+                            color = Color(0xFFD32F2F),
+                            fontSize = 14.sp,
+                            fontFamily = mulishFamily,
+                            fontWeight = FontWeight.SemiBold,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                        )
+                    }
+
+                    StreamButton(
+                        text = if (viewModel.isLoading) "Сохранение..." else "Сохранить",
+                        onClick = { viewModel.updateStream(onSuccess = onBack) }
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Кнопка удаления
+                    Button(
+                        onClick = { showDeleteDialog = true },
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
-                    )
+                            .width(140.dp)
+                            .height(35.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFE57373)
+                        ),
+                        shape = RoundedCornerShape(20.dp)
+                    ) {
+                        Text(
+                            text = "Удалить",
+                            color = Color.White,
+                            fontSize = 14.sp,
+                            fontFamily = montserratFamily,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(40.dp))
                 }
-
-                StreamButton(
-                    text = if (viewModel.isLoading) "Сохранение..." else "Сохранить",
-                    onClick = { viewModel.updateStream(onSuccess = onBack) }
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Кнопка удаления
-                Button(
-                    onClick = { showDeleteDialog = true },
-                    modifier = Modifier
-                        .width(140.dp)
-                        .height(35.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFE57373)
-                    ),
-                    shape = RoundedCornerShape(20.dp)
-                ) {
-                    Text(
-                        text = "Удалить",
-                        color = Color.White,
-                        fontSize = 14.sp,
-                        fontFamily = montserratFamily,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(40.dp))
             }
         }
 
