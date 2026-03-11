@@ -36,7 +36,8 @@ fun StreamCard(
     trl: String = "TRL:",
     flow: String = "Поток:",
     onClick: () -> Unit = {},
-    modifier: Modifier = Modifier
+    onEditClick: () -> Unit = {},
+    modifier: Modifier = Modifier,
 ) {
     val montserratFamily = FontFamily(
         Font(Res.font.Montserrat_Regular, FontWeight.Normal),
@@ -145,7 +146,7 @@ fun StreamCard(
             }
 
             Text(
-                text = "Отчет",
+                text = "Редактировать",
                 fontSize = 12.sp,
                 color = Color(0xFF8338EB),
                 fontFamily = interFamily,
@@ -153,6 +154,7 @@ fun StreamCard(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(bottom = 13.dp, end = 20.dp)
+                    .clickable(onClick = onEditClick)
             )
         }
     }

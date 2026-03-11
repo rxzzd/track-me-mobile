@@ -151,13 +151,19 @@ private fun TeamInfoContentScreen(
             // ── Рынки НТИ ───────────────────────────────────────────
             Text("Рынки НТИ:", fontSize = 14.sp, color = TextBlack)
             Spacer(Modifier.height(8.dp))
-            Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                maxItemsInEachRow = 3, // Теперь это будет работать правильно
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 if (team.ntiMarkets.isEmpty()) {
                     PurpleChip("—")
                 } else {
                     team.ntiMarkets.forEach { market ->
+                        // Оставляем ТОЛЬКО чип.
+                        // Если PurpleChip принимает Modifier, добавьте .weight(1f)
                         PurpleChip(market.displayName)
-                        Spacer(Modifier.width(8.dp))
                     }
                 }
             }

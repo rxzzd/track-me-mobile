@@ -117,6 +117,44 @@ private fun StreamListContent(
                                 AddBtn(
                                     modifier = Modifier.width(24.dp),
                                     onClick = { navigator.push(AddStreamScreen()) }
+                                CircularProgressIndicator(color = Color(0xFF8338EB))
+                            }
+                        }
+                    }
+                    viewModel.errorMessage?.let { error ->
+                        item(key = "error_message") {
+                            Text(
+                                text = error,
+                                color = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        }
+                    }
+                    itemsIndexed(
+                        items = viewModel.streams,
+                        key = { index, stream -> "${index}_${stream.id}" }
+                    ) { _, stream ->
+                        StreamCard(
+                            streamId = stream.id,
+                            title = stream.name,
+                            markets = "Рынки НТИ: ${stream.ntiMarkets.joinToString { it.displayName }}",
+                            trl = "Дата начала: ${stream.startDate}",
+                            flow = "Дата конца: ${stream.endDate}",
+                            onClick = { navigator.push(TeamListScreen(streamId = stream.name)) },
+                            onEditClick = {
+                                navigator.push(EditStreamScreen(streamId = stream.id))
+                            }
+                        )
+                    }
+                    if (viewModel.isLoadingMore) {
+                        item(key = "loading_more_indicator") {
+                            Box(
+                                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator(
+                                    color = Color(0xFF8338EB),
+                                    modifier = Modifier.size(32.dp)
                                 )
                             }
                             Spacer(modifier = Modifier.height(16.dp))

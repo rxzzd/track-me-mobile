@@ -14,14 +14,14 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.track_me_mobile.features.streams.presentation.AddStreamViewModel
+import com.example.track_me_mobile.features.streams.presentation.StreamMarketState
 import org.jetbrains.compose.resources.Font
 import com.example.track_me_mobile.generated.resources.Res
 import com.example.track_me_mobile.generated.resources.Mulish_SemiBold
 
 @Composable
 fun AddStreamMarket(
-    viewModel: AddStreamViewModel,
+    viewModel: StreamMarketState,
     modifier: Modifier = Modifier
 ) {
     val mulishFamily = FontFamily(

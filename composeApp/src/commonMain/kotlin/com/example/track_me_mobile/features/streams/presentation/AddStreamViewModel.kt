@@ -10,9 +10,15 @@ import com.example.track_me_mobile.features.streams.domain.models.NtiMarket
 import com.example.track_me_mobile.features.streams.domain.models.StreamCreateRequest
 import kotlinx.coroutines.launch
 
+interface StreamMarketState {
+    var availableMarkets: List<NtiMarket>
+    var selectedMarketIds: Set<String>
+    fun toggleMarket(id: String)
+}
+
 class AddStreamViewModel(
     private val repository: StreamRepository
-) : ScreenModel {
+) : ScreenModel, StreamMarketState {
 
     var name by mutableStateOf("")
     var startDate by mutableStateOf("")
@@ -20,8 +26,8 @@ class AddStreamViewModel(
     var trackStartDate by mutableStateOf("") // НОВОЕ ПОЛЕ
     var meetingsCount by mutableStateOf(0)   // НОВОЕ ПОЛЕ
 
-    var availableMarkets by mutableStateOf<List<NtiMarket>>(emptyList())
-    var selectedMarketIds by mutableStateOf<Set<String>>(emptySet())
+    override var availableMarkets by mutableStateOf<List<NtiMarket>>(emptyList())
+    override var selectedMarketIds by mutableStateOf<Set<String>>(emptySet())
 
     var isLoading by mutableStateOf(false)
     var isSuccess by mutableStateOf(false)
@@ -46,7 +52,7 @@ class AddStreamViewModel(
         }
     }
 
-    fun toggleMarket(id: String) {
+    override fun toggleMarket(id: String) {
         selectedMarketIds = if (id in selectedMarketIds) selectedMarketIds - id else selectedMarketIds + id
     }
 

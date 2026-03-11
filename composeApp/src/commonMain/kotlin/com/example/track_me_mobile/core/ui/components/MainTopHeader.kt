@@ -34,7 +34,7 @@ import com.example.track_me_mobile.features.teams.presentation.TeamListScreen
 import org.koin.compose.koinInject
 
 @Composable
-fun MainTopHeader() {
+fun MainTopHeader(onBackClick: () -> Unit = {}) {
     val viewModel: GlobalHeaderViewModel = koinInject()
     val userRole by viewModel.userRole.collectAsState()
 

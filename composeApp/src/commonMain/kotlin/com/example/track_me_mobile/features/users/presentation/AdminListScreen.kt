@@ -22,7 +22,6 @@ import com.example.track_me_mobile.features.profile.presentation.UserProfileScre
 import com.example.track_me_mobile.core.ui.components.MainTopHeader
 import com.example.track_me_mobile.core.ui.utils.NavigationRefreshEffect
 import com.example.track_me_mobile.features.users.presentation.components.AdminItem
-import com.example.track_me_mobile.features.streams.presentation.components.SearchBar
 import com.example.track_me_mobile.core.ui.theme.TrackMePurple
 import com.example.track_me_mobile.core.ui.theme.TrackMePurpleLight
 import com.example.track_me_mobile.features.tracker_list.presentation.components.SearchBar
