@@ -141,13 +141,6 @@ fun TeamListContent(
                     modifier = Modifier.padding(vertical = 16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        painter = painterResource(Res.drawable.arrowback),
-                        contentDescription = null,
-                        tint = PrimaryPurple,
-                        modifier = Modifier.size(24.dp).clickable { navigator.pop() }
-                    )
-                    Spacer(Modifier.width(12.dp))
                     Text(
                         text = "Команды",
                         fontFamily = montserrat,

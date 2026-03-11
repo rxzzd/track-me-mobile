@@ -9,7 +9,7 @@ import com.example.track_me_mobile.features.teams.domain.models.TeamCard
 
 interface TeamCardRepository {
     // Просмотр
-    suspend fun getTeamById(id: String): Result<TeamCard>
+    suspend fun getTeamById(teamId: String): Result<TeamCard>
     suspend fun getTrackerFullName(username: String): Result<String>
 
     // Данные для форм

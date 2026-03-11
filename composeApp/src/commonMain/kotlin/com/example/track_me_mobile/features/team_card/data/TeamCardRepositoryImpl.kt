@@ -27,7 +27,7 @@ class TeamCardRepositoryImpl(
     private val client: HttpClient,
     private val userInfoHolder: UserInfoHolder
 ) : TeamCardRepository {
-
+    private val ssoBase = "https://${ApiConstants.GATEWAY_HOST}/sso"
     private val role get() = userInfoHolder.userInfo?.mainRole ?: Role.TRACKER
     private val isAdmin get() = role == Role.ADMIN || role == Role.SUPER_ADMIN
     private val username get() = userInfoHolder.userInfo?.username ?: "unknown"
@@ -68,18 +68,46 @@ class TeamCardRepositoryImpl(
 
     override suspend fun getTrackerFullName(username: String): Result<String> {
         return try {
-            val csrf = fetchCsrf()
-            val response = client.get("${ApiConstants.USERS_INFO}/$username/info") {
-                header(HttpHeaders.Accept, "application/json")
-                header(csrf.headerName, csrf.token)
-                header("X-Requested-With", "XMLHttpRequest")
+            val role = userInfoHolder.userInfo?.mainRole ?: Role.TRACKER
+            val currentUsername = userInfoHolder.userInfo?.username
+
+            println("[TEAM_CARD_REPO] getTrackerFullName: username=$username, role=$role, current=$currentUsername")
+
+            val fullName = if (role == Role.TRACKER) {
+                // Для трекера используем /account/info (текущий пользователь)
+                println("[TEAM_CARD_REPO] Используем /account/info для трекера")
+                val response = client.get("$ssoBase/api/v1/account/info") {
+                    header(HttpHeaders.Accept, "application/json")
+                }
+
+                if (response.status != HttpStatusCode.OK) {
+                    return Result.failure(Exception("Ошибка загрузки данных пользователя"))
+                }
+
+                val userInfo = response.body<UserInfoDto>()
+                userInfo.fullName ?: "ФИО недоступно"
+
+            } else {
+                // Для админа используем /users/{username}/info
+                println("[TEAM_CARD_REPO] Используем /users/$username/info для админа")
+                val response = client.get("$ssoBase/api/v1/users/$username/info") {
+                    header(HttpHeaders.Accept, "application/json")
+                }
+
+                if (response.status != HttpStatusCode.OK) {
+                    return Result.failure(Exception("Ошибка загрузки данных пользователя"))
+                }
+
+                val userInfo = response.body<UserInfoDto>()
+                userInfo.fullName ?: "ФИО недоступно"
             }
-            if (response.status != HttpStatusCode.OK) {
-                return Result.failure(Exception("Status: ${response.status}"))
-            }
-            val dto = response.body<UserInfoDto>()
-            Result.success(dto.fullName ?: username)
+
+            println("[TEAM_CARD_REPO] ФИО получено: $fullName")
+            Result.success(fullName)
+
         } catch (e: Exception) {
+            println("[TEAM_CARD_REPO] Ошибка получения ФИО: ${e.message}")
+            e.printStackTrace()
             Result.failure(e)
         }
     }
