@@ -31,14 +31,28 @@ import com.example.track_me_mobile.features.users.presentation.TrackerListViewMo
 import com.example.track_me_mobile.features.meetings.data.MeetingRepositoryImpl
 import com.example.track_me_mobile.features.meetings.domain.MeetingRepository
 import com.example.track_me_mobile.features.meetings.presentation.MeetingViewModel
+import com.example.track_me_mobile.features.splash.SplashViewModel
 import org.koin.dsl.module
+import com.example.track_me_mobile.core.storage.PersistentStorage
 
 val appModule = module {
 
     // ── Core ────────────────────────────────────────────────────────────────
-    single { SessionStorage() }
-    single { HttpClientFactory.create(get()) }
+    single { PersistentStorage.create() } // ← ДОБАВИТЬ
+    single { SessionStorage(get()) } // ← ИЗМЕНИТЬ (теперь принимает PersistentStorage)
+
+    single {
+        HttpClientFactory.create(
+            sessionStorage = get(),
+            onUnauthorized = {
+                println("[App] Unauthorized - session cleared")
+            }
+        )
+    }
     single { UserInfoHolder() }
+
+    // ── Splash ──────────────────────────────────────────────────────────────
+    factory { SplashViewModel(get(), get(), get()) }
 
     // ── Auth ────────────────────────────────────────────────────────────────
     single { AuthRepositoryImpl(get(), get()) }

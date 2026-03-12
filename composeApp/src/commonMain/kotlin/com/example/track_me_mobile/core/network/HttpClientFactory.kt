@@ -3,16 +3,24 @@ package com.example.track_me_mobile.core.network
 import io.ktor.client.*
 import io.ktor.client.plugins.cookies.*
 import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
 import kotlinx.serialization.json.Json
 import io.ktor.client.plugins.logging.*
+import io.ktor.client.plugins.observer.ResponseObserver
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 object HttpClientFactory {
 
-    fun create(sessionStorage: SessionStorage): HttpClient {
+    fun create(
+        sessionStorage: SessionStorage,
+        onUnauthorized: (() -> Unit)? = null
+    ): HttpClient {
         return HttpClient {
-            // Плагин сам берёт SESSION из sessionStorage и подставляет в каждый запрос
             install(HttpCookies) {
                 storage = sessionStorage.cookieStorage
             }
@@ -33,6 +41,21 @@ object HttpClientFactory {
                     }
                 }
                 level = LogLevel.HEADERS
+            }
+
+            // Обработка 401 ошибок (refresh_token истёк)
+            install(ResponseObserver) {
+                onResponse { response ->
+                    if (response.status == HttpStatusCode.Unauthorized) {
+                        println("[HTTP] 401 Unauthorized - refresh_token expired, clearing session")
+
+                        // Очищаем сессию в фоновом потоке
+                        CoroutineScope(Dispatchers.Main).launch {
+                            sessionStorage.clear()
+                            onUnauthorized?.invoke()
+                        }
+                    }
+                }
             }
 
             followRedirects = false
