@@ -27,6 +27,16 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.parameter.parametersOf
 import kotlin.time.Clock
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import cafe.adriel.voyager.core.model.screenModelScope
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.request.get
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 
 class MeetingScreen(
     private val meetingId: String,
@@ -103,21 +113,42 @@ class MeetingScreen(
                     onBack = { isEditing = false }
                 )
             } else {
+
+                val currentMeeting = viewModel.meeting ?: data
+
+                val currentTeamStatusUi = when (currentMeeting.teamStatus) {
+                    "WITH_ISSUES" -> "Есть проблемы"
+                    "MANY_ISSUES" -> "Есть большие проблемы"
+                    else -> "Всё ок"
+                }
+                val currentMeetingStatusUi = when (currentMeeting.status) {
+                    "COMPLETED" -> "Состоялась"
+                    "COMPLETED_AS_NOT_HAPPENED" -> "Не состоялась"
+                    else -> "Не указана"
+                }
+                val currentDisplayDate = try {
+                    val instant = Instant.parse(currentMeeting.startDate)
+                    val date = instant.toLocalDateTime(TimeZone.currentSystemDefault()).date
+                    "${date.dayOfMonth.toString().padStart(2, '0')}.${date.monthNumber.toString().padStart(2, '0')}"
+                } catch (e: Exception) {
+                    "01.01"
+                }
+
                 MeetingDetailView(
-                    data = data,
-                    displayDate = displayDate,
-                    teamStatusUi = teamStatusUi,
-                    meetingStatusUi = meetingStatusUi,
+                    data = currentMeeting,
+                    displayDate = currentDisplayDate,
+                    teamStatusUi = currentTeamStatusUi,
+                    meetingStatusUi = currentMeetingStatusUi,
                     onEditClick = { isEditing = true },
                     onBack = { navigator.pop() },
                     onResultChange = { newResUi ->
                         viewModel.updateMeeting(
-                            meetingId = data.id,
-                            tasksNext = data.tasksNextMeeting,
-                            tasksCurrent = data.tasksCurrentMeeting,
-                            teamStatusUI = teamStatusUi,
-                            link = data.link,
-                            uiDate = displayDate,
+                            meetingId =currentMeeting.id,
+                            tasksNext = currentMeeting.tasksNextMeeting,
+                            tasksCurrent = currentMeeting.tasksCurrentMeeting,
+                            teamStatusUI = currentTeamStatusUi,
+                            link = currentMeeting.link,
+                            uiDate = currentDisplayDate,
                             meetingStatusUI = newResUi
                         )
                     }
@@ -324,9 +355,12 @@ fun MeetingEditView(
     onSave: (String, String, String, String, String, String?) -> Unit,
     onBack: () -> Unit
 ) {
+
+    var pendingImageBytes by remember { mutableStateOf<ByteArray?>(null) }
+
     val imagePicker = rememberImagePicker { imageBytes ->
         println("[MeetingEdit] Image selected, size: ${imageBytes.size} bytes")
-        viewModel.uploadImage(imageBytes)
+        pendingImageBytes = imageBytes
     }
 
     var tasksNext by remember { mutableStateOf(initialData.tasksNextMeeting) }
@@ -335,8 +369,10 @@ fun MeetingEditView(
     var link by remember { mutableStateOf(initialData.link) }
     var selectedDateText by remember { mutableStateOf(initialDisplayDate) }
     val screenshotUri = viewModel.meeting?.imageUrl
-    var isExpanded by remember { mutableStateOf(false) }
 
+    val currentImageUrl = viewModel.meeting?.imageUrl
+
+    var isExpanded by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
 
@@ -402,20 +438,214 @@ fun MeetingEditView(
                 }
             }
 
-            ScreenshotPickerBlock(screenshotUri = screenshotUri, isEditing = true, onUploadClick = { imagePicker() })
-
+            ScreenshotPickerBlockWithPreview(
+                screenshotUri = currentImageUrl,
+                pendingImageBytes = pendingImageBytes,
+                isEditing = true,
+                onUploadClick = { imagePicker() }
+            )
             MeetingInputRow("Ссылка на видеовстречу:", link, { link = it }, isEnabled = true)
 
             Spacer(modifier = Modifier.height(32.dp))
             Button(
                 onClick = {
-                    onSave(tasksNext, tasksCurrent, teamStatusUi, link, selectedDateText, screenshotUri)
+                    // Запускаем корутину для последовательной загрузки
+                    viewModel.screenModelScope.launch {
+                        if (pendingImageBytes != null) {
+                            println("[MeetingEdit] Uploading image...")
+                            viewModel.uploadImage(pendingImageBytes!!)
+                            pendingImageBytes = null
+
+                            // Ждем пока загрузится (макс 3 секунды)
+                            var attempts = 0
+                            while (attempts < 30 && viewModel.isLoading) {
+                                delay(100)
+                                attempts++
+                            }
+
+                            // Даем серверу время обработать файл
+                            println("[MeetingEdit] Waiting for server processing...")
+                            delay(2000) // ← ДОБАВИТЬ ЗАДЕРЖКУ 2 секунды
+                        }
+
+                        // Теперь сохраняем остальные данные и выходим
+                        onSave(tasksNext, tasksCurrent, teamStatusUi, link, selectedDateText, currentImageUrl)
+                    }
                 },
                 modifier = Modifier.fillMaxWidth().height(60.dp),
+                enabled = !viewModel.isLoading, // ← БЛОКИРУЕМ во время загрузки
                 colors = ButtonDefaults.buttonColors(containerColor = TrackMePurple),
                 shape = RoundedCornerShape(16.dp)
-            ) { Text("Сохранить изменения", color = Color.White, fontWeight = FontWeight.Bold) }
+            ) {
+                if (viewModel.isLoading) {
+                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                } else {
+                    Text("Сохранить изменения", color = Color.White, fontWeight = FontWeight.Bold)
+                }
+            }
             Spacer(modifier = Modifier.height(40.dp))
+        }
+    }
+}
+
+@Composable
+fun ScreenshotPickerBlockWithPreview(
+    screenshotUri: String?,
+    pendingImageBytes: ByteArray?,
+    isEditing: Boolean,
+    onUploadClick: () -> Unit
+) {
+    Column(modifier = Modifier.padding(vertical = 12.dp)) {
+        Text(
+            text = "Скриншот встречи:",
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Medium,
+            color = Color.Black
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        val hasImage = !screenshotUri.isNullOrEmpty() &&
+                !screenshotUri.contains("/null") &&
+                screenshotUri.length > 50
+
+        val serverImageBitmap = remember(screenshotUri) { mutableStateOf<ImageBitmap?>(null) }
+        val previewImageBitmap = remember(pendingImageBytes) { mutableStateOf<ImageBitmap?>(null) }
+        val isLoading = remember { mutableStateOf(false) }
+        val hasError = remember { mutableStateOf(false) }
+        val showFullScreen = remember { mutableStateOf(false) }
+
+        val httpClient = koinInject<HttpClient>()
+
+        // Загружаем изображение с сервера
+        if (hasImage && pendingImageBytes == null) {
+            LaunchedEffect(screenshotUri) {
+                try {
+                    isLoading.value = true
+                    hasError.value = false
+                    val url: String = screenshotUri
+                    val response: HttpResponse = httpClient.get(url)
+                    val bytes: ByteArray = response.body()
+                    serverImageBitmap.value = loadImageBitmap(bytes)
+                    isLoading.value = false
+                } catch (e: Exception) {
+                    println("[Screenshot] Load failed: ${e.message}")
+                    hasError.value = true
+                    isLoading.value = false
+                }
+            }
+        }
+
+        // Конвертируем pending image в preview
+        LaunchedEffect(pendingImageBytes) {
+            if (pendingImageBytes != null) {
+                previewImageBitmap.value = loadImageBitmap(pendingImageBytes)
+            } else {
+                previewImageBitmap.value = null
+            }
+        }
+
+        // Определяем какое изображение показывать
+        val displayBitmap: ImageBitmap? = previewImageBitmap.value ?: serverImageBitmap.value
+
+        // АДАПТИВНЫЙ КОНТЕЙНЕР
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .then(
+                    if (displayBitmap != null) {
+                        Modifier.wrapContentHeight()
+                    } else {
+                        Modifier.height(200.dp)
+                    }
+                )
+                .clip(RoundedCornerShape(25.dp))
+                .then(
+                    if (displayBitmap == null) {
+                        Modifier.background(Color(0xFFE0E0E0))
+                    } else {
+                        Modifier
+                    }
+                )
+                .clickable {
+                    if (isEditing) {
+                        onUploadClick()
+                    } else if (displayBitmap != null) {
+                        showFullScreen.value = true
+                    }
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            when {
+                isLoading.value -> {
+                    CircularProgressIndicator(color = TrackMePurple)
+                }
+                hasError.value -> {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            imageVector = Icons.Default.ImageNotSupported,
+                            contentDescription = null,
+                            tint = Color.Gray,
+                            modifier = Modifier.size(64.dp)
+                        )
+                        Text("Не удалось загрузить", color = Color.Gray, fontSize = 14.sp)
+                    }
+                }
+                displayBitmap != null -> {
+                    Box {
+                        Image(
+                            bitmap = displayBitmap,
+                            contentDescription = "Скриншот встречи",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .wrapContentHeight(),
+                            contentScale = ContentScale.FillWidth
+                        )
+
+                        // Badge если это preview
+                        if (previewImageBitmap.value != null) {
+                            Surface(
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .padding(8.dp),
+                                color = Color(0xFF4CAF50),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text(
+                                    "Новое фото",
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                                    color = Color.White,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+                }
+                else -> {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            imageVector = Icons.Default.AddAPhoto,
+                            contentDescription = null,
+                            tint = TrackMePurple,
+                            modifier = Modifier.size(100.dp)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Нажмите, чтобы загрузить",
+                            color = TrackMePurple,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Normal
+                        )
+                    }
+                }
+            }
+        }
+
+        if (showFullScreen.value && displayBitmap != null) {
+            FullScreenImageViewer(
+                imageBitmap = displayBitmap,
+                onDismiss = { showFullScreen.value = false }
+            )
         }
     }
 }

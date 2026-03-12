@@ -12,7 +12,7 @@ class MainActivity : ComponentActivity() {
 
 
         setContent {
-            App() // Просто запускаем наше KMP приложение
+            App()
         }
     }
 }

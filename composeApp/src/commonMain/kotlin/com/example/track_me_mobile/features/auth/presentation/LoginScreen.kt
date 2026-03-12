@@ -28,9 +28,7 @@ class LoginScreen : Screen {
             onLoginClick = {
                 navigator.push(getLoginWebViewScreen())
             },
-            onRegisterClick = {
-                navigator.push(RegistrationScreen())
-            }
+
         )
     }
 }
@@ -40,7 +38,6 @@ fun LoginScreenContent(
     isLoading: Boolean,
     errorMessage: String?,
     onLoginClick: () -> Unit,
-    onRegisterClick: () -> Unit
 ) {
     Surface(modifier = Modifier.fillMaxSize(), color = Color.White) {
         Column(
@@ -74,11 +71,6 @@ fun LoginScreenContent(
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
-
-                TrackMeButton(
-                    text = "Регистрация",
-                    onClick = onRegisterClick
-                )
             }
 
             errorMessage?.let {

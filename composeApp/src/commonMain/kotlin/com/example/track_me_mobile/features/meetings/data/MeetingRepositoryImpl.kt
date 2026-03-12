@@ -14,6 +14,7 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
+import kotlin.time.Clock
 
 class MeetingRepositoryImpl(
     private val client: HttpClient
@@ -163,7 +164,10 @@ class MeetingRepositoryImpl(
     )
 
     private fun MeetingDto.toDomain() : Meeting {
-        val imageUrl = ApiConstants.meetingImage(id)
+
+        val timestamp = Clock.System.now().toEpochMilliseconds()
+        val baseUrl = ApiConstants.meetingImage(id)
+        val imageUrl = "$baseUrl?t=$timestamp"
         println("[MeetingRepo] Mapping meeting ${number}, imageUrl: $imageUrl")
 
         return Meeting(

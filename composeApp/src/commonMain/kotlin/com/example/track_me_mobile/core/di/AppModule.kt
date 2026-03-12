@@ -5,9 +5,7 @@ import com.example.track_me_mobile.core.network.HttpClientFactory
 import com.example.track_me_mobile.core.network.SessionStorage
 import com.example.track_me_mobile.core.ui.components.GlobalHeaderViewModel
 import com.example.track_me_mobile.features.auth.data.AuthRepositoryImpl
-import com.example.track_me_mobile.features.auth.data.RegistrationRepositoryImpl
 import com.example.track_me_mobile.features.auth.domain.AuthRepository
-import com.example.track_me_mobile.features.auth.domain.RegistrationRepository
 import com.example.track_me_mobile.features.auth.presentation.LoginViewModel
 import com.example.track_me_mobile.features.profile.data.ProfileRepositoryImpl
 import com.example.track_me_mobile.features.profile.domain.ProfileRepository
@@ -47,9 +45,6 @@ val appModule = module {
     single<AuthRepository> { get<AuthRepositoryImpl>() }
     factory { LoginViewModel(get(), get(), get()) }
     factory { GlobalHeaderViewModel(get(), get()) }
-
-    // ── Registration ────────────────────────────────────────────────────────
-    single<RegistrationRepository> { RegistrationRepositoryImpl(get()) }
 
     // ── Streams ─────────────────────────────────────────────────────────────
     single<StreamRepository> { StreamRepositoryImpl(get()) }
