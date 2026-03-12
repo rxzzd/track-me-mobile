@@ -20,13 +20,32 @@ import androidx.compose.ui.unit.sp
 import com.example.track_me_mobile.core.ui.theme.TrackMePurple
 
 @Composable
-fun TableCell(text: String, width: Dp, isHeader: Boolean = false) {
-    Text(
-        text = text,
-        modifier = Modifier.width(width).heightIn(min = 44.dp).border(0.5.dp, TrackMePurple).padding(8.dp),
-        fontSize = 12.sp, fontWeight = if (isHeader) FontWeight.Bold else FontWeight.Normal,
-        textAlign = TextAlign.Center, color = Color.Black
-    )
+fun TableCell(
+    text: String,
+    width: Dp,
+    isHeader: Boolean = false,
+    textColor: Color = Color.Black
+) {
+    val bg = if (isHeader) Color(0xFFD1C4E9) else Color.Transparent
+    Box(
+        modifier = Modifier
+            .width(width)
+            .fillMaxHeight()
+            .defaultMinSize(minHeight = 44.dp)
+            .background(bg)
+            .border(0.5.dp, TrackMePurple)
+            .padding(horizontal = 8.dp, vertical = 6.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            fontSize = if (isHeader) 11.sp else 12.sp,
+            fontWeight = if (isHeader) FontWeight.Bold else FontWeight.Normal,
+            textAlign = TextAlign.Center,
+            color = textColor,
+            lineHeight = 14.sp
+        )
+    }
 }
 
 @Composable
