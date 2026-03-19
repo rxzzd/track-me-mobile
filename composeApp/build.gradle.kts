@@ -15,7 +15,7 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-    
+
     listOf(
         iosArm64(),
         iosSimulatorArm64()
@@ -25,7 +25,7 @@ kotlin {
             isStatic = true
         }
     }
-    
+
     sourceSets {
         androidMain.dependencies {
             val voyagerVersion = "1.1.0-beta02"
@@ -39,8 +39,15 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.koin.android)
             implementation(libs.ktor.client.okhttp)
+
+            implementation("io.insert-koin:koin-android:3.5.0")
+            implementation("io.insert-koin:koin-androidx-compose:3.5.0")
         }
         commonMain.dependencies {
+
+            implementation("io.coil-kt.coil3:coil-compose:3.0.0-alpha06")
+            implementation("io.coil-kt.coil3:coil-network-ktor:3.0.0-alpha06")
+
             implementation(libs.compose.webview.multiplatform)
             implementation("net.openid:appauth:0.11.1")
             implementation(libs.ktor.client.core)
@@ -84,7 +91,6 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(compose.materialIconsExtended)
             implementation("org.jetbrains.compose.material:material-icons-extended:1.7.0")
-
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -118,9 +124,11 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    buildToolsVersion = "36.1.0 rc1"
 }
 
 dependencies {
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.6.0")
     debugImplementation(libs.compose.uiTooling)
 }
 

@@ -6,38 +6,33 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.transitions.SlideTransition
-import org.koin.compose.KoinApplication
-
-// Импорты твоих настроек и ресурсов
-import com.example.track_me_mobile.core.di.appModule
 import com.example.track_me_mobile.core.ui.theme.TrackMeTypography
 import com.example.track_me_mobile.core.ui.theme.TrackMeDeepPurple
-import com.example.track_me_mobile.features.auth.presentation.LoginScreen
-
+import com.example.track_me_mobile.features.splash.SplashScreen
 
 @Composable
 fun App() {
-    KoinApplication(application = {
-        modules(appModule)
-    }) {
-        val trackMeColorScheme = lightColorScheme(
-            primary = TrackMeDeepPurple,
-            background = Color.White,
-            surface = Color.White,
-            onPrimary = Color.White,
-            onBackground = Color.Black,
-            error = Color(0xFFBA1A1A)
-        )
+    // Koin уже инициализирован в Application, просто используем
+    AppContent()
+}
 
-        MaterialTheme(
-            typography = TrackMeTypography(),
-            colorScheme = trackMeColorScheme
-        ) {
-            Navigator(screen = LoginScreen()) { navigator ->
-                SlideTransition(navigator)
-            }
+@Composable
+private fun AppContent() {
+    val trackMeColorScheme = lightColorScheme(
+        primary = TrackMeDeepPurple,
+        background = Color.White,
+        surface = Color.White,
+        onPrimary = Color.White,
+        onBackground = Color.Black,
+        error = Color(0xFFBA1A1A)
+    )
 
+    MaterialTheme(
+        typography = TrackMeTypography(),
+        colorScheme = trackMeColorScheme
+    ) {
+        Navigator(screen = SplashScreen()) { navigator ->
+            SlideTransition(navigator)
         }
     }
 }
-

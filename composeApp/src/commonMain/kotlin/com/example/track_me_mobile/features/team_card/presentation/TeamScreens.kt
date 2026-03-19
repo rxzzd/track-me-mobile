@@ -8,6 +8,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import org.koin.core.component.KoinComponent
 import org.koin.core.parameter.parametersOf
+import com.example.track_me_mobile.features.meetings.presentation.MeetingScreen
 
 // ─── Просмотр карточки ────────────────────────────────────────────────────────
 data class InfoTeamLevel(val teamId: String) : Screen {
@@ -21,7 +22,7 @@ data class InfoTeamLevel(val teamId: String) : Screen {
             viewModel       = viewModel,
             onBackClick     = { navigator.pop() },
             onEditClick     = { navigator.push(EditTeamLevel(teamId)) },
-            onMeetingsClick = { /* TODO */ }
+            onMeetingsClick = { navigator.push(MeetingsTeamLevel(teamId)) }
         )
     }
 }
@@ -51,21 +52,27 @@ data class EditTeamLevel(val teamId: String) : Screen {
         TeamEditScreen(
             viewModel    = viewModel,
             onBackClick  = { navigator.pop() },
-            onSaved      = { navigator.pop() },       // возврат → список обновится через isTopScreen
-            onDeactivated = { navigator.popUntilRoot() } // деактивация → уходим на корень
+            onSaved      = { navigator.pop() },
+            onDeactivated = { navigator.popUntilRoot() }
         )
     }
 }
 
-// ─── Встречи ──────────────────────────────────────────────────────────────────
-data class MeetingsTeamLevel(val meetings: List<MeetingData>) : Screen {
+// ─── Встречи команды ──────────────────────────────────────────────────────────
+data class MeetingsTeamLevel(val teamId: String) : Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
+        val viewModel = remember(teamId) {
+            object : KoinComponent {}.getKoin().get<TeamMeetingsViewModel> { parametersOf(teamId) }
+        }
+
         TeamMeetingsScreen(
-            meetings           = meetings,
-            onBackClick        = { navigator.pop() },
-            onPlanMeetingClick = { }
+            viewModel      = viewModel,
+            onBackClick    = { navigator.pop() },
+            onMeetingClick = { meetingId, teamCardId ->  // ← ДВА ПАРАМЕТРА
+                navigator.push(MeetingScreen(meetingId, teamCardId))
+            }
         )
     }
 }

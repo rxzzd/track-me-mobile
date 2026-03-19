@@ -22,6 +22,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
@@ -38,18 +39,20 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.example.track_me_mobile.core.ui.components.MainTopHeader
 import com.example.track_me_mobile.core.ui.theme.*
+import com.example.track_me_mobile.core.utils.ImageUtils
+import com.example.track_me_mobile.features.meetings.presentation.loadImageBitmap
+import com.example.track_me_mobile.features.meetings.presentation.rememberImagePicker
+import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.ImageBitmap
 
 
 class ProfileEditScreen : Screen {
-
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-        // Shared ViewModel — тот же экземпляр, что и в ProfileScreen
         val viewModel = koinScreenModel<ProfileViewModel>()
         val profile = viewModel.profile
 
-        // Пока профиль не загружен — показываем загрузку
         if (profile == null) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(color = TrackMePurple)
@@ -58,13 +61,14 @@ class ProfileEditScreen : Screen {
         }
 
         ProfileEditScreenContent(
-            initialName     = profile.fullName,
-            initialEmail    = profile.email,
-            initialPhone    = profile.phoneNumber ?: "+7",
-            isSaving        = viewModel.isSaving,
-            errorMessage    = viewModel.errorMessage,
-            onSaveComplete  = { name, email, phone ->
-                viewModel.saveProfile(name, email, phone) {
+            initialName = profile.fullName,
+            initialEmail = profile.email,
+            initialPhone = profile.phoneNumber ?: "+7",
+            initialAvatarUrl = profile.avatarUrl,  // ← Добавлено
+            isSaving = viewModel.isSaving,
+            errorMessage = viewModel.errorMessage,
+            onSaveComplete = { name, email, phone, avatarUrl ->
+                viewModel.saveProfile(name, email, phone, avatarUrl) {
                     navigator.pop()
                 }
             },
@@ -78,21 +82,51 @@ fun ProfileEditScreenContent(
     initialName: String,
     initialEmail: String,
     initialPhone: String,
+    initialAvatarUrl: String?,  // ← Новый параметр
     isSaving: Boolean,
     errorMessage: String?,
-    onSaveComplete: (String, String, String) -> Unit,
+    onSaveComplete: (String, String, String, String?) -> Unit,
     onCancel: () -> Unit
 ) {
-    var name     by remember { mutableStateOf(initialName) }
-    var email    by remember { mutableStateOf(initialEmail) }
-    var phone    by remember { mutableStateOf(initialPhone) }
+    var name by remember { mutableStateOf(initialName) }
+    var email by remember { mutableStateOf(initialEmail) }
+    var phone by remember { mutableStateOf(initialPhone) }
+    var avatarDataUri by remember { mutableStateOf(initialAvatarUrl) }
+    var avatarBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
 
-    val isNameValid     = name.trim().split(" ").size >= 2
-    val isEmailValid    = email.contains("@") && email.contains(".")
-    val isPhoneValid    = phone.length == 12
+    var pendingImageBytes by remember { mutableStateOf<ByteArray?>(null) }
 
-    val isChanged = name != initialName || email != initialEmail || phone != initialPhone
-    val canSave   = isNameValid && isEmailValid && isPhoneValid && isChanged && !isSaving
+    val imagePicker = rememberImagePicker { imageBytes ->
+        println("[ProfileEdit] Avatar selected, size: ${imageBytes.size} bytes")
+        val dataUri = ImageUtils.createDataUri(imageBytes)
+        avatarDataUri = dataUri
+        pendingImageBytes = imageBytes  // ← Сохраняем для обработки
+    }
+
+    LaunchedEffect(pendingImageBytes) {
+        pendingImageBytes?.let { bytes ->
+            avatarBitmap = loadImageBitmap(bytes)
+        }
+    }
+
+    // Загружаем существующий аватар
+    LaunchedEffect(initialAvatarUrl) {
+        if (!initialAvatarUrl.isNullOrEmpty()) {
+            ImageUtils.extractBase64(initialAvatarUrl)?.let { bytes ->
+                avatarBitmap = loadImageBitmap(bytes)
+            }
+        }
+    }
+
+    val isNameValid = name.trim().split(" ").size >= 2
+    val isEmailValid = email.contains("@") && email.contains(".")
+    val isPhoneValid = phone.length == 12
+
+    val isChanged = name != initialName ||
+            email != initialEmail ||
+            phone != initialPhone ||
+            avatarDataUri != initialAvatarUrl
+    val canSave = isNameValid && isEmailValid && isPhoneValid && isChanged && !isSaving
 
     Scaffold(
         topBar = { MainTopHeader() },
@@ -109,15 +143,48 @@ fun ProfileEditScreenContent(
             Text("Личный кабинет", fontSize = 32.sp, color = TrackMePurple,
                 modifier = Modifier.padding(bottom = 35.dp))
 
+            // АВАТАР С КНОПКОЙ ЗАГРУЗКИ
             Box(
-                modifier = Modifier.size(180.dp).clip(RoundedCornerShape(20.dp))
+                modifier = Modifier
+                    .size(180.dp)
+                    .clip(RoundedCornerShape(20.dp))
                     .background(TrackMePurpleLight.copy(alpha = 0.3f)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.Person, null, modifier = Modifier.size(120.dp), tint = TrackMePurple)
-                IconButton(onClick = { }, modifier = Modifier.align(Alignment.TopEnd).padding(8.dp)) {
-                    Icon(Icons.Outlined.FileDownload, null, tint = TrackMePurple, modifier = Modifier.size(28.dp))
+                if (avatarBitmap != null) {
+                    Image(
+                        bitmap = avatarBitmap!!,
+                        contentDescription = "Аватар",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        Icons.Default.Person,
+                        null,
+                        modifier = Modifier.size(120.dp),
+                        tint = TrackMePurple
+                    )
                 }
+
+                // Кнопка загрузки поверх
+//                Surface(
+//                    modifier = Modifier
+//                        .align(Alignment.BottomEnd)
+//                        .padding(8.dp)
+//                        .size(40.dp),
+//                    shape = RoundedCornerShape(20.dp),
+//                    color = TrackMePurple
+//                ) {
+//                    IconButton(onClick = { imagePicker() }) {
+//                        Icon(
+//                            Icons.Outlined.FileDownload,
+//                            null,
+//                            tint = Color.White,
+//                            modifier = Modifier.size(24.dp)
+//                        )
+//                    }
+//                }
             }
 
             Spacer(modifier = Modifier.height(15.dp))
@@ -125,38 +192,37 @@ fun ProfileEditScreenContent(
             Spacer(modifier = Modifier.height(25.dp))
 
             ProfileInputRow(
-                value         = name,
+                value = name,
                 onValueChange = { if (it.all { c -> c.isLetter() || c.isWhitespace() }) name = it },
-                isError       = !isNameValid,
-                errorText     = "Введите фамилию и имя"
+                isError = !isNameValid,
+                errorText = "Введите фамилию и имя"
             )
 
             ProfileInputRow(
-                value         = email,
+                value = email,
                 onValueChange = { email = it },
-                isError       = !isEmailValid,
-                errorText     = "Некорректный Email",
-                keyboardType  = KeyboardType.Email
+                isError = !isEmailValid,
+                errorText = "Некорректный Email",
+                keyboardType = KeyboardType.Email
             )
 
             ProfileInputRow(
-                value         = phone,
+                value = phone,
                 onValueChange = { input ->
                     if (input.startsWith("+7")) {
                         val digits = input.substring(2).filter { it.isDigit() }
                         phone = "+7" + digits.take(10)
                     }
                 },
-                isError       = !isPhoneValid,
-                errorText     = "Нужно 10 цифр после +7",
-                keyboardType  = KeyboardType.Phone
+                isError = !isPhoneValid,
+                errorText = "Нужно 10 цифр после +7",
+                keyboardType = KeyboardType.Phone
             )
 
-            // Показываем сетевую ошибку если есть
             errorMessage?.let {
                 Text(
-                    text     = it,
-                    color    = MaterialTheme.colorScheme.error,
+                    text = it,
+                    color = MaterialTheme.colorScheme.error,
                     fontSize = 14.sp,
                     modifier = Modifier.padding(top = 8.dp)
                 )
@@ -168,12 +234,16 @@ fun ProfileEditScreenContent(
                 CircularProgressIndicator(color = TrackMePurple)
             } else {
                 Button(
-                    onClick  = { onSaveComplete(name, email, phone) },
-                    enabled  = canSave,
+                    onClick = {
+                        // Передаем ТОЛЬКО если пользователь загрузил НОВОЕ фото
+                        val newAvatar = if (avatarDataUri != initialAvatarUrl) avatarDataUri else null
+                        onSaveComplete(name, email, phone, newAvatar)
+                    },
+                    enabled = canSave,
                     modifier = Modifier.fillMaxWidth(0.65f).height(46.dp),
-                    shape    = RoundedCornerShape(50),
-                    colors   = ButtonDefaults.buttonColors(
-                        containerColor         = TrackMePurple,
+                    shape = RoundedCornerShape(50),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = TrackMePurple,
                         disabledContainerColor = Color.Gray.copy(alpha = 0.4f)
                     )
                 ) {

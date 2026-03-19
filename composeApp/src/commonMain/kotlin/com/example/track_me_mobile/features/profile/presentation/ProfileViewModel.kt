@@ -54,6 +54,7 @@ class ProfileViewModel(
         fullName: String,
         email: String,
         phoneNumber: String,
+        newAvatarUrl: String? = null,  // ← новый аватар если загрузили
         onSuccess: () -> Unit
     ) {
         screenModelScope.launch {
@@ -61,25 +62,26 @@ class ProfileViewModel(
             errorMessage = null
             saveSuccess = false
 
-            val currentAvatarUrl = profile?.avatarUrl
+            // Если не загрузили новый - берем старый, если старого нет - пустая строка
+            val avatarToSend = newAvatarUrl ?: profile?.avatarUrl ?: ""
 
-            println("PROFILE: Сохранение: name=$fullName, email=$email, phone=$phoneNumber")
+            println("PROFILE: Saving. Avatar: ${if (avatarToSend.isEmpty()) "empty" else "${avatarToSend.length} chars"}")
 
-            repository.updateAccount(fullName, email, phoneNumber, currentAvatarUrl)
+            repository.updateAccount(fullName, email, phoneNumber, avatarToSend)
                 .onSuccess {
-                    println("PROFILE: Успешно сохранено")
+                    println("PROFILE: Saved successfully")
                     profile = profile?.copy(
-                        fullName    = fullName,
-                        email       = email,
-                        phoneNumber = phoneNumber
+                        fullName = fullName,
+                        email = email,
+                        phoneNumber = phoneNumber,
+                        avatarUrl = if (newAvatarUrl != null) newAvatarUrl else profile?.avatarUrl
                     )
                     isSaving = false
                     saveSuccess = true
                     onSuccess()
                 }
                 .onFailure { error ->
-                    println("PROFILE: Ошибка сохранения: ${error.message}")
-                    error.printStackTrace()
+                    println("PROFILE: Save failed: ${error.message}")
                     errorMessage = "Не удалось сохранить изменения"
                     isSaving = false
                 }
