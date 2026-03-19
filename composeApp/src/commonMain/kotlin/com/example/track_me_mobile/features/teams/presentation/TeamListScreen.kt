@@ -35,6 +35,9 @@ import com.example.track_me_mobile.features.team_card.presentation.InfoTeamLevel
 import com.example.track_me_mobile.features.teams.domain.models.TeamCard
 import com.example.track_me_mobile.generated.resources.*
 import org.jetbrains.compose.resources.painterResource
+import org.koin.compose.koinInject
+import com.example.track_me_mobile.core.domain.UserInfoHolder
+import com.example.track_me_mobile.core.domain.models.Role
 
 // ─────────────────────────────────────────────
 // Цвета перенести в core/ui/theme/Color.kt !
@@ -109,6 +112,8 @@ fun TeamListContent(
 ) {
     val navigator = LocalNavigator.currentOrThrow
     val montserrat = MontserratFontFamily()
+    val userInfoHolder = koinInject<UserInfoHolder>()
+    val userRole = userInfoHolder.userInfo?.mainRole
 
     var showFilters by remember { mutableStateOf(false) }
     val selectedMarkets = remember { mutableStateListOf<String>() }
@@ -141,6 +146,19 @@ fun TeamListContent(
                     modifier = Modifier.padding(vertical = 16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // Показываем стрелку только для ADMIN и SUPER_ADMIN
+                    if (userRole == Role.ADMIN || userRole == Role.SUPER_ADMIN) {
+                        Icon(
+                            painter = painterResource(Res.drawable.arrowback),
+                            contentDescription = null,
+                            tint = PrimaryPurple,
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clickable { navigator.pop() }
+                        )
+                        Spacer(Modifier.width(12.dp))
+                    }
+
                     Text(
                         text = "Команды",
                         fontFamily = montserrat,

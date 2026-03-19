@@ -1,19 +1,43 @@
 package com.example.track_me_mobile
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.graphics.Color
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.transitions.SlideTransition
+import org.koin.compose.KoinApplication
+
+// Импорты твоих настроек и ресурсов
+import com.example.track_me_mobile.core.di.appModule
+import com.example.track_me_mobile.core.ui.theme.TrackMeTypography
+import com.example.track_me_mobile.core.ui.theme.TrackMeDeepPurple
 import com.example.track_me_mobile.features.auth.presentation.LoginScreen
-import com.example.track_me_mobile.features.profile.presentation.ProfileEditScreen
-import com.example.track_me_mobile.features.profile.presentation.ProfileScreen
-import com.example.track_me_mobile.features.profile.presentation.ProfileNavigation
+
+
 @Composable
-@Preview
 fun App() {
-    MaterialTheme {
-        // Вызываем навигатор, который сам решит, какой экран показать
-        ProfileNavigation()
+    KoinApplication(application = {
+        modules(appModule)
+    }) {
+        val trackMeColorScheme = lightColorScheme(
+            primary = TrackMeDeepPurple,
+            background = Color.White,
+            surface = Color.White,
+            onPrimary = Color.White,
+            onBackground = Color.Black,
+            error = Color(0xFFBA1A1A)
+        )
+
+        MaterialTheme(
+            typography = TrackMeTypography(),
+            colorScheme = trackMeColorScheme
+        ) {
+            Navigator(screen = LoginScreen()) { navigator ->
+                SlideTransition(navigator)
+            }
+
+        }
     }
 }
+

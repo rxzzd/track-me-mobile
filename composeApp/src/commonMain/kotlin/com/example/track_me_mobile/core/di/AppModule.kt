@@ -83,4 +83,15 @@ val appModule = module {
     factory {
         com.example.track_me_mobile.core.feedback.presentation.FeedbackViewModel(get(), get())
     }
+    // Reports
+    single<com.example.track_me_mobile.features.reports.domain.ReportRepository> {
+        com.example.track_me_mobile.features.reports.data.ReportRepositoryImpl(get())
+    }
+    factory {
+        com.example.track_me_mobile.features.reports.presentation.ReportsViewModel(
+            repository = get(),
+            userInfoHolder = get(),
+            httpClient = get()  // Добавляем HttpClient
+        )
+    }
 }
