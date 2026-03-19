@@ -21,6 +21,9 @@ class StreamListViewModel(
     var streams by mutableStateOf<List<Stream>>(emptyList())
         private set
 
+    var streamImages by mutableStateOf<Map<String, ByteArray?>>(emptyMap())
+        private set
+
     var isLoading by mutableStateOf(false)
         private set
 
@@ -138,6 +141,8 @@ class StreamListViewModel(
             ).onSuccess { page ->
                 val newList = if (reset) page.content else allStreams + page.content
                 allStreams = newList.distinctBy { it.id }
+                val newStreamIds = page.content.map { it.id }
+                loadStreamImages(newStreamIds)
                 applyLocalFilters()
                 hasMore = currentPage + 1 < page.totalPages
                 currentPage++
@@ -188,6 +193,21 @@ class StreamListViewModel(
                 .onFailure {
                     println("### NTI_MARKETS failed to load")
                 }
+        }
+    }
+
+    private fun loadStreamImages(streamIds: List<String>) {
+        streamIds.forEach { streamId ->
+            screenModelScope.launch {
+                repository.getStreamImage(streamId)
+                    .onSuccess { bytes ->
+                        streamImages = streamImages + (streamId to bytes)
+                    }
+                    .onFailure {
+                        println("[StreamList] Failed to load image for $streamId")
+                        streamImages = streamImages + (streamId to null)
+                    }
+            }
         }
     }
 }

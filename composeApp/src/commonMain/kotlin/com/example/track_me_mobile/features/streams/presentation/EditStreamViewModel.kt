@@ -23,6 +23,15 @@ class EditStreamViewModel(
     var trackStartDate by mutableStateOf("")
     var meetingsCount by mutableStateOf(0)
 
+    var streamImageBytes by mutableStateOf<ByteArray?>(null)
+        private set
+
+    var pendingImageBytes by mutableStateOf<ByteArray?>(null)
+        private set
+
+    var isUploadingImage by mutableStateOf(false)
+        private set
+
     override var availableMarkets by mutableStateOf<List<NtiMarket>>(emptyList())
     override var selectedMarketIds by mutableStateOf<Set<String>>(emptySet())
 
@@ -42,6 +51,7 @@ class EditStreamViewModel(
     init {
         loadMarkets()
         loadStream()
+        loadStreamImage()
     }
 
     private fun loadMarkets() {
@@ -164,6 +174,46 @@ class EditStreamViewModel(
                     errorMessage = "В потоке есть команды. Удалите команды перед удалением потока."
                 }
         }
+    }
+
+    private fun loadStreamImage() {
+        screenModelScope.launch {
+            repository.getStreamImage(streamId)
+                .onSuccess { bytes ->
+                    streamImageBytes = bytes
+                }
+                .onFailure {
+                    println("[EditStream] Failed to load image: ${it.message}")
+                }
+        }
+    }
+
+    fun setStreamImage(bytes: ByteArray) {
+        pendingImageBytes = bytes
+    }
+
+    fun uploadStreamImage(onSuccess: () -> Unit = {}) {
+        val bytes = pendingImageBytes ?: return
+
+        screenModelScope.launch {
+            isUploadingImage = true
+
+            repository.uploadStreamImage(streamId, bytes)
+                .onSuccess {
+                    streamImageBytes = bytes
+                    pendingImageBytes = null
+                    onSuccess()
+                }
+                .onFailure {
+                    errorMessage = "Не удалось загрузить фото"
+                }
+
+            isUploadingImage = false
+        }
+    }
+
+    fun clearPendingImage() {
+        pendingImageBytes = null
     }
 
     fun dismissTeamsDialog() {

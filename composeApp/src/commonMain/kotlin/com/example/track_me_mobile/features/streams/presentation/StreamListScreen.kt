@@ -192,6 +192,7 @@ private fun StreamListContent(
                                 markets = "Рынки НТИ: ${stream.ntiMarkets.joinToString { it.displayName }}",
                                 trl = "Дата начала: ${stream.startDate}",
                                 flow = "Дата конца: ${stream.endDate}",
+                                imageBytes = viewModel.streamImages[stream.id],  // ← ДОБАВИТЬ
                                 onClick = { navigator.push(TeamListScreen(streamId = stream.name)) },
                                 onEditClick = {
                                     navigator.push(EditStreamScreen(streamId = stream.id))

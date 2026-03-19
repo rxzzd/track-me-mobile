@@ -35,6 +35,7 @@ import com.example.track_me_mobile.features.streams.domain.StreamRepository
 import com.example.track_me_mobile.generated.resources.montserrat_bold
 import org.koin.compose.koinInject
 import org.jetbrains.compose.resources.painterResource
+import com.example.track_me_mobile.features.meetings.presentation.rememberImagePicker
 
 class EditStreamScreen(
     private val streamId: String
@@ -96,41 +97,55 @@ fun EditStreamPageContent(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     // Заголовок со стрелкой назад
-                    Box(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                        contentAlignment = Alignment.Center
+                    // Заголовок со стрелкой назад
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Текст по центру
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                painter = painterResource(Res.drawable.arrowback),
+                                contentDescription = "Назад",
+                                tint = Color(0xFF8338EB),
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+
                         Text(
                             text = "Редактирование потока",
-                            fontSize = 32.sp,
+                            fontSize = 28.sp,
                             color = Color(0xFF44069A),
                             fontFamily = mulishFamily,
                             fontWeight = FontWeight.Bold,
-                            lineHeight = 32.sp,
-                            textAlign = TextAlign.Center
+                            lineHeight = 28.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.weight(2f)
                         )
 
-                        // Стрелка слева от текста
-//                        Row(
-//                            modifier = Modifier
-//                                .fillMaxWidth(),
-//                            horizontalArrangement = Arrangement.Start,
-//                            verticalAlignment = Alignment.CenterVertically
-//                        ) {
-//                            IconButton(onClick = onBack) {
-//                                Icon(
-//                                    painter = painterResource(Res.drawable.arrowback),
-//                                    contentDescription = "Back",
-//                                    tint = Color(0xFF8338EB),
-//                                    modifier = Modifier.size(24.dp)
-//                                )
-//                            }
-//                        }
+                        Spacer(modifier = Modifier.size(48.dp))
                     }
 
-                    Spacer(modifier = Modifier.height(20.dp))
-                    AddStreamPhoto()
+                    Spacer(modifier = Modifier.size(10.dp))
+
+                    Column(
+                        modifier = Modifier.width(rowWidth),
+                        horizontalAlignment = Alignment.Start
+                    ) {
+
+                        val imagePicker = rememberImagePicker { bytes ->
+                            viewModel.setStreamImage(bytes)
+                        }
+
+                        StreamImagePickerBlock(
+                            existingImageBytes = viewModel.streamImageBytes,
+                            pendingImageBytes = viewModel.pendingImageBytes,
+                            onPickImage = { imagePicker() },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+
                     Spacer(modifier = Modifier.height(20.dp))
 
                     // Поле НАЗВАНИЕ
@@ -279,8 +294,23 @@ fun EditStreamPageContent(
                     }
 
                     StreamButton(
-                        text = if (viewModel.isLoading) "Сохранение..." else "Сохранить",
-                        onClick = { viewModel.updateStream(onSuccess = onBack) }
+                        text = when {
+                            viewModel.isUploadingImage -> "Загрузка фото..."
+                            viewModel.isLoading -> "Сохранение..."
+                            else -> "Сохранить"
+                        },
+                        onClick = {
+                            if (viewModel.pendingImageBytes != null) {
+                                // Сначала загружаем фото
+                                viewModel.uploadStreamImage {
+                                    // Потом обновляем поток
+                                    viewModel.updateStream(onSuccess = onBack)
+                                }
+                            } else {
+                                // Нет нового фото - просто обновляем
+                                viewModel.updateStream(onSuccess = onBack)
+                            }
+                        }
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))

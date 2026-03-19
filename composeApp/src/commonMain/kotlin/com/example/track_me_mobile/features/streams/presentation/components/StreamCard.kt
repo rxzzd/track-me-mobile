@@ -35,6 +35,7 @@ fun StreamCard(
     markets: String = "Рынки НТИ:",
     trl: String = "TRL:",
     flow: String = "Поток:",
+    imageBytes: ByteArray? = null,
     onClick: () -> Unit = {},
     onEditClick: () -> Unit = {},
     modifier: Modifier = Modifier,
@@ -74,19 +75,10 @@ fun StreamCard(
                 verticalAlignment = Alignment.Top,
                 horizontalArrangement = Arrangement.Start
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(width = 110.dp, height = 110.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFFF5F5F5))
-                ) {
-                    Image(
-                        painter = painterResource(Res.drawable.base_stream_photo),
-                        contentDescription = "Base photo",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                }
+                StreamCardImage(
+                    imageBytes = imageBytes,
+                    modifier = Modifier.size(width = 110.dp, height = 110.dp)
+                )
 
                 Spacer(modifier = Modifier.width(12.dp))
 

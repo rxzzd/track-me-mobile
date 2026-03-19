@@ -46,4 +46,7 @@ object ApiConstants {
     fun deleteMeeting(id: String) = "$MEETING_BASE_URL/delete-meeting/$id"
     fun meetingImage(id: String) = "$MEETING_BASE_URL/image/$id"
 
+    fun streamImage(streamId: String) = "$GATEWAY_BASE/backend/api/v1/streams/$streamId/image"
+
+
 }
