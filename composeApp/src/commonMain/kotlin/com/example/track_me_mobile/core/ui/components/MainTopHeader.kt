@@ -29,6 +29,7 @@ import com.example.track_me_mobile.core.navigation.AdminListScreen
 import com.example.track_me_mobile.core.ui.models.HeaderMenuItem
 import com.example.track_me_mobile.core.ui.theme.TrackMePurple
 import com.example.track_me_mobile.features.auth.presentation.LoginScreen
+import com.example.track_me_mobile.features.reports.presentation.ReportsListScreen
 import com.example.track_me_mobile.features.streams.presentation.StreamListScreen
 import com.example.track_me_mobile.features.teams.presentation.TeamListScreen
 import org.koin.compose.koinInject
@@ -73,7 +74,13 @@ fun MainTopHeader(onBackClick: () -> Unit = {}) {
                 list.add(HeaderMenuItem("Все команды", currentScreen is TeamListScreen) {
                     navigate(TeamListScreen())
                 })
-                list.add(HeaderMenuItem("Отчетность", false) { expanded = false })
+                list.add(HeaderMenuItem(
+                    "Отчетность",
+                    currentScreen is ReportsListScreen  // ← Подсветка
+                ) {
+                    expanded = false
+                    navigator.push(ReportsListScreen())
+                })
             }
             Role.ADMIN -> {
                 list.add(HeaderMenuItem("Трекеры", currentScreen is TrackerListScreen) {

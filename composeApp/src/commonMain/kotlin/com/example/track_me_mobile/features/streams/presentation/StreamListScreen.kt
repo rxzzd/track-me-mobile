@@ -119,22 +119,29 @@ private fun StreamListContent(
                             }
                         }
 
-                        item(key = "filter_info") {
-                            Row(
-                                modifier = Modifier
-                                    .width(328.dp)
-                                    .onGloballyPositioned { coordinates ->
-                                        filterInfoBlockBounds.value = coordinates.boundsInRoot()
-                                    },
-                                horizontalArrangement = Arrangement.spacedBy(5.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                FilterInfoBlock("Год(${viewModel.selectedYears.size})")
-                                FilterInfoBlock("Рынки(${viewModel.selectedMarkets.size})")
-                                FilterInfoBlock("TRL(${viewModel.selectedTrls.size})")
-                                Spacer(modifier = Modifier.weight(1f))
+                        // Показываем FilterInfoBlock только когда фильтр открыт
+                        if (showFilterPopUp) {
+                            item(key = "filter_info") {
+                                Row(
+                                    modifier = Modifier
+                                        .width(328.dp)
+                                        .onGloballyPositioned { coordinates ->
+                                            filterInfoBlockBounds.value = coordinates.boundsInRoot()
+                                        },
+                                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    FilterInfoBlock("Год(${viewModel.selectedYears.size})")
+                                    FilterInfoBlock("Рынки(${viewModel.selectedMarkets.size})")
+                                    FilterInfoBlock("TRL(${viewModel.selectedTrls.size})")
+                                    Spacer(modifier = Modifier.weight(1f))
+                                }
+                                Spacer(modifier = Modifier.height(20.dp))
                             }
-                            Spacer(modifier = Modifier.height(20.dp))
+                        } else {
+                            item(key = "filter_info_placeholder") {
+                                Spacer(modifier = Modifier.height(20.dp))
+                            }
                         }
 
                         // Показываем индикатор загрузки только если нет данных и идёт первая загрузка

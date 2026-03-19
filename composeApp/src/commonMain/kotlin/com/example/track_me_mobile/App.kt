@@ -14,6 +14,7 @@ import com.example.track_me_mobile.core.ui.theme.TrackMeTypography
 import com.example.track_me_mobile.core.ui.theme.TrackMeDeepPurple
 import com.example.track_me_mobile.features.auth.presentation.LoginScreen
 
+
 @Composable
 fun App() {
     KoinApplication(application = {
@@ -35,6 +36,8 @@ fun App() {
             Navigator(screen = LoginScreen()) { navigator ->
                 SlideTransition(navigator)
             }
+
         }
     }
 }
+
