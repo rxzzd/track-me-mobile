@@ -23,6 +23,12 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 
+import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import com.example.track_me_mobile.core.utils.ImageUtils
+import com.example.track_me_mobile.features.meetings.presentation.loadImageBitmap
+
 
 class ProfileScreen : Screen {
 
@@ -54,12 +60,12 @@ class ProfileScreen : Screen {
             viewModel.profile != null -> {
                 val p = viewModel.profile!!
                 ProfileScreenContent(
-                    name      = p.fullName,
-                    email     = p.email,
-                    phone     = p.phoneNumber ?: "Не указан",
-                    // telegram пока не приходит с сервера — берём из username как fallback
-                    telegram  = "@${p.username}",
-                    role      = p.roles.firstOrNull() ?: "Пользователь",
+                    name = p.fullName,
+                    email = p.email,
+                    phone = p.phoneNumber ?: "Не указан",
+                    telegram = "@${p.username}",
+                    role = p.roles.firstOrNull() ?: "Пользователь",
+                    avatarUrl = p.avatarUrl,
                     onNavigateToEdit = {
                         navigator.push(ProfileEditScreen())
                     }
@@ -76,8 +82,20 @@ fun ProfileScreenContent(
     phone: String,
     telegram: String,
     role: String,
+    avatarUrl: String?,
     onNavigateToEdit: () -> Unit
 ) {
+    var avatarBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
+
+    // Загружаем аватар если есть
+    LaunchedEffect(avatarUrl) {
+        if (!avatarUrl.isNullOrEmpty()) {
+            ImageUtils.extractBase64(avatarUrl)?.let { bytes ->
+                avatarBitmap = loadImageBitmap(bytes)
+            }
+        }
+    }
+
     Scaffold(
         topBar = { MainTopHeader() },
         containerColor = BackgroundWhite
@@ -97,6 +115,7 @@ fun ProfileScreenContent(
                 modifier = Modifier.padding(bottom = 35.dp)
             )
 
+            // АВАТАР - ЗАМЕНИТЕ ЭТОТ Box
             Box(
                 modifier = Modifier
                     .size(180.dp)
@@ -104,12 +123,21 @@ fun ProfileScreenContent(
                     .background(TrackMePurpleLight.copy(alpha = 0.3f)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = null,
-                    modifier = Modifier.size(120.dp),
-                    tint = TrackMePurple
-                )
+                if (avatarBitmap != null) {
+                    Image(
+                        bitmap = avatarBitmap!!,
+                        contentDescription = "Аватар",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = null,
+                        modifier = Modifier.size(120.dp),
+                        tint = TrackMePurple
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(15.dp))
