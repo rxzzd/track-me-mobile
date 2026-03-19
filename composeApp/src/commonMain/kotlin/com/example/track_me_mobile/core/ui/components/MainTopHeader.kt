@@ -33,6 +33,11 @@ import com.example.track_me_mobile.features.reports.presentation.ReportsListScre
 import com.example.track_me_mobile.features.streams.presentation.StreamListScreen
 import com.example.track_me_mobile.features.teams.presentation.TeamListScreen
 import org.koin.compose.koinInject
+import androidx.compose.foundation.Image
+import androidx.compose.ui.layout.ContentScale
+import com.example.track_me_mobile.generated.resources.Res
+import com.example.track_me_mobile.generated.resources.logo
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun MainTopHeader(onBackClick: () -> Unit = {}) {
@@ -141,14 +146,12 @@ fun MainTopHeader(onBackClick: () -> Unit = {}) {
                 },
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .background(Color.White.copy(alpha = 0.2f), RoundedCornerShape(8.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("T", color = Color.White, fontWeight = FontWeight.Bold)
-            }
+            Image(
+                painter = painterResource(Res.drawable.logo),
+                contentDescription = "TrackMe Logo",
+                modifier = Modifier.size(32.dp),
+                contentScale = ContentScale.Fit
+            )
             Spacer(modifier = Modifier.width(8.dp))
             Text("TrackMe", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 22.sp)
         }
