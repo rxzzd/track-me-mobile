@@ -21,6 +21,9 @@ import androidx.compose.ui.window.PopupProperties
 import androidx.compose.ui.zIndex
 import com.example.track_me_mobile.core.ui.components.MainTopHeader
 import com.example.track_me_mobile.core.ui.theme.TrackMePurple
+import com.example.track_me_mobile.features.reports.presentation.components.CustomHorizontalScrollbar
+import com.example.track_me_mobile.features.reports.presentation.components.CustomVerticalScrollbar
+import com.example.track_me_mobile.features.reports.presentation.components.TableCell
 import com.example.track_me_mobile.features.streams.presentation.components.*
 
 data class StreamData(val id: Int, val name: String, val tracker: String, val date: String)
