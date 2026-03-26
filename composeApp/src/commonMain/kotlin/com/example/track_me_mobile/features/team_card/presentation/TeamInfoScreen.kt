@@ -11,9 +11,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.example.track_me_mobile.core.ui.components.MainTopHeader
 import com.example.track_me_mobile.core.ui.theme.*
 import com.example.track_me_mobile.features.teams.domain.models.TeamCard
+import com.example.track_me_mobile.features.teams.presentation.DarkPurple
+import com.example.track_me_mobile.generated.resources.Res
+import com.example.track_me_mobile.generated.resources.arrowback
+import org.jetbrains.compose.resources.painterResource
+
 @Composable
 fun TeamInfoScreen(
     viewModel: TeamCardViewModel,
@@ -84,6 +91,9 @@ private fun TeamInfoContentScreen(
     onEditClick: () -> Unit,
     onMeetingsClick: () -> Unit
 ) {
+
+    val navigator = LocalNavigator.currentOrThrow
+    val montserrat = MontserratFontFamily()
     val descScrollState = rememberScrollState()
 
     Scaffold(
@@ -98,16 +108,22 @@ private fun TeamInfoContentScreen(
                 .padding(16.dp)
         ) {
 
-            // ── Назад ──────────────────────────────────────────────
-            Text(
-                text = "←",
-                color = TrackMePurple,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.clickable { onBackClick() }
-            )
+            Row(
+                modifier = Modifier.padding(vertical = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Показываем стрелку только для ADMIN и SUPER_ADMIN
 
-            Spacer(Modifier.height(16.dp))
+                Icon(
+                    painter = painterResource(Res.drawable.arrowback),
+                    contentDescription = null,
+                    tint = DarkPurple,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clickable { navigator.pop() }
+                )
+                Spacer(Modifier.width(12.dp))
+            }
 
             // ── Информация о потоке (как на макете) ─────────────────
             InfoTextRow(

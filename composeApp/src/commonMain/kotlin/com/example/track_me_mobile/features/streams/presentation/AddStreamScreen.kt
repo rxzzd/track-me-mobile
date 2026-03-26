@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
@@ -24,6 +25,7 @@ import org.jetbrains.compose.resources.painterResource
 import com.example.track_me_mobile.generated.resources.Mulish_SemiBold
 import com.example.track_me_mobile.generated.resources.Res
 import com.example.track_me_mobile.generated.resources.arrowback
+import com.example.track_me_mobile.features.meetings.presentation.rememberImagePicker
 
 class AddStreamScreen : Screen {
 
@@ -51,8 +53,8 @@ fun AddStreamPageContent(
         Font(Res.font.Mulish_SemiBold, FontWeight.SemiBold)
     )
 
-    val rowWidth = 300.dp
-    val labelWidth = 150.dp
+    val rowWidth = 328.dp
+    val labelWidth = 135.dp
 
     MaterialTheme {
         Scaffold(
@@ -73,62 +75,80 @@ fun AddStreamPageContent(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     // Заголовок со стрелкой назад
-                    Box(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                        contentAlignment = Alignment.Center
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Текст по центру
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                painter = painterResource(Res.drawable.arrowback),
+                                contentDescription = "Назад",
+                                tint = Color(0xFF8338EB),
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+
                         Text(
                             text = "Создание потока",
-                            fontSize = 32.sp,
+                            fontSize = 28.sp,
                             color = Color(0xFF44069A),
                             fontFamily = mulishFamily,
                             fontWeight = FontWeight.Bold,
-                            lineHeight = 32.sp,
+                            lineHeight = 28.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.weight(2f)
                         )
 
-                        // Стрелка слева от текста
-//                        Row(
-//                            modifier = Modifier
-//                                .fillMaxWidth()
-//                                .padding(start = 8.dp),
-//                            horizontalArrangement = Arrangement.Start,
-//                            verticalAlignment = Alignment.CenterVertically
-//                        ) {
-//                            IconButton(onClick = onBack) {
-//                                Icon(
-//                                    painter = painterResource(Res.drawable.arrowback),
-//                                    contentDescription = "Back",
-//                                    tint = Color(0xFF8338EB),
-//                                    modifier = Modifier.size(24.dp)
-//                                )
-//                            }
-//                        }
+                        Spacer(modifier = Modifier.size(48.dp))
+                    }
+
+                    Spacer(modifier = Modifier.size(10.dp))
+
+                    Column(
+                        modifier = Modifier.width(rowWidth),
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        val imagePicker = rememberImagePicker { bytes ->
+                            viewModel.setStreamImage(bytes)
+                        }
+
+                        StreamImagePickerBlock(
+                            existingImageBytes = null,  // Нет существующего фото при создании
+                            pendingImageBytes = viewModel.pendingImageBytes,
+                            onPickImage = { imagePicker() },
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    AddStreamPhoto()
+                    // Поле НАЗВАНИЕ
+                    Row(
+                        modifier = Modifier.width(rowWidth),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Spacer(modifier = Modifier.width(20.dp))
 
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    StreamNameInput(
-                        value = viewModel.name,
-                        onValueChange = { viewModel.name = it }
-                    )
+                        StreamNameInput(
+                            value = viewModel.name,
+                            onValueChange = { viewModel.name = it }
+                        )
+                    }
 
                     Spacer(modifier = Modifier.height(14.dp))
 
                     Column(
-                        modifier = Modifier
-                            .width(rowWidth)
-                            .padding(start = 20.dp),
+                        modifier = Modifier.width(rowWidth),
                         horizontalAlignment = Alignment.Start
                     ) {
-                        // НАЧАЛО ПОТОКА
+                        // Поле НАЧАЛО
                         Row(
-                            modifier = Modifier.fillMaxWidth().wrapContentHeight(),
-                            verticalAlignment = Alignment.CenterVertically
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
                                 text = "Начало:",
@@ -146,10 +166,11 @@ fun AddStreamPageContent(
 
                         Spacer(modifier = Modifier.height(14.dp))
 
-                        // КОНЕЦ ПОТОКА
+                        // Поле КОНЕЦ
                         Row(
-                            modifier = Modifier.fillMaxWidth().wrapContentHeight(),
-                            verticalAlignment = Alignment.CenterVertically
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
                                 text = "Конец:",
@@ -167,10 +188,11 @@ fun AddStreamPageContent(
 
                         Spacer(modifier = Modifier.height(14.dp))
 
-                        // ТРЕКШЕН-МИТИНГ
+                        // Поле ТРЕКШЕН-МИТИНГ
                         Row(
-                            modifier = Modifier.fillMaxWidth().wrapContentHeight(),
-                            verticalAlignment = Alignment.CenterVertically
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Column(modifier = Modifier.width(labelWidth)) {
                                 Text(
@@ -198,7 +220,6 @@ fun AddStreamPageContent(
 
                         Spacer(modifier = Modifier.height(20.dp))
 
-                        // КОЛИЧЕСТВО ВСТРЕЧ
                         Text(
                             text = "Количество встреч:",
                             color = Color(0xFF8338EB),
@@ -208,34 +229,44 @@ fun AddStreamPageContent(
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
 
-                        Box(
+                        Row(
                             modifier = Modifier.fillMaxWidth(),
-                            contentAlignment = Alignment.Center
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
                         ) {
-                            MeetingsCountDropdown(
-                                value = viewModel.meetingsCount,
-                                onValueChange = { viewModel.meetingsCount = it }
-                            )
+                            Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                                MeetingsCountDropdown(
+                                    value = viewModel.meetingsCount,
+                                    onValueChange = { viewModel.meetingsCount = it }
+                                )
+                            }
                         }
                     }
 
                     Spacer(modifier = Modifier.height(24.dp))
-
                     AddStreamMarket(viewModel = viewModel)
-
                     Spacer(modifier = Modifier.height(14.dp))
 
                     viewModel.errorMessage?.let { error ->
                         Text(
                             text = error,
-                            color = Color.Red,
-                            fontSize = 12.sp,
-                            modifier = Modifier.padding(bottom = 8.dp)
+                            color = Color(0xFFD32F2F),
+                            fontSize = 14.sp,
+                            fontFamily = mulishFamily,
+                            fontWeight = FontWeight.SemiBold,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
                         )
                     }
 
                     StreamButton(
-                        text = if (viewModel.isLoading) "Создание..." else "Создать поток",
+                        text = when {
+                            viewModel.isUploadingImage -> "Загрузка фото..."
+                            viewModel.isLoading -> "Создание..."
+                            else -> "Создать поток"
+                        },
                         onClick = { viewModel.createStream(onSuccess = onSuccess) }
                     )
 

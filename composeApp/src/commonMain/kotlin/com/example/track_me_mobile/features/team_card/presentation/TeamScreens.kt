@@ -51,7 +51,6 @@ data class EditTeamLevel(val teamId: String) : Screen {
         }
         TeamEditScreen(
             viewModel    = viewModel,
-            onBackClick  = { navigator.pop() },
             onSaved      = { navigator.pop() },
             onDeactivated = { navigator.popUntilRoot() }
         )

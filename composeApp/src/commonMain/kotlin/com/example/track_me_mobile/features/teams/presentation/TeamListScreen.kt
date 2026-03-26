@@ -141,7 +141,6 @@ fun TeamListContent(
                     .padding(horizontal = 20.dp)
             ) {
 
-                // ── Заголовок ──
                 Row(
                     modifier = Modifier.padding(vertical = 16.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -151,7 +150,7 @@ fun TeamListContent(
                         Icon(
                             painter = painterResource(Res.drawable.arrowback),
                             contentDescription = null,
-                            tint = PrimaryPurple,
+                            tint = DarkPurple,
                             modifier = Modifier
                                 .size(24.dp)
                                 .clickable { navigator.pop() }
@@ -281,7 +280,7 @@ fun TeamListContent(
                     }
                 }
             }
-        } // end PullToRefreshBox
+        }
     }
 
     // ── Диалог фильтров ──

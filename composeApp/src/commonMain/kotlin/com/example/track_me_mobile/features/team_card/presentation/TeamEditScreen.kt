@@ -15,20 +15,26 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.example.track_me_mobile.core.ui.components.MainTopHeader
 import com.example.track_me_mobile.core.ui.theme.*
 import com.example.track_me_mobile.features.team_card.domain.models.TrackerUser
 import com.example.track_me_mobile.features.teams.domain.models.NtiMarket
 import com.example.track_me_mobile.features.teams.domain.models.Stream
+import com.example.track_me_mobile.features.teams.presentation.DarkPurple
+import com.example.track_me_mobile.generated.resources.Res
+import com.example.track_me_mobile.generated.resources.arrowback
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun TeamEditScreen(
     viewModel: TeamEditViewModel,
-    onBackClick: () -> Unit,
     onSaved: () -> Unit,
     onDeactivated: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
+    val navigator = LocalNavigator.currentOrThrow
     var showDeactivateDialog by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -66,8 +72,14 @@ fun TeamEditScreen(
                         .padding(16.dp)
                 ) {
                     // ── Назад ──
-                    Text("←", color = TrackMePurple, fontSize = 24.sp, fontWeight = FontWeight.Bold,
-                        modifier = Modifier.clickable { onBackClick() })
+                    Icon(
+                        painter = painterResource(Res.drawable.arrowback),
+                        contentDescription = null,
+                        tint = DarkPurple,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clickable { navigator.pop() }
+                    )
 
                     Spacer(Modifier.height(20.dp))
 

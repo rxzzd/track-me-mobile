@@ -24,6 +24,14 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
+import com.example.track_me_mobile.core.domain.models.Role
+import com.example.track_me_mobile.features.teams.presentation.DarkPurple
+import com.example.track_me_mobile.features.teams.presentation.PrimaryPurple
+import com.example.track_me_mobile.generated.resources.Res
+import com.example.track_me_mobile.generated.resources.arrowback
+import org.jetbrains.compose.resources.painterResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,6 +40,9 @@ fun TeamMeetingsScreen(
     onBackClick: () -> Unit,
     onMeetingClick: (String, String) -> Unit
 ) {
+    val navigator = LocalNavigator.currentOrThrow
+    val montserrat = MontserratFontFamily()
+
     var showPlanDialog by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
     var selectedDateMillis by remember { mutableStateOf<Long?>(null) }
@@ -56,20 +67,29 @@ fun TeamMeetingsScreen(
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = "←",
-                    color = TrackMePurple,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.clickable { onBackClick() }
+            Row(
+                modifier = Modifier.padding(vertical = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Показываем стрелку только для ADMIN и SUPER_ADMIN
+
+                Icon(
+                    painter = painterResource(Res.drawable.arrowback),
+                    contentDescription = null,
+                    tint = DarkPurple,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clickable { navigator.pop() }
                 )
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(Modifier.width(12.dp))
+
                 Text(
-                    text = "Встречи команды",
+                    text = "Встречи",
+                    fontFamily = montserrat,
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TrackMePurple
+                    color = DarkPurple,
+                    modifier = Modifier.weight(1f)
                 )
             }
 

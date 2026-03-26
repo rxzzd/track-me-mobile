@@ -40,7 +40,7 @@ fun StreamCardImage(
                 bitmap = imageBitmap!!,
                 contentDescription = "Фото потока",
                 modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Inside
+                contentScale = ContentScale.Crop
             )
         } else {
             // Показываем placeholder (base_stream_photo)
@@ -48,7 +48,7 @@ fun StreamCardImage(
                 painter = painterResource(Res.drawable.base_stream_photo),
                 contentDescription = "Фото по умолчанию",
                 modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Fit
+                contentScale = ContentScale.Crop
             )
         }
     }

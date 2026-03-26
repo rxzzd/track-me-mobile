@@ -13,8 +13,14 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.example.track_me_mobile.core.ui.theme.*
 import com.example.track_me_mobile.core.ui.components.MainTopHeader
+import com.example.track_me_mobile.features.teams.presentation.DarkPurple
+import com.example.track_me_mobile.generated.resources.Res
+import com.example.track_me_mobile.generated.resources.arrowback
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun TeamCreateScreen(
@@ -80,6 +86,9 @@ private fun TeamCreateForm(
     onBackClick: () -> Unit,
     onCreated: () -> Unit
 ) {
+
+    val navigator = LocalNavigator.currentOrThrow
+
     Column(
         modifier = Modifier
             .padding(padding)
@@ -88,12 +97,13 @@ private fun TeamCreateForm(
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
-        Text(
-            text = "←",
-            color = TrackMePurple,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.clickable { onBackClick() }
+        Icon(
+            painter = painterResource(Res.drawable.arrowback),
+            contentDescription = null,
+            tint = DarkPurple,
+            modifier = Modifier
+                .size(24.dp)
+                .clickable { navigator.pop() }
         )
 
         Spacer(Modifier.height(24.dp))
