@@ -14,6 +14,18 @@ import androidx.compose.ui.unit.sp
 import com.example.track_me_mobile.core.ui.components.MainTopHeader
 import com.example.track_me_mobile.core.ui.theme.*
 import com.example.track_me_mobile.features.teams.domain.models.TeamCard
+import kotlin.math.roundToInt
+private fun Double.formatTwoDecimals(): String {
+    val rounded = (this * 100.0).roundToInt() / 100.0
+    val parts = rounded.toString().split('.')
+    return if (parts.size == 1) {
+        "${parts[0]}.00"
+    } else {
+        val frac = parts[1].padEnd(2, '0').take(2)
+        "${parts[0]}.$frac"
+    }
+}
+
 @Composable
 fun TeamInfoScreen(
     viewModel: TeamCardViewModel,
@@ -98,14 +110,37 @@ private fun TeamInfoContentScreen(
                 .padding(16.dp)
         ) {
 
-            // ── Назад ──────────────────────────────────────────────
-            Text(
-                text = "←",
-                color = TrackMePurple,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.clickable { onBackClick() }
-            )
+            // ── Назад + рейтинг команды ──────────────────────────────
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "←",
+                    color = TrackMePurple,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.clickable { onBackClick() }
+                )
+
+                team.averageGrade?.let { avg ->
+                    val gradeColor = when {
+                        avg >= 0.51 -> Color(0xB30DB862)
+                        avg >= 0.26 -> Color(0xCCFFC411)
+                        avg >= 0.0  -> Color(0xCCFF1504)
+                        else -> Color(0xFF878685)
+                    }
+                    Text(
+                        text = avg.formatTwoDecimals(),
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .background(gradeColor, RoundedCornerShape(30.dp))
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                    )
+                }
+            }
 
             Spacer(Modifier.height(16.dp))
 
@@ -136,7 +171,7 @@ private fun TeamInfoContentScreen(
             team.averageGrade?.let {
                 InfoTextRow(
                     label    = "Средняя оценка:",
-                    value = (kotlin.math.round(it * 100) / 100.0).toString(),
+                    value    = it.formatTwoDecimals(),
                     isPurple = true
                 )
             }

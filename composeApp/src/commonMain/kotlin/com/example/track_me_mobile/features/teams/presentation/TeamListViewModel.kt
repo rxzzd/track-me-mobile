@@ -45,15 +45,31 @@ class TeamListViewModel(
     fun loadTeams() {
         screenModelScope.launch {
             state = TeamListState.Loading
-            repository.getTeamCards(streamId = streamFilter)
-                .onSuccess { teams ->
-                    allTeams = teams
-                    applyFilters()
+
+            try {
+                val pageSize = 100
+                val accumulated = mutableListOf<TeamCard>()
+                var currentPage = 0
+
+                while (true) {
+                    val result = repository.getTeamCards(streamId = streamFilter, page = currentPage, size = pageSize)
+
+                    val pageTeams = result.getOrElse {
+                        throw it
+                    }
+
+                    accumulated += pageTeams
+
+                    if (pageTeams.size < pageSize) break
+                    currentPage++
                 }
-                .onFailure {
-                    println("[TEAMS_VM] Ошибка: ${it.message}")
-                    state = TeamListState.Error("Не удалось загрузить список команд")
-                }
+
+                allTeams = accumulated
+                applyFilters()
+            } catch (e: Throwable) {
+                println("[TEAMS_VM] Ошибка: ${e.message}")
+                state = TeamListState.Error("Не удалось загрузить список команд")
+            }
         }
     }
 

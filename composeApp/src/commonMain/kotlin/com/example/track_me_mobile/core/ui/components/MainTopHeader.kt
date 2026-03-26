@@ -53,7 +53,8 @@ fun MainTopHeader(onBackClick: () -> Unit = {}) {
         val list = mutableListOf<HeaderMenuItem>()
 
         fun navigate(target: Screen) {
-            if (currentScreen!!::class != target::class) {
+            // Навигируем даже если текущий экран того же класса, но другие параметры (например, переход из потока на все команды)
+            if (currentScreen != target) {
                 navigator.push(target)
             }
             expanded = false

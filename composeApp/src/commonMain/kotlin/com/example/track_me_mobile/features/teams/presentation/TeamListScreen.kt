@@ -15,13 +15,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import cafe.adriel.voyager.core.screen.Screen
+import kotlin.math.roundToInt
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.example.track_me_mobile.core.ui.components.MainTopHeader
@@ -402,6 +405,7 @@ fun FilterDialogContent(
 // ─────────────────────────────────────────────
 // Карточка команды
 // ─────────────────────────────────────────────
+@Preview
 @Composable
 fun TeamCard(team: TeamCard) {
     val montserrat = MontserratFontFamily()
@@ -424,8 +428,42 @@ fun TeamCard(team: TeamCard) {
                     modifier = Modifier
                         .size(110.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFFD9D9D9))
-                )
+                        .background(Color(0xFFF5F5F5))
+                ) {
+                    Image(
+                        painter = painterResource(Res.drawable.base_stream_photo),
+                        contentDescription = "Фото потока",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+
+                // Рейтинг в правом верхнем углу изображения
+                team.averageGrade?.let { avg ->
+                    val gradeColor = when {
+                        avg >= 0.51 -> Color(0xB30DB862) // зелёный
+                        avg >= 0.26 -> Color(0xCCFFC411) // жёлтый
+                        avg >= 0.0  -> Color(0xCCFF1504) // красный
+                        else -> Color(0xFF878685)
+                    }
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .offset(x = -55.dp, y = (11).dp)
+                            .clip(RoundedCornerShape(30.dp))
+                            .background(gradeColor)
+                            .padding(horizontal = 12.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = avg.formatTwoDecimals(),
+                            color = Color.Black,
+                            fontFamily = montserrat,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
                 Box(
                     modifier = Modifier
                         .padding(bottom = 8.dp)
@@ -511,6 +549,17 @@ fun TeamCard(team: TeamCard) {
 // ─────────────────────────────────────────────
 // Checkbox
 // ─────────────────────────────────────────────
+private fun Double.formatTwoDecimals(): String {
+    val rounded = (this * 100.0).roundToInt() / 100.0
+    val parts = rounded.toString().split('.')
+    return if (parts.size == 1) {
+        "${parts[0]}.00"
+    } else {
+        val frac = parts[1].padEnd(2, '0').take(2)
+        "${parts[0]}.$frac"
+    }
+}
+
 @Composable
 fun CustomCheckbox(
     checked: Boolean,
@@ -535,3 +584,4 @@ fun CustomCheckbox(
         }
     }
 }
+
