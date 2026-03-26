@@ -8,13 +8,15 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import com.example.track_me_mobile.features.meetings.domain.MeetingRepository
 import com.example.track_me_mobile.features.meetings.domain.models.Meeting
 import com.example.track_me_mobile.features.meetings.domain.models.MeetingUpdateRequest
+import com.example.track_me_mobile.features.team_card.domain.TeamCardRepository
 import kotlinx.coroutines.launch
 
 class MeetingViewModel(
     private val repository: MeetingRepository,
     private val meetingId: String,
-    private val teamCardId: String  // ← ДОБАВИТЬ
-) : ScreenModel {
+    private val teamCardId: String,
+    private val teamCardRepository: TeamCardRepository,
+    ) : ScreenModel {
 
     var meeting by mutableStateOf<Meeting?>(null)
         private set
@@ -28,7 +30,25 @@ class MeetingViewModel(
     init {
         println("[MeetingVM] init with meetingId=$meetingId, teamCardId=$teamCardId")
         loadMeetings()
+        loadTeamCard()
     }
+
+    var meetingRoomLink by mutableStateOf<String?>(null)
+        private set
+
+    fun loadTeamCard(){
+        screenModelScope.launch {
+            errorMessage = null
+            teamCardRepository.getTeamById(teamCardId)
+                .onSuccess { teamCard ->
+                    meetingRoomLink = teamCard.meetingRoomLink
+                }
+                .onFailure { e ->
+                    println("[MeetingVM] Ошибка загрузки карточки команды: ${e.message}")
+                }
+        }
+    }
+
 
     fun loadMeetings() {
         screenModelScope.launch {

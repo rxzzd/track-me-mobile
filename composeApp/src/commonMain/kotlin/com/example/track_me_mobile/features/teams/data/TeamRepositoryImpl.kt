@@ -127,6 +127,7 @@ class TeamRepositoryImpl(
     private fun com.example.track_me_mobile.features.teams.data.model.TeamCardDto.toDomain() = TeamCard(
         id                       = id,
         name                     = name,
+        meetingRoomLink = meetingRoomLink,
         description              = description,
         status                   = status,
         username                 = username,
@@ -138,6 +139,5 @@ class TeamRepositoryImpl(
         meetingsCount            = meetingsCount,
         meetingsCompletedCount   = meetingsCompletedCount,
         meetingsNotHappenedCount = meetingsNotHappenedCount,
-        teamsCount               = null
     )
 }

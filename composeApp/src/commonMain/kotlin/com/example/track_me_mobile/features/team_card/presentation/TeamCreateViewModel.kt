@@ -24,6 +24,7 @@ data class CreateTeamUiState(
     val ntiMarkets: List<NtiMarket> = emptyList(),
 
     val teamName: String = "",
+    val meetingRoomLink: String = "",
     val description: String = "",
     val selectedTracker: TrackerUser? = null,
     val selectedStream: Stream? = null,
@@ -33,6 +34,7 @@ data class CreateTeamUiState(
     val isTrackerRole: Boolean = false,
 
     val teamNameError: String? = null,
+    val meetingRoomLinkError: String? = null,
     val trackerError: String? = null,
     val streamError: String? = null,
     val marketsError: String? = null,
@@ -123,6 +125,7 @@ class TeamCreateViewModel(
     // ── Обновление полей ───────────────────────────────────────────────────
 
     fun onTeamNameChange(value: String) = _state.update { it.copy(teamName = value, teamNameError = null) }
+    fun onMeetingRoomChange(value: String) = _state.update {it.copy(meetingRoomLink = value, meetingRoomLinkError = null)}
     fun onDescriptionChange(value: String) = _state.update { it.copy(description = value, descriptionError = null) }
     fun onTrackerSelected(tracker: TrackerUser) = _state.update { it.copy(selectedTracker = tracker, trackerError = null) }
     fun onStreamSelected(stream: Stream) = _state.update { it.copy(selectedStream = stream, streamError = null) }
@@ -144,6 +147,7 @@ class TeamCreateViewModel(
             val request = CreateTeamRequest(
                 name            = s.teamName.trim(),
                 description     = s.description.trim(),
+                meetingRoomLink = s.meetingRoomLink.trim(),
                 trackerUsername = s.selectedTracker!!.username,
                 streamId        = s.selectedStream!!.id,
                 ntiMarketIds    = s.selectedMarkets.map { it.id },
@@ -168,6 +172,11 @@ class TeamCreateViewModel(
 
     // ── Валидация ──────────────────────────────────────────────────────────
 
+    fun isLinkRegex(s: String): Boolean {
+        val urlRegex = "^(https?|ftp)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]".toRegex()
+        return urlRegex.matches(s)
+    }
+
     private fun validate(): Boolean {
         val s = _state.value
 
@@ -177,6 +186,7 @@ class TeamCreateViewModel(
             s.teamName.length > 100     -> "Максимум 100 символов"
             else                        -> null
         }
+        val meetingRoomLinkError = if (!isLinkRegex(s.meetingRoomLink) && s.meetingRoomLink.isNotBlank()) "Ссылка должна быть корректной (например https://webinar.tusur.ru/b/...)" else null
         val trackerError     = if (s.selectedTracker == null) "Выберите трекера" else null
         val streamError      = if (s.selectedStream == null) "Выберите поток" else null
         val marketsError     = if (s.selectedMarkets.isEmpty()) "Выберите хотя бы один рынок НТИ" else null
@@ -191,6 +201,7 @@ class TeamCreateViewModel(
         _state.update {
             it.copy(
                 teamNameError    = teamNameError,
+                meetingRoomLinkError = meetingRoomLinkError,
                 trackerError     = trackerError,
                 streamError      = streamError,
                 marketsError     = marketsError,
@@ -199,6 +210,6 @@ class TeamCreateViewModel(
             )
         }
 
-        return listOf(teamNameError, trackerError, streamError, marketsError, trlError, descriptionError).all { it == null }
+        return listOf(teamNameError, meetingRoomLinkError, trackerError, streamError, marketsError, trlError, descriptionError).all { it == null }
     }
 }

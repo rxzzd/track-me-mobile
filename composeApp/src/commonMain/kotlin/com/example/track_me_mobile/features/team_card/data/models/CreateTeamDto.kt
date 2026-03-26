@@ -23,6 +23,7 @@ data class NtiMarketDto(
 @Serializable
 data class CreateTeamRequestDto(
     val name: String,
+    val meetingRoomLink: String,
     val description: String,
     val ntiMarketIds: List<String>,
     val readinessLevel: String

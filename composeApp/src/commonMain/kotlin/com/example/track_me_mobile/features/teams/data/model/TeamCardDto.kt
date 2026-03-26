@@ -23,6 +23,7 @@ data class StreamDto(
 data class TeamCardDto(
     val id: String,
     val name: String,
+    val meetingRoomLink: String,
     val description: String,
     val status: String,
     val username: String,

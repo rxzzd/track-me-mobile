@@ -29,6 +29,7 @@ import kotlin.time.Clock
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalUriHandler
 import cafe.adriel.voyager.core.model.screenModelScope
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -40,7 +41,7 @@ import org.koin.compose.koinInject
 
 class MeetingScreen(
     private val meetingId: String,
-    private val teamCardId: String  // ← ДОБАВИТЬ
+    private val teamCardId: String
 ) : Screen {
 
     @Composable
@@ -139,6 +140,7 @@ class MeetingScreen(
                     displayDate = currentDisplayDate,
                     teamStatusUi = currentTeamStatusUi,
                     meetingStatusUi = currentMeetingStatusUi,
+                    meetingRoomLink = viewModel.meetingRoomLink,
                     onEditClick = { isEditing = true },
                     onBack = { navigator.pop() },
                     onResultChange = { newResUi ->
@@ -186,6 +188,7 @@ fun MeetingDetailView(
     displayDate: String,
     teamStatusUi: String,
     meetingStatusUi: String,
+    meetingRoomLink: String?,
     onEditClick: () -> Unit,
     onBack: () -> Unit,
     onResultChange: (String) -> Unit
@@ -203,9 +206,26 @@ fun MeetingDetailView(
             data.link.isNotBlank()
 
     Scaffold(topBar = { MainTopHeader() }) { paddingValues ->
+        val uriHandler = LocalUriHandler.current
+
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues).padding(horizontal = 24.dp).verticalScroll(rememberScrollState())) {
             Row(modifier = Modifier.padding(top = 16.dp, bottom = 12.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text("Встреча №${data.number}", fontSize = 32.sp, fontWeight = FontWeight.Bold, color = TrackMePurple, modifier = Modifier.weight(1f))
+                if (!meetingRoomLink.isNullOrBlank()) {
+                    IconButton(
+                        onClick = {
+                            try {
+                                uriHandler.openUri(meetingRoomLink)
+                            } catch (e: Exception) {
+                                println("[MeetingScreen] Failed to open link: ${e.message}")
+                            }
+                        }
+                    ) {
+
+                        Icon(Icons.Default.Videocam, null, tint = Color(0xFF6DB371))
+
+                    }
+                }
                 IconButton(onClick = onBack) { Icon(Icons.Default.Close, null, tint = TrackMePurple) }
             }
 
@@ -310,13 +330,14 @@ fun MeetingDetailView(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            Text("Ссылка на видеовстречу:", fontWeight = FontWeight.Medium, color = Color.Black)
+            Text("Запись встречи:", fontWeight = FontWeight.Medium, color = Color.Black)
             Row(modifier = Modifier.padding(top = 8.dp, bottom = 32.dp)) {
                 Surface(modifier = Modifier.weight(1f).height(56.dp).border(1.dp, TrackMePurple, RoundedCornerShape(12.dp)), shape = RoundedCornerShape(12.dp), color = Color.White) {
                     Box(contentAlignment = Alignment.CenterStart, modifier = Modifier.padding(horizontal = 16.dp)) {
                         Text(data.link.ifEmpty { "https://..." }, color = Color.Black, maxLines = 1)
                     }
                 }
+                //иконка видеовстречи
                 Spacer(Modifier.width(12.dp))
                 IconButton(onClick = {}, modifier = Modifier.size(56.dp).background(Color(0xFFD1F3E0), RoundedCornerShape(12.dp))) {
                     Icon(Icons.Default.Videocam, null, tint = Color(0xFF6DB371))

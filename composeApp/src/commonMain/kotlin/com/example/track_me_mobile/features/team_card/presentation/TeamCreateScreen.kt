@@ -129,6 +129,27 @@ private fun TeamCreateForm(
 
         Spacer(Modifier.height(20.dp))
 
+        // ── Название команды ─────────────────────────────────────────────
+        CreateFormField(label = "Ссылка на комнату:", error = state.meetingRoomLinkError) {
+            OutlinedTextField(
+                value         = state.meetingRoomLink,
+                onValueChange = viewModel::onMeetingRoomChange,
+                singleLine    = true,
+                isError       = state.teamNameError != null,
+                placeholder   = { Text("Введите ссылку (пример: https://webinar.tusur.ru/b/...)", color = TextGray, fontSize = 14.sp) },
+                modifier      = Modifier.fillMaxWidth(),
+                shape         = RoundedCornerShape(12.dp),
+                colors        = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor   = TrackMePurple,
+                    unfocusedBorderColor = TrackMePurple.copy(alpha = 0.4f),
+                    errorBorderColor     = Color.Red
+                ),
+                textStyle = TextStyle(fontSize = 14.sp, color = Color.Black)
+            )
+        }
+
+        Spacer(Modifier.height(20.dp))
+
         // ── Трекер ───────────────────────────────────────────────────────
         if (state.isTrackerRole) {
             Row(verticalAlignment = Alignment.CenterVertically) {

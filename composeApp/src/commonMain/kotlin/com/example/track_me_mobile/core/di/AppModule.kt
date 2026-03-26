@@ -120,6 +120,6 @@ val appModule = module {
 
     // MeetingViewModel - для конкретной встречи (с meetingId)
     factory { (meetingId: String, teamCardId: String) ->  // ← ДВА ПАРАМЕТРА
-        MeetingViewModel(get(), meetingId, teamCardId)
+        MeetingViewModel(get(), meetingId, teamCardId, get())
     }
 }

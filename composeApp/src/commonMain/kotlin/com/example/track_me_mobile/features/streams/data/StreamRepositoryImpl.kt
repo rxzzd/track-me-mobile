@@ -286,6 +286,7 @@ class StreamRepositoryImpl(
     private fun TeamCardDto.toDomainTeamCard() = com.example.track_me_mobile.features.teams.domain.models.TeamCard(
         id = id,
         name = name,
+        meetingRoomLink = meetingRoomLink,
         description = description,
         status = status,
         username = username,
@@ -305,7 +306,7 @@ class StreamRepositoryImpl(
         },
         meetingsCount = meetingsCount,
         meetingsCompletedCount = meetingsCompletedCount,
-        meetingsNotHappenedCount = meetingsNotHappenedCount
+        meetingsNotHappenedCount = meetingsNotHappenedCount,
     )
 }
 

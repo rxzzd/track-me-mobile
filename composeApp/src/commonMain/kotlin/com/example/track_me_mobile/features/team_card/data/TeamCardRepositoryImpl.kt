@@ -7,7 +7,6 @@ import com.example.track_me_mobile.features.auth.data.model.CsrfResponse
 import com.example.track_me_mobile.features.auth.data.model.UserInfoDto
 import com.example.track_me_mobile.features.team_card.data.models.CreateTeamRequestDto
 import com.example.track_me_mobile.features.team_card.data.models.NtiMarketDto
-import com.example.track_me_mobile.features.team_card.data.models.TrackerUserDto
 import com.example.track_me_mobile.features.team_card.data.models.TrackersPageDto
 import com.example.track_me_mobile.features.team_card.data.models.UpdateTeamRequestDto
 import com.example.track_me_mobile.features.team_card.domain.TeamCardRepository
@@ -234,6 +233,7 @@ class TeamCardRepositoryImpl(
                 setBody(
                     CreateTeamRequestDto(
                         name           = request.name,
+                        meetingRoomLink = request.meetingRoomLink,
                         description    = request.description,
                         ntiMarketIds   = request.ntiMarketIds,
                         readinessLevel = request.readinessLevel
@@ -277,6 +277,7 @@ class TeamCardRepositoryImpl(
                 setBody(
                     UpdateTeamRequestDto(
                         name           = request.name,
+                        meetingRoomLink = request.meetingRoomLink,
                         description    = request.description,
                         ntiMarketIds   = request.ntiMarketIds,
                         readinessLevel = request.readinessLevel
@@ -349,6 +350,7 @@ class TeamCardRepositoryImpl(
         TeamCard(
             id                       = id,
             name                     = name,
+            meetingRoomLink          = meetingRoomLink,
             description              = description,
             status                   = status,
             username                 = username,

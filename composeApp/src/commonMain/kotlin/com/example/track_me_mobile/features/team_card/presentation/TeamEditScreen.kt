@@ -95,9 +95,9 @@ fun TeamEditScreen(
                                 error           = state.trackerError
                             )
                             Spacer(Modifier.width(8.dp))
-                            Icon(Icons.Default.Edit, contentDescription = null,
-                                tint = if (state.trackerError != null) Color.Red else TrackMePurple.copy(alpha = 0.6f),
-                                modifier = Modifier.size(18.dp))
+//                            Icon(Icons.Default.Edit, contentDescription = null,
+//                                tint = if (state.trackerError != null) Color.Red else TrackMePurple.copy(alpha = 0.6f),
+//                                modifier = Modifier.size(18.dp))
                         }
                     } else {
                         ReadonlyRow(label = "Трекер:", value = state.originalTeam?.username ?: "")
@@ -113,6 +113,7 @@ fun TeamEditScreen(
                             onValueChange = viewModel::onNameChange,
                             singleLine    = true,
                             isError       = state.nameError != null,
+                            placeholder   = { Text("Введите название", color = TextGray, fontSize = 14.sp) },
                             modifier      = Modifier.weight(1f),
                             shape         = RoundedCornerShape(12.dp),
                             colors        = OutlinedTextFieldDefaults.colors(
@@ -121,14 +122,43 @@ fun TeamEditScreen(
                                 errorBorderColor     = Color.Red
                             ),
                             textStyle = TextStyle(fontSize = 14.sp, color = Color.Black),
-                            trailingIcon  = {
-                                Icon(Icons.Default.Edit, contentDescription = null,
-                                    tint = TrackMePurple.copy(alpha = 0.6f), modifier = Modifier.size(18.dp))
-                            }
+//                            trailingIcon  = {
+//                                Icon(Icons.Default.Edit, contentDescription = null,
+//                                    tint = TrackMePurple.copy(alpha = 0.6f), modifier = Modifier.size(18.dp))
+//                            }
                         )
                     }
                     if (state.nameError != null) {
                         Text(state.nameError!!, color = Color.Red, fontSize = 11.sp,
+                            modifier = Modifier.padding(start = 4.dp, top = 2.dp))
+                    }
+
+                    Spacer(Modifier.height(16.dp))
+
+                    Text("Ссылка на комнату:", fontSize = 14.sp, color = Color.Black, modifier = Modifier.padding(bottom = 6.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        OutlinedTextField(
+                            value         = state.meetingRoomLink,
+                            onValueChange = viewModel::onMeetingRoomLinkChange,
+                            singleLine    = true,
+                            isError       = state.meetingRoomLinkError != null,
+                            placeholder   = { Text("Введите ссылку (пример: https://webinar.tusur.ru/b/...)", color = TextGray, fontSize = 14.sp) },
+                            modifier      = Modifier.weight(1f),
+                            shape         = RoundedCornerShape(12.dp),
+                            colors        = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor   = TrackMePurple,
+                                unfocusedBorderColor = TrackMePurple.copy(alpha = 0.4f),
+                                errorBorderColor     = Color.Red
+                            ),
+                            textStyle = TextStyle(fontSize = 14.sp, color = Color.Black),
+//                            trailingIcon  = {
+//                                Icon(Icons.Default.Edit, contentDescription = null,
+//                                    tint = TrackMePurple.copy(alpha = 0.6f), modifier = Modifier.size(18.dp))
+//                            }
+                        )
+                    }
+                    if (state.meetingRoomLinkError != null) {
+                        Text(state.meetingRoomLinkError!!, color = Color.Red, fontSize = 11.sp,
                             modifier = Modifier.padding(start = 4.dp, top = 2.dp))
                     }
 
@@ -146,9 +176,9 @@ fun TeamEditScreen(
                                 error           = state.streamError
                             )
                             Spacer(Modifier.width(8.dp))
-                            Icon(Icons.Default.Edit, contentDescription = null,
-                                tint = if (state.streamError != null) Color.Red else TrackMePurple.copy(alpha = 0.6f),
-                                modifier = Modifier.size(18.dp))
+//                            Icon(Icons.Default.Edit, contentDescription = null,
+//                                tint = if (state.streamError != null) Color.Red else TrackMePurple.copy(alpha = 0.6f),
+//                                modifier = Modifier.size(18.dp))
                         }
                     } else {
                         ReadonlyRow(label = "Поток:", value = state.originalTeam?.stream?.name ?: "")
@@ -167,13 +197,13 @@ fun TeamEditScreen(
                             error           = state.marketsError
                         )
                         Spacer(Modifier.width(8.dp))
-                        Icon(Icons.Default.Edit, contentDescription = null,
-                            tint = TrackMePurple.copy(alpha = 0.6f), modifier = Modifier.size(18.dp))
+//                        Icon(Icons.Default.Edit, contentDescription = null,
+//                            tint = TrackMePurple.copy(alpha = 0.6f), modifier = Modifier.size(18.dp))
                     }
 
                     Spacer(Modifier.height(16.dp))
 
-                    // ── TRL — карандашик ──
+                    // TRL
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         DropdownSectionRow(
                             label           = "TRL:",
@@ -182,14 +212,13 @@ fun TeamEditScreen(
                             onValueSelected = viewModel::onTrlSelected,
                             error           = state.trlError
                         )
-                        Spacer(Modifier.width(8.dp))
-                        Icon(Icons.Default.Edit, contentDescription = null,
-                            tint = TrackMePurple.copy(alpha = 0.6f), modifier = Modifier.size(18.dp))
+//                        Spacer(Modifier.width(8.dp))
+//                        Icon(Icons.Default.Edit, contentDescription = null,
+//                            tint = TrackMePurple.copy(alpha = 0.6f), modifier = Modifier.size(18.dp))
                     }
 
                     Spacer(Modifier.height(20.dp))
 
-                    // ── ОПИСАНИЕ — карандашик ──
                     Text("Описание:", fontSize = 14.sp, color = Color.Black, modifier = Modifier.padding(bottom = 6.dp))
                     OutlinedTextField(
                         value         = state.description,
@@ -205,10 +234,10 @@ fun TeamEditScreen(
                         ),
                         textStyle    = TextStyle(fontSize = 14.sp, color = Color.Black),
                         maxLines     = 10,
-                        trailingIcon = {
-                            Icon(Icons.Default.Edit, contentDescription = null,
-                                tint = TrackMePurple.copy(alpha = 0.6f), modifier = Modifier.size(18.dp))
-                        }
+//                        trailingIcon = {
+//                            Icon(Icons.Default.Edit, contentDescription = null,
+//                                tint = TrackMePurple.copy(alpha = 0.6f), modifier = Modifier.size(18.dp))
+//                        }
                     )
                     if (state.descriptionError != null) {
                         Text(state.descriptionError!!, color = Color.Red, fontSize = 11.sp,
@@ -305,7 +334,6 @@ fun TeamEditScreen(
     }
 }
 
-// ── Поле только для чтения (трекер/поток у роли TRACKER) ─────────────────────
 @Composable
 private fun ReadonlyRow(label: String, value: String) {
     Row(verticalAlignment = Alignment.CenterVertically) {
