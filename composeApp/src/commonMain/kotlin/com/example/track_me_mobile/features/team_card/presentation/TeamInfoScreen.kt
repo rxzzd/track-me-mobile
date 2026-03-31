@@ -112,7 +112,6 @@ private fun TeamInfoContentScreen(
                 modifier = Modifier.padding(vertical = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Показываем стрелку только для ADMIN и SUPER_ADMIN
 
                 Icon(
                     painter = painterResource(Res.drawable.arrowback),
@@ -124,8 +123,11 @@ private fun TeamInfoContentScreen(
                 )
                 Spacer(Modifier.width(12.dp))
             }
-
-            // ── Информация о потоке (как на макете) ─────────────────
+            InfoTextRow(
+                label    = "Название команды:",
+                value    = team.name ?: "—",
+                isPurple = true
+            )
             InfoTextRow(
                 label    = "Название потока:",
                 value    = team.stream?.name ?: "—",

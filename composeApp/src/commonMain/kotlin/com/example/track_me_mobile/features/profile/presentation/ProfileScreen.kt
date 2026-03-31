@@ -100,8 +100,8 @@ fun ProfileScreenContent(
     Scaffold(
         topBar = { MainTopHeader() },
         containerColor = BackgroundWhite,
-        floatingActionButton = { FeedbackFab() },
-        floatingActionButtonPosition = FabPosition.End
+//        floatingActionButton = { FeedbackFab() },
+//        floatingActionButtonPosition = FabPosition.End
     ) { paddingValues ->
         Column(
             modifier = Modifier

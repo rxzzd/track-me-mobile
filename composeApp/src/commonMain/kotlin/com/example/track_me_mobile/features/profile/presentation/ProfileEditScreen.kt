@@ -291,48 +291,66 @@ fun ProfileInputRow(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Surface(
                 modifier = Modifier
-                    .weight(1f)
+                    .fillMaxWidth()
                     .height(42.dp)
-                    .clickable { isEnabled = true }, // <-- Добавлено сюда
-                color    = TrackMePurpleLight.copy(alpha = 0.2f),
-                shape    = RoundedCornerShape(50),
-                border   = androidx.compose.foundation.BorderStroke(
+                    .clickable { isEnabled = true },
+                color = TrackMePurpleLight.copy(alpha = 0.2f),
+                shape = RoundedCornerShape(50),
+                border = androidx.compose.foundation.BorderStroke(
                     width = 1.dp,
                     color = if (isEnabled) (if (isError) Color.Red else TrackMePurple) else Color.Transparent
                 )
             ) {
-                Box(contentAlignment = Alignment.Center) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
                     BasicTextField(
-                        value         = textFieldValueState,
+                        value = textFieldValueState,
                         onValueChange = { newFieldValue ->
                             textFieldValueState = newFieldValue
                             onValueChange(newFieldValue.text)
                         },
-                        enabled       = isEnabled,
-                        singleLine    = true,
-                        textStyle     = TextStyle(color = TrackMePurple, fontSize = 16.sp, textAlign = TextAlign.Center),
-                        keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = ImeAction.Done),
+                        enabled = isEnabled,
+                        singleLine = true,
+                        textStyle = TextStyle(
+                            color = TrackMePurple,
+                            fontSize = 16.sp,
+                            textAlign = TextAlign.Center
+                        ),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = keyboardType,
+                            imeAction = ImeAction.Done
+                        ),
                         keyboardActions = KeyboardActions(onDone = {
                             isEnabled = false
                             focusManager.clearFocus()
                         }),
-                        cursorBrush   = SolidColor(TrackMePurple),
-                        modifier      = Modifier
+                        cursorBrush = SolidColor(TrackMePurple),
+                        modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 10.dp)
+                            .padding(start = 16.dp, end = 19.dp)
                             .focusRequester(focusRequester)
                     )
+
+                    IconButton(
+                        onClick = {
+                            isEnabled = !isEnabled
+                            if (!isEnabled) focusManager.clearFocus()
+                        },
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .padding(end = 8.dp)
+                            .size(32.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Edit,
+                            contentDescription = if (isEnabled) "Готово" else "Редактировать",
+                            tint = if (isEnabled) Color.Gray else TrackMePurple,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
-            }
-            Spacer(modifier = Modifier.width(12.dp))
-            IconButton(
-                onClick  = {
-                    isEnabled = !isEnabled
-                    if (!isEnabled) focusManager.clearFocus()
-                },
-                modifier = Modifier.size(24.dp)
-            ) {
-                Icon(Icons.Default.Edit, null, tint = if (isEnabled) Color.Gray else TrackMePurple)
             }
         }
         if (isError && isEnabled) {
