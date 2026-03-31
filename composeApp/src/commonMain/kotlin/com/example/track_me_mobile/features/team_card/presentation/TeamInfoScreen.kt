@@ -160,7 +160,6 @@ private fun TeamInfoContentScreen(
 
             // ── Информация о потоке (как на макете) ─────────────────
 
-            }
             InfoTextRow(
                 label    = "Название команды:",
                 value    = team.name ?: "—",
