@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+
 data class TeamEditUiState(
     val isLoading: Boolean = true,
     val loadError: String? = null,
@@ -29,6 +30,7 @@ data class TeamEditUiState(
 
     // Редактируемые поля
     val name: String = "",
+    val meetingRoomLink: String = "",
     val description: String = "",
     val selectedTracker: TrackerUser? = null,
     val selectedStream: Stream? = null,
@@ -41,6 +43,7 @@ data class TeamEditUiState(
 
     // Ошибки валидации
     val nameError: String? = null,
+    val meetingRoomLinkError: String? = null,
     val trackerError: String? = null,
     val streamError: String? = null,
     val marketsError: String? = null,
@@ -81,6 +84,7 @@ class TeamEditViewModel(
                 _state.update { it.copy(isLoading = false, loadError = "Не удалось загрузить карточку команды") }
                 return@launch
             }
+
 
             // 2. Рынки НТИ (нужны всем)
             val marketsResult = repository.getNtiMarkets()
@@ -126,6 +130,7 @@ class TeamEditViewModel(
                     availableStreams    = streams,
                     availableMarkets   = allMarkets,
                     name               = team.name,
+                    meetingRoomLink = team.meetingRoomLink,
                     description        = team.description,
                     selectedTracker    = selectedTracker,
                     selectedStream     = selectedStream,
@@ -138,6 +143,7 @@ class TeamEditViewModel(
     }
 
     fun onNameChange(v: String)               = _state.update { it.copy(name = v, nameError = null) }
+    fun onMeetingRoomLinkChange(v: String) = _state.update { it.copy(meetingRoomLink = v, meetingRoomLinkError = null) }
     fun onDescriptionChange(v: String)        = _state.update { it.copy(description = v, descriptionError = null) }
     fun onTrackerSelected(v: TrackerUser)     = _state.update { it.copy(selectedTracker = v, trackerError = null) }
     fun onStreamSelected(v: Stream)           = _state.update { it.copy(selectedStream = v, streamError = null) }
@@ -153,6 +159,7 @@ class TeamEditViewModel(
                 UpdateTeamRequest(
                     teamId          = teamId,
                     name            = s.name.trim(),
+                    meetingRoomLink = s.meetingRoomLink,
                     description     = s.description.trim(),
                     ntiMarketIds    = s.selectedMarkets.map { it.id },
                     readinessLevel  = s.selectedTrl,
@@ -185,6 +192,11 @@ class TeamEditViewModel(
         }
     }
 
+    fun isLinkRegex(s: String): Boolean {
+        val urlRegex = "^(https?|ftp)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]".toRegex()
+        return urlRegex.matches(s)
+    }
+
     private fun validate(): Boolean {
         val s = _state.value
         val nameError = when {
@@ -193,6 +205,7 @@ class TeamEditViewModel(
             s.name.length > 100 -> "Максимум 100 символов"
             else                -> null
         }
+        val meetingRoomLinkError = if (!isLinkRegex(s.meetingRoomLink) && s.meetingRoomLink.isNotBlank()) "Ссылка должна быть корректной (например https://webinar.tusur.ru/b/...)" else null
         val trackerError     = if (isAdmin && s.selectedTracker == null) "Выберите трекера" else null
         val streamError      = if (isAdmin && s.selectedStream == null) "Выберите поток" else null
         val marketsError     = if (s.selectedMarkets.isEmpty()) "Выберите хотя бы один рынок НТИ" else null
@@ -205,10 +218,15 @@ class TeamEditViewModel(
         }
         _state.update {
             it.copy(
-                nameError = nameError, trackerError = trackerError, streamError = streamError,
-                marketsError = marketsError, trlError = trlError, descriptionError = descriptionError
+                nameError = nameError,
+                meetingRoomLinkError = meetingRoomLinkError,
+                trackerError = trackerError,
+                streamError = streamError,
+                marketsError = marketsError,
+                trlError = trlError,
+                descriptionError = descriptionError
             )
         }
-        return listOf(nameError, trackerError, streamError, marketsError, trlError, descriptionError).all { it == null }
+        return listOf(nameError, meetingRoomLinkError, trackerError, streamError, marketsError, trlError, descriptionError).all { it == null }
     }
 }

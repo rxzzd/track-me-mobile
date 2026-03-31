@@ -33,6 +33,12 @@ class AddStreamViewModel(
     var isSuccess by mutableStateOf(false)
     var errorMessage by mutableStateOf<String?>(null)
 
+    var pendingImageBytes by mutableStateOf<ByteArray?>(null)
+        private set
+
+    var isUploadingImage by mutableStateOf(false)
+        private set
+
     init {
         loadMarkets()
     }
@@ -82,14 +88,45 @@ class AddStreamViewModel(
             )
 
             repository.createStream(request)
-                .onSuccess {
-                    isSuccess = true
-                    onSuccess()
+                .onSuccess { createdStream ->
+                    // Если есть фото - загружаем его
+                    if (pendingImageBytes != null) {
+                        uploadImageForCreatedStream(createdStream.id, onSuccess)
+                    } else {
+                        isSuccess = true
+                        isLoading = false
+                        onSuccess()
+                    }
                 }
                 .onFailure {
                     errorMessage = it.message ?: "Ошибка при создании"
+                    isLoading = false
                 }
+        }
+    }
+
+    private fun uploadImageForCreatedStream(streamId: String, onSuccess: () -> Unit) {
+        val bytes = pendingImageBytes ?: return
+
+        screenModelScope.launch {
+            isUploadingImage = true
+
+            repository.uploadStreamImage(streamId, bytes)
+                .onSuccess {
+                    isSuccess = true
+                    pendingImageBytes = null
+                    onSuccess()
+                }
+                .onFailure {
+                    errorMessage = "Поток создан, но не удалось загрузить фото"
+                }
+
+            isUploadingImage = false
             isLoading = false
         }
+    }
+
+    fun setStreamImage(bytes: ByteArray) {
+        pendingImageBytes = bytes
     }
 }

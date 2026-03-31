@@ -13,8 +13,14 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.example.track_me_mobile.core.ui.theme.*
 import com.example.track_me_mobile.core.ui.components.MainTopHeader
+import com.example.track_me_mobile.features.teams.presentation.DarkPurple
+import com.example.track_me_mobile.generated.resources.Res
+import com.example.track_me_mobile.generated.resources.arrowback
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun TeamCreateScreen(
@@ -80,6 +86,9 @@ private fun TeamCreateForm(
     onBackClick: () -> Unit,
     onCreated: () -> Unit
 ) {
+
+    val navigator = LocalNavigator.currentOrThrow
+
     Column(
         modifier = Modifier
             .padding(padding)
@@ -88,12 +97,13 @@ private fun TeamCreateForm(
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
-        Text(
-            text = "←",
-            color = TrackMePurple,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.clickable { onBackClick() }
+        Icon(
+            painter = painterResource(Res.drawable.arrowback),
+            contentDescription = null,
+            tint = DarkPurple,
+            modifier = Modifier
+                .size(24.dp)
+                .clickable { navigator.pop() }
         )
 
         Spacer(Modifier.height(24.dp))
@@ -106,6 +116,27 @@ private fun TeamCreateForm(
                 singleLine    = true,
                 isError       = state.teamNameError != null,
                 placeholder   = { Text("Введите название", color = TextGray, fontSize = 14.sp) },
+                modifier      = Modifier.fillMaxWidth(),
+                shape         = RoundedCornerShape(12.dp),
+                colors        = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor   = TrackMePurple,
+                    unfocusedBorderColor = TrackMePurple.copy(alpha = 0.4f),
+                    errorBorderColor     = Color.Red
+                ),
+                textStyle = TextStyle(fontSize = 14.sp, color = Color.Black)
+            )
+        }
+
+        Spacer(Modifier.height(20.dp))
+
+        // ── Название команды ─────────────────────────────────────────────
+        CreateFormField(label = "Ссылка на комнату:", error = state.meetingRoomLinkError) {
+            OutlinedTextField(
+                value         = state.meetingRoomLink,
+                onValueChange = viewModel::onMeetingRoomChange,
+                singleLine    = true,
+                isError       = state.teamNameError != null,
+                placeholder   = { Text("Введите ссылку (пример: https://webinar.tusur.ru/b/...)", color = TextGray, fontSize = 14.sp) },
                 modifier      = Modifier.fillMaxWidth(),
                 shape         = RoundedCornerShape(12.dp),
                 colors        = OutlinedTextFieldDefaults.colors(

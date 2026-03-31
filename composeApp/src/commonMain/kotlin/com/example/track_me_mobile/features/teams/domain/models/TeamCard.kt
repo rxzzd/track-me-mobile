@@ -19,6 +19,7 @@ data class Stream(
 data class TeamCard(
     val id: String,
     val name: String,
+    val meetingRoomLink: String,
     val description: String,
     val status: String,
     val username: String,
@@ -30,5 +31,5 @@ data class TeamCard(
     val meetingsCount: Int,
     val meetingsCompletedCount: Int,
     val meetingsNotHappenedCount: Int,
-    val teamsCount: Int? = null
+    val teamsCount: Int? = null,
 )

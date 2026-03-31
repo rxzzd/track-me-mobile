@@ -12,6 +12,8 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import io.ktor.client.request.forms.*
+
 
 class StreamRepositoryImpl(
     private val client: HttpClient
@@ -208,8 +210,71 @@ class StreamRepositoryImpl(
         }
     }
 
-    override suspend fun uploadStreamImage(id: String, bytes: ByteArray): Result<Unit> = Result.success(Unit)
+    override suspend fun uploadStreamImage(streamId: String, imageBytes: ByteArray): Result<Unit> {
+        return try {
+            println("[StreamRepo] Uploading image for stream $streamId, size: ${imageBytes.size} bytes")
 
+            // ДОБАВИТЬ: Получаем CSRF токен
+            val csrfData = getCsrf()
+
+            val response = client.post(ApiConstants.streamImage(streamId)) {
+                // ДОБАВИТЬ: Передаём CSRF токен в header
+                header(csrfData.headerName, csrfData.token)
+                header("X-Requested-With", "XMLHttpRequest")
+
+                setBody(
+                    MultiPartFormDataContent(
+                        formData {
+                            append("file", imageBytes, Headers.build {
+                                append(HttpHeaders.ContentType, "image/jpeg")
+                                append(HttpHeaders.ContentDisposition, "filename=\"stream.jpg\"")
+                            })
+                        }
+                    )
+                )
+            }
+
+            if (response.status == HttpStatusCode.OK) {
+                println("[StreamRepo] Image uploaded successfully")
+                Result.success(Unit)
+            } else {
+                val error = response.bodyAsText()
+                println("[StreamRepo] Upload failed: ${response.status}, $error")
+                Result.failure(Exception("Ошибка загрузки: ${response.status}"))
+            }
+        } catch (e: Exception) {
+            println("[StreamRepo] Upload error: ${e.message}")
+            e.printStackTrace()
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getStreamImage(streamId: String): Result<ByteArray?> {
+        return try {
+            println("[StreamRepo] Fetching image for stream $streamId")
+
+            val response = client.get(ApiConstants.streamImage(streamId))
+
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    val bytes = response.readBytes()
+                    println("[StreamRepo] Image loaded, size: ${bytes.size} bytes")
+                    Result.success(bytes)
+                }
+                HttpStatusCode.NotFound -> {
+                    println("[StreamRepo] No image found for stream")
+                    Result.success(null)
+                }
+                else -> {
+                    println("[StreamRepo] Failed to load image: ${response.status}")
+                    Result.failure(Exception("Не удалось загрузить фото"))
+                }
+            }
+        } catch (e: Exception) {
+            println("[StreamRepo] Error loading image: ${e.message}")
+            Result.failure(e)
+        }
+    }
     private suspend fun getCsrf(): com.example.track_me_mobile.features.auth.data.model.CsrfResponse {
         return client.get(ApiConstants.CSRF_ENDPOINT).body()
     }
@@ -221,6 +286,7 @@ class StreamRepositoryImpl(
     private fun TeamCardDto.toDomainTeamCard() = com.example.track_me_mobile.features.teams.domain.models.TeamCard(
         id = id,
         name = name,
+        meetingRoomLink = meetingRoomLink,
         description = description,
         status = status,
         username = username,
@@ -240,7 +306,7 @@ class StreamRepositoryImpl(
         },
         meetingsCount = meetingsCount,
         meetingsCompletedCount = meetingsCompletedCount,
-        meetingsNotHappenedCount = meetingsNotHappenedCount
+        meetingsNotHappenedCount = meetingsNotHappenedCount,
     )
 }
 

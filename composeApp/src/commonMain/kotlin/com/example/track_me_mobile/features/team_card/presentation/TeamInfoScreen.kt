@@ -11,10 +11,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.example.track_me_mobile.core.ui.components.MainTopHeader
 import com.example.track_me_mobile.core.ui.theme.*
 import com.example.track_me_mobile.features.teams.domain.models.TeamCard
 import kotlin.math.roundToInt
+import com.example.track_me_mobile.features.teams.presentation.DarkPurple
+import com.example.track_me_mobile.generated.resources.Res
+import com.example.track_me_mobile.generated.resources.arrowback
+import org.jetbrains.compose.resources.painterResource
+
+
 private fun Double.formatTwoDecimals(): String {
     val rounded = (this * 100.0).roundToInt() / 100.0
     val parts = rounded.toString().split('.')
@@ -25,6 +33,7 @@ private fun Double.formatTwoDecimals(): String {
         "${parts[0]}.$frac"
     }
 }
+
 
 @Composable
 fun TeamInfoScreen(
@@ -96,6 +105,9 @@ private fun TeamInfoContentScreen(
     onEditClick: () -> Unit,
     onMeetingsClick: () -> Unit
 ) {
+
+    val navigator = LocalNavigator.currentOrThrow
+    val montserrat = MontserratFontFamily()
     val descScrollState = rememberScrollState()
 
     Scaffold(
@@ -116,13 +128,15 @@ private fun TeamInfoContentScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = "←",
-                    color = TrackMePurple,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.clickable { onBackClick() }
+                Icon(
+                    painter = painterResource(Res.drawable.arrowback),
+                    contentDescription = null,
+                    tint = DarkPurple,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clickable { navigator.pop() }
                 )
+                Spacer(Modifier.width(12.dp))
 
                 team.averageGrade?.let { avg ->
                     val gradeColor = when {
@@ -145,6 +159,13 @@ private fun TeamInfoContentScreen(
             Spacer(Modifier.height(16.dp))
 
             // ── Информация о потоке (как на макете) ─────────────────
+
+            }
+            InfoTextRow(
+                label    = "Название команды:",
+                value    = team.name ?: "—",
+                isPurple = true
+            )
             InfoTextRow(
                 label    = "Название потока:",
                 value    = team.stream?.name ?: "—",
