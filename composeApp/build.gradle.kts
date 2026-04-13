@@ -29,11 +29,8 @@ kotlin {
     sourceSets {
         androidMain.dependencies {
             val voyagerVersion = "1.1.0-beta02"
-            // Android
             implementation("androidx.activity:activity-compose:1.8.2")
-// Hilt integration
             implementation("cafe.adriel.voyager:voyager-hilt:${voyagerVersion}")
-// LiveData integration
             implementation("cafe.adriel.voyager:voyager-livedata:${voyagerVersion}")
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.activity.compose)
@@ -60,26 +57,15 @@ kotlin {
             implementation(libs.koin.compose)
             implementation("org.jetbrains.compose.material:material-icons-extended:1.6.11")
             val voyagerVersion = "1.1.0-beta02"
-            // Multiplatform
-            // Navigator
             implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
-            // Screen Model
             implementation("cafe.adriel.voyager:voyager-screenmodel:$voyagerVersion")
-            // BottomSheetNavigator
             implementation("cafe.adriel.voyager:voyager-bottom-sheet-navigator:$voyagerVersion")
-            // TabNavigator
             implementation("cafe.adriel.voyager:voyager-tab-navigator:$voyagerVersion")
-            // Transitions
             implementation("cafe.adriel.voyager:voyager-transitions:$voyagerVersion")
-            // Koin integration
             implementation("cafe.adriel.voyager:voyager-koin:$voyagerVersion")
 
-            //implementation(compose.materialIconsExtended)
             implementation("network.chaintech:kmp-date-time-picker:1.0.6")
-            // Android
-            // Hilt integration
             implementation("cafe.adriel.voyager:voyager-hilt:$voyagerVersion")
-            // LiveData integration
             implementation("cafe.adriel.voyager:voyager-livedata:$voyagerVersion")
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)

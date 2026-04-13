@@ -53,8 +53,6 @@ class LoginWebViewScreen : Screen {
                         val url = request?.url?.toString() ?: return false
                         val uri = request.url
 
-                        // Строгая проверка code callback: хост шлюза + путь /login/oauth2/code/
-                        // (url.contains() ловил бы этот путь внутри redirect_uri= у SSO)
                         val isCodeCallback = uri.host == ApiConstants.GATEWAY_HOST
                                 && uri.path?.startsWith("/login/oauth2/code/") == true
 
@@ -62,8 +60,6 @@ class LoginWebViewScreen : Screen {
                             codeCallbackReceived = true
                         }
 
-                        // После обмена code на токены шлюз редиректит на фронт.
-                        // Перехватываем — не даём WebView уйти на веб-сайт.
                         val isAfterLogin = url.contains("/after-login")
                         if (isAfterLogin && codeCallbackReceived && !isLoginHandled) {
                             handleAuthSuccess()
@@ -77,7 +73,6 @@ class LoginWebViewScreen : Screen {
                         super.onPageFinished(view, url)
                         if (url == null || isLoginHandled || !codeCallbackReceived) return
 
-                        // Запасной вариант: если after-login не поймали в shouldOverride
                         if (url.contains(ApiConstants.GATEWAY_HOST)) {
                             handleAuthSuccess()
                         }
@@ -102,7 +97,6 @@ class LoginWebViewScreen : Screen {
                     }
                 }
 
-                // Сбрасываем состояние WebView перед каждым входом
                 clearCache(true)
                 clearHistory()
                 clearFormData()

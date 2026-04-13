@@ -31,7 +31,7 @@ fun TeamCreateScreen(
     val state by viewModel.state.collectAsState()
 
     Scaffold(
-        topBar = { MainTopHeader() },       // ← только MainTopHeader, без обёртки TopAppBar
+        topBar = { MainTopHeader() },
         containerColor = BackgroundWhite
     ) { padding ->
 
@@ -107,8 +107,6 @@ private fun TeamCreateForm(
         )
 
         Spacer(Modifier.height(24.dp))
-
-        // ── Название команды ─────────────────────────────────────────────
         CreateFormField(label = "Название команды:", error = state.teamNameError) {
             OutlinedTextField(
                 value         = state.teamName,
@@ -128,8 +126,6 @@ private fun TeamCreateForm(
         }
 
         Spacer(Modifier.height(20.dp))
-
-        // ── Название команды ─────────────────────────────────────────────
         CreateFormField(label = "Ссылка на комнату:", error = state.meetingRoomLinkError) {
             OutlinedTextField(
                 value         = state.meetingRoomLink,
@@ -149,8 +145,6 @@ private fun TeamCreateForm(
         }
 
         Spacer(Modifier.height(20.dp))
-
-        // ── Трекер ───────────────────────────────────────────────────────
         if (state.isTrackerRole) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("Трекер:", fontSize = 14.sp, color = Color.Black)
@@ -178,8 +172,6 @@ private fun TeamCreateForm(
                 error           = state.trackerError
             )
         }
-
-        // ── Поток ────────────────────────────────────────────────────────
         Spacer(Modifier.height(16.dp))
         DropdownObjectRow(
             label           = "Поток:",
@@ -189,8 +181,6 @@ private fun TeamCreateForm(
             onValueSelected = viewModel::onStreamSelected,
             error           = state.streamError
         )
-
-        // ── Рынки НТИ ────────────────────────────────────────────────────
         Spacer(Modifier.height(16.dp))
         MultiDropdownObjectRow(
             label           = "Рынки НТИ:",
@@ -200,8 +190,6 @@ private fun TeamCreateForm(
             onValuesChanged = viewModel::onMarketsChanged,
             error           = state.marketsError
         )
-
-        // ── TRL ──────────────────────────────────────────────────────────
         Spacer(Modifier.height(16.dp))
         DropdownSectionRow(
             label           = "TRL:",
@@ -210,8 +198,6 @@ private fun TeamCreateForm(
             onValueSelected = viewModel::onTrlSelected,
             error           = state.trlError
         )
-
-        // ── Описание ─────────────────────────────────────────────────────
         Spacer(Modifier.height(20.dp))
         CreateFormField(label = "Описание:", error = state.descriptionError) {
             OutlinedTextField(
@@ -232,8 +218,6 @@ private fun TeamCreateForm(
                 maxLines  = 10,
             )
         }
-
-        // ── Ошибка сабмита ───────────────────────────────────────────────
         if (state.submitError != null) {
             Spacer(Modifier.height(12.dp))
             Text(
@@ -246,8 +230,6 @@ private fun TeamCreateForm(
                     .padding(12.dp)
             )
         }
-
-        // ── Кнопка создать ───────────────────────────────────────────────
         Spacer(Modifier.height(32.dp))
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             Button(
@@ -272,8 +254,6 @@ private fun TeamCreateForm(
         Spacer(Modifier.height(24.dp))
     }
 }
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
 
 @Composable
 private fun CreateFormField(

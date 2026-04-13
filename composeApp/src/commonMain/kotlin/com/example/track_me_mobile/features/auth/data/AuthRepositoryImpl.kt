@@ -18,8 +18,6 @@ class AuthRepositoryImpl(
     private val sessionStorage: SessionStorage
 ) : AuthRepository {
 
-    // Вызывается из ViewModel после получения SESSION из WebView.
-    // Сохраняет сессию в хранилище — Ktor плагин подставит её автоматически.
     suspend fun saveSession(cookieString: String) {
         val sessionValue = cookieString
             .split(";")
@@ -34,7 +32,6 @@ class AuthRepositoryImpl(
 
     override suspend fun getUserInfo(): Result<UserInfo> {
         return try {
-            // ШАГ 1: CSRF — SESSION подставляется плагином HttpCookies автоматически
             val csrfResponse = client.get(ApiConstants.CSRF_ENDPOINT) {
                 header(HttpHeaders.Accept, "application/json")
             }
@@ -50,7 +47,6 @@ class AuthRepositoryImpl(
 
             val csrfData = csrfResponse.body<CsrfResponse>()
 
-            // ШАГ 2: Профиль пользователя
             val profileResponse = client.get(ApiConstants.ACCOUNT_INFO) {
                 header(HttpHeaders.Accept,   "application/json")
                 header(csrfData.headerName,  csrfData.token)

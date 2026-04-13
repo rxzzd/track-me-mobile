@@ -38,9 +38,9 @@ import com.example.track_me_mobile.core.storage.PersistentStorage
 
 val appModule = module {
 
-    // ── Core ────────────────────────────────────────────────────────────────
-    single { PersistentStorage.create() } // ← ДОБАВИТЬ
-    single { SessionStorage(get()) } // ← ИЗМЕНИТЬ (теперь принимает PersistentStorage)
+
+    single { PersistentStorage.create() }
+    single { SessionStorage(get()) }
 
     single {
         HttpClientFactory.create(
@@ -52,16 +52,16 @@ val appModule = module {
     }
     single { UserInfoHolder() }
 
-    // ── Splash ──────────────────────────────────────────────────────────────
+
     factory { SplashViewModel(get(), get(), get()) }
 
-    // ── Auth ────────────────────────────────────────────────────────────────
+
     single { AuthRepositoryImpl(get(), get()) }
     single<AuthRepository> { get<AuthRepositoryImpl>() }
     factory { LoginViewModel(get(), get(), get()) }
     factory { GlobalHeaderViewModel(get(), get()) }
 
-    // ── Streams ─────────────────────────────────────────────────────────────
+
     single<StreamRepository> { StreamRepositoryImpl(get()) }
     factory { StreamListViewModel(get()) }
     factory { AddStreamViewModel(get()) }
@@ -69,34 +69,34 @@ val appModule = module {
     single<ProfileRepository> { ProfileRepositoryImpl(get()) }
     factory { ProfileViewModel(get()) }
 
-    // ── Profile ─────────────────────────────────────────────────────────────
+
     single<ProfileRepository> { ProfileRepositoryImpl(get()) }
     factory { ProfileViewModel(get()) }
     factory { (username: String) -> UserProfileViewModel(get(), username) }
 
-    // ── Users ────────────────────────────────────────────────────────────────
+
     single<UsersRepository> { UsersRepositoryImpl(get()) }
     factory { TrackerListViewModel(get()) }
     factory { AdminListViewModel(get()) }
 
-    // Teams
-    single<TeamRepository> { TeamRepositoryImpl(get(), get()) }  // HttpClient, UserInfoHolder
+
+    single<TeamRepository> { TeamRepositoryImpl(get(), get()) }
     factory { TeamListViewModel(get()) }
 
-    // ── Team Card ────────────────────────────────────────────────────────────
+
     single<TeamCardRepository> { TeamCardRepositoryImpl(get(), get()) }
     factory { (teamId: String) -> TeamCardViewModel(teamId, get()) }
-    factory { TeamCreateViewModel(get(), get()) }                          // создание
-    factory { (teamId: String) -> TeamEditViewModel(teamId, get(), get()) } // редактирование
+    factory { TeamCreateViewModel(get(), get()) }
+    factory { (teamId: String) -> TeamEditViewModel(teamId, get(), get()) }
 
-    // Feedback
+
     single<com.example.track_me_mobile.core.feedback.domain.FeedbackRepository> {
         com.example.track_me_mobile.core.feedback.data.FeedbackRepositoryImpl(get())
     }
     factory {
         com.example.track_me_mobile.core.feedback.presentation.FeedbackViewModel(get(), get())
     }
-    // Reports
+
     single<com.example.track_me_mobile.features.reports.domain.ReportRepository> {
         com.example.track_me_mobile.features.reports.data.ReportRepositoryImpl(get())
     }
@@ -104,22 +104,22 @@ val appModule = module {
         com.example.track_me_mobile.features.reports.presentation.ReportsViewModel(
             repository = get(),
             userInfoHolder = get(),
-            httpClient = get()  // Добавляем HttpClient
+            httpClient = get()
         )
     }
     factory { TeamCreateViewModel(get(), get()) }
     factory { (teamId: String) -> TeamEditViewModel(teamId, get(), get()) }
 
-    // ── Meetings ─────────────────────────────────────────────────────────────
+
     single<MeetingRepository> { MeetingRepositoryImpl(get()) }
 
-    // TeamMeetingsViewModel - для списка встреч команды (с teamId)
+
     factory { (teamId: String) ->
         TeamMeetingsViewModel(teamId, get())
     }
 
-    // MeetingViewModel - для конкретной встречи (с meetingId)
-    factory { (meetingId: String, teamCardId: String) ->  // ← ДВА ПАРАМЕТРА
+
+    factory { (meetingId: String, teamCardId: String) ->
         MeetingViewModel(get(), meetingId, teamCardId, get())
     }
 }

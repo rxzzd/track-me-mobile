@@ -13,7 +13,7 @@ class TrackMeApplication : Application() {
 
         startKoin {
             androidLogger(Level.ERROR)
-            androidContext(this@TrackMeApplication) // ← Передаем контекст
+            androidContext(this@TrackMeApplication)
             modules(appModule)
         }
     }

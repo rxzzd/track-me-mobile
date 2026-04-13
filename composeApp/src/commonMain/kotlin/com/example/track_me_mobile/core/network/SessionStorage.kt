@@ -17,10 +17,8 @@ class SessionStorage(
     suspend fun save(sessionValue: String) {
         println("[SessionStorage] Saving SESSION to persistent storage")
 
-        // Сохраняем в SharedPreferences
         persistentStorage.saveString(SESSION_KEY, sessionValue)
 
-        // И в in-memory для текущей сессии
         cookieStorage.addCookie(
             gatewayUrl,
             Cookie(
@@ -35,7 +33,6 @@ class SessionStorage(
     }
 
     suspend fun get(): String? {
-        // Сначала пробуем из памяти
         val memorySession = cookieStorage.get(gatewayUrl)
             .find { it.name == "SESSION" }?.value
 
@@ -44,13 +41,11 @@ class SessionStorage(
             return memorySession
         }
 
-        // Если нет - загружаем из persistent storage
         val persistedSession = persistentStorage.getString(SESSION_KEY)
 
         if (persistedSession != null) {
             println("[SessionStorage] Restoring SESSION from persistent storage")
 
-            // Восстанавливаем в in-memory
             cookieStorage.addCookie(
                 gatewayUrl,
                 Cookie(
@@ -73,10 +68,8 @@ class SessionStorage(
     suspend fun clear() {
         println("[SessionStorage] Clearing SESSION")
 
-        // Удаляем из persistent storage
         persistentStorage.remove(SESSION_KEY)
 
-        // Удаляем из in-memory
         cookieStorage.get(gatewayUrl)
             .filter { it.name == "SESSION" }
             .forEach {

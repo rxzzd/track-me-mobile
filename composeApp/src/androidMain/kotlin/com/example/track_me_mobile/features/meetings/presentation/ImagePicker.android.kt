@@ -21,7 +21,6 @@ actual fun rememberImagePicker(
             try {
                 println("[ImagePicker] Selected: $selectedUri")
 
-                // Конвертируем Uri в ByteArray
                 val bytes = uriToByteArray(context, selectedUri)
 
                 if (bytes != null) {

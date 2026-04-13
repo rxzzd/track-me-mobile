@@ -43,13 +43,11 @@ object HttpClientFactory {
                 level = LogLevel.HEADERS
             }
 
-            // Обработка 401 ошибок (refresh_token истёк)
             install(ResponseObserver) {
                 onResponse { response ->
                     if (response.status == HttpStatusCode.Unauthorized) {
                         println("[HTTP] 401 Unauthorized - refresh_token expired, clearing session")
 
-                        // Очищаем сессию в фоновом потоке
                         CoroutineScope(Dispatchers.Main).launch {
                             sessionStorage.clear()
                             onUnauthorized?.invoke()

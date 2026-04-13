@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 class LoginViewModel(
     private val repository: AuthRepository,
     private val repositoryImpl: AuthRepositoryImpl,
-    private val userInfoHolder: UserInfoHolder  // ← сохраняем UserInfo после логина
+    private val userInfoHolder: UserInfoHolder
 ) : ScreenModel {
 
     var isLoading by mutableStateOf(false)
@@ -33,7 +33,7 @@ class LoginViewModel(
 
                 repository.getUserInfo()
                     .onSuccess { userInfo ->
-                        userInfoHolder.save(userInfo)  // ← теперь UserInfo доступен всем
+                        userInfoHolder.save(userInfo)
                         isLoading = false
                         onNavigate(userInfo.mainRole)
                     }

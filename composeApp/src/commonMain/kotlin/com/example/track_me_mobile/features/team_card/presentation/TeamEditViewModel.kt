@@ -23,12 +23,10 @@ data class TeamEditUiState(
 
     val originalTeam: TeamCard? = null,
 
-    // Справочники (только для ADMIN)
     val availableTrackers: List<TrackerUser> = emptyList(),
     val availableStreams: List<Stream> = emptyList(),
     val availableMarkets: List<NtiMarket> = emptyList(),
 
-    // Редактируемые поля
     val name: String = "",
     val meetingRoomLink: String = "",
     val description: String = "",
@@ -37,11 +35,8 @@ data class TeamEditUiState(
     val selectedMarkets: List<NtiMarket> = emptyList(),
     val selectedTrl: String = "",
 
-    // Роль
-    val isAdminRole: Boolean = false,  // ADMIN/SUPER_ADMIN — может менять всё
-    // TRACKER — не может менять трекера и поток
+    val isAdminRole: Boolean = false,
 
-    // Ошибки валидации
     val nameError: String? = null,
     val meetingRoomLinkError: String? = null,
     val trackerError: String? = null,
@@ -78,7 +73,6 @@ class TeamEditViewModel(
         screenModelScope.launch {
             _state.update { it.copy(isLoading = true, loadError = null) }
 
-            // 1. Команда
             val teamResult = repository.getTeamById(teamId)
             if (teamResult.isFailure) {
                 _state.update { it.copy(isLoading = false, loadError = "Не удалось загрузить карточку команды") }
@@ -86,7 +80,6 @@ class TeamEditViewModel(
             }
 
 
-            // 2. Рынки НТИ (нужны всем)
             val marketsResult = repository.getNtiMarkets()
             if (marketsResult.isFailure) {
                 _state.update { it.copy(isLoading = false, loadError = "Не удалось загрузить рынки НТИ") }
@@ -97,7 +90,6 @@ class TeamEditViewModel(
             val allMarkets = marketsResult.getOrElse { emptyList() }
             val currentMarkets = allMarkets.filter { m -> team.ntiMarkets.any { it.id == m.id } }
 
-            // 3. Трекеры и потоки — только для ADMIN
             var trackers: List<TrackerUser> = emptyList()
             var streams: List<Stream> = emptyList()
             var selectedTracker: TrackerUser? = null
@@ -116,7 +108,6 @@ class TeamEditViewModel(
                 }
                 trackers = trackersResult.getOrElse { emptyList() }
                 streams  = streamsResult.getOrElse { emptyList() }
-                // Предвыбираем текущего трекера и поток
                 selectedTracker = trackers.find { it.username == team.username }
                     ?: TrackerUser(id = team.username, username = team.username, fullName = team.username, email = "", avatarUrl = null)
                 selectedStream  = streams.find { it.id == team.stream?.id } ?: team.stream

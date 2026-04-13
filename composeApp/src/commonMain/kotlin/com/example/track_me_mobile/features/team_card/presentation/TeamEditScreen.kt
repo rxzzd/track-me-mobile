@@ -71,7 +71,6 @@ fun TeamEditScreen(
                         .imePadding()
                         .padding(16.dp)
                 ) {
-                    // ── Назад ──
                     Icon(
                         painter = painterResource(Res.drawable.arrowback),
                         contentDescription = null,
@@ -83,7 +82,6 @@ fun TeamEditScreen(
 
                     Spacer(Modifier.height(20.dp))
 
-                    // ── ТРЕКЕР ──
                     if (state.isAdminRole) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             DropdownObjectRow(
@@ -95,9 +93,6 @@ fun TeamEditScreen(
                                 error           = state.trackerError
                             )
                             Spacer(Modifier.width(8.dp))
-//                            Icon(Icons.Default.Edit, contentDescription = null,
-//                                tint = if (state.trackerError != null) Color.Red else TrackMePurple.copy(alpha = 0.6f),
-//                                modifier = Modifier.size(18.dp))
                         }
                     } else {
                         ReadonlyRow(label = "Трекер:", value = state.originalTeam?.username ?: "")
@@ -105,7 +100,6 @@ fun TeamEditScreen(
 
                     Spacer(Modifier.height(16.dp))
 
-                    // ── НАЗВАНИЕ — карандашик всегда ──
                     Text("Название команды:", fontSize = 14.sp, color = Color.Black, modifier = Modifier.padding(bottom = 6.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         OutlinedTextField(
@@ -122,10 +116,6 @@ fun TeamEditScreen(
                                 errorBorderColor     = Color.Red
                             ),
                             textStyle = TextStyle(fontSize = 14.sp, color = Color.Black),
-//                            trailingIcon  = {
-//                                Icon(Icons.Default.Edit, contentDescription = null,
-//                                    tint = TrackMePurple.copy(alpha = 0.6f), modifier = Modifier.size(18.dp))
-//                            }
                         )
                     }
                     if (state.nameError != null) {
@@ -151,10 +141,6 @@ fun TeamEditScreen(
                                 errorBorderColor     = Color.Red
                             ),
                             textStyle = TextStyle(fontSize = 14.sp, color = Color.Black),
-//                            trailingIcon  = {
-//                                Icon(Icons.Default.Edit, contentDescription = null,
-//                                    tint = TrackMePurple.copy(alpha = 0.6f), modifier = Modifier.size(18.dp))
-//                            }
                         )
                     }
                     if (state.meetingRoomLinkError != null) {
@@ -164,7 +150,6 @@ fun TeamEditScreen(
 
                     Spacer(Modifier.height(16.dp))
 
-                    // ── ПОТОК ──
                     if (state.isAdminRole) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             DropdownObjectRow(
@@ -176,9 +161,6 @@ fun TeamEditScreen(
                                 error           = state.streamError
                             )
                             Spacer(Modifier.width(8.dp))
-//                            Icon(Icons.Default.Edit, contentDescription = null,
-//                                tint = if (state.streamError != null) Color.Red else TrackMePurple.copy(alpha = 0.6f),
-//                                modifier = Modifier.size(18.dp))
                         }
                     } else {
                         ReadonlyRow(label = "Поток:", value = state.originalTeam?.stream?.name ?: "")
@@ -186,7 +168,6 @@ fun TeamEditScreen(
 
                     Spacer(Modifier.height(16.dp))
 
-                    // ── РЫНКИ НТИ — карандашик ──
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         MultiDropdownObjectRow(
                             label           = "Рынки НТИ:",
@@ -197,13 +178,10 @@ fun TeamEditScreen(
                             error           = state.marketsError
                         )
                         Spacer(Modifier.width(8.dp))
-//                        Icon(Icons.Default.Edit, contentDescription = null,
-//                            tint = TrackMePurple.copy(alpha = 0.6f), modifier = Modifier.size(18.dp))
                     }
 
                     Spacer(Modifier.height(16.dp))
 
-                    // TRL
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         DropdownSectionRow(
                             label           = "TRL:",
@@ -212,9 +190,6 @@ fun TeamEditScreen(
                             onValueSelected = viewModel::onTrlSelected,
                             error           = state.trlError
                         )
-//                        Spacer(Modifier.width(8.dp))
-//                        Icon(Icons.Default.Edit, contentDescription = null,
-//                            tint = TrackMePurple.copy(alpha = 0.6f), modifier = Modifier.size(18.dp))
                     }
 
                     Spacer(Modifier.height(20.dp))
@@ -234,10 +209,6 @@ fun TeamEditScreen(
                         ),
                         textStyle    = TextStyle(fontSize = 14.sp, color = Color.Black),
                         maxLines     = 10,
-//                        trailingIcon = {
-//                            Icon(Icons.Default.Edit, contentDescription = null,
-//                                tint = TrackMePurple.copy(alpha = 0.6f), modifier = Modifier.size(18.dp))
-//                        }
                     )
                     if (state.descriptionError != null) {
                         Text(state.descriptionError!!, color = Color.Red, fontSize = 11.sp,
@@ -254,7 +225,6 @@ fun TeamEditScreen(
 
                     Spacer(Modifier.height(32.dp))
 
-                    // ── Кнопки ──
                     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
                         Button(
                             onClick  = { viewModel.save(onSuccess = onSaved) },
@@ -288,7 +258,6 @@ fun TeamEditScreen(
         }
     }
 
-    // ── Диалог деактивации ────────────────────────────────────────────────
     if (showDeactivateDialog) {
         AlertDialog(
             onDismissRequest = { showDeactivateDialog = false },

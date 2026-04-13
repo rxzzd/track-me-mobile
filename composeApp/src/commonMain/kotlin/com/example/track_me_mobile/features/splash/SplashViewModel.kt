@@ -26,27 +26,23 @@ class SplashViewModel(
             try {
                 println("[Splash] Checking session...")
 
-                // Проверяем наличие SESSION cookie
                 val sessionCookie = sessionStorage.get()
 
                 if (sessionCookie.isNullOrBlank()) {
                     println("[Splash] No session found → Login")
-                    delay(500) // Минимальная задержка для плавности
+                    delay(500)
                     onResult(SplashDestination.Login)
                     return@launch
                 }
 
                 println("[Splash] Session exists, validating...")
 
-                // Проверяем валидность сессии через getUserInfo
                 authRepository.getUserInfo()
                     .onSuccess { userInfo ->
                         println("[Splash] Session valid! User: ${userInfo.username}, Role: ${userInfo.mainRole}")
 
-                        // Сохраняем UserInfo
                         userInfoHolder.save(userInfo)
 
-                        // Определяем куда перенаправить
                         val destination = when (userInfo.mainRole) {
                             Role.ADMIN, Role.SUPER_ADMIN -> SplashDestination.AdminHome
                             Role.TRACKER -> SplashDestination.TrackerHome
@@ -60,7 +56,6 @@ class SplashViewModel(
                         println("[Splash] Session invalid: ${e.message}")
                         errorMessage = "Сессия истекла"
 
-                        // Очищаем невалидную сессию
                         sessionStorage.clear()
 
                         delay(1000)

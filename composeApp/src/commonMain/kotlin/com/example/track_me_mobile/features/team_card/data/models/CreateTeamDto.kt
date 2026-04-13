@@ -3,7 +3,6 @@ package com.example.track_me_mobile.features.team_card.data.models
 import com.example.track_me_mobile.features.teams.domain.models.NtiMarket
 import kotlinx.serialization.Serializable
 
-// ── NTI Markets response ──────────────────────────────────────────────────────
 
 @Serializable
 data class NtiMarketDto(
@@ -18,7 +17,6 @@ data class NtiMarketDto(
     )
 }
 
-// ── Create team request body ──────────────────────────────────────────────────
 
 @Serializable
 data class CreateTeamRequestDto(

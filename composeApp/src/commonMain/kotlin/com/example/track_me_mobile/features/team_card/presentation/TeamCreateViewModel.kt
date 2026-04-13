@@ -65,25 +65,16 @@ class TeamCreateViewModel(
             _state.update { it.copy(isLoading = true, loadError = null) }
 
             val isTrackerRole = userInfoHolder.userInfo?.mainRole == Role.TRACKER
-
-            // ── Последовательная загрузка — каждый запрос делает свой fetchCsrf()
-            // Параллельность вызывала race condition на CSRF-куке в Ktor cookie storage
-
-            // 1. Потоки
             val streamsResult = repository.getStreams()
             if (streamsResult.isFailure) {
                 _state.update { it.copy(isLoading = false, loadError = "Не удалось загрузить потоки. Попробуйте ещё раз.") }
                 return@launch
             }
-
-            // 2. Рынки НТИ (GET, CSRF не нужен)
             val marketsResult = repository.getNtiMarkets()
             if (marketsResult.isFailure) {
                 _state.update { it.copy(isLoading = false, loadError = "Не удалось загрузить рынки НТИ. Попробуйте ещё раз.") }
                 return@launch
             }
-
-            // 3. Трекеры — только для админов
             val trackers: List<TrackerUser> = if (!isTrackerRole) {
                 val trackersResult = repository.getTrackers()
                 if (trackersResult.isFailure) {
@@ -95,8 +86,6 @@ class TeamCreateViewModel(
 
             val streams = streamsResult.getOrElse { emptyList() }
             val markets = marketsResult.getOrElse { emptyList() }
-
-            // Для трекера — предзаполняем его самого из userInfoHolder
             val currentUserTracker: TrackerUser? = if (isTrackerRole) {
                 userInfoHolder.userInfo?.let { info ->
                     TrackerUser(
@@ -122,8 +111,6 @@ class TeamCreateViewModel(
         }
     }
 
-    // ── Обновление полей ───────────────────────────────────────────────────
-
     fun onTeamNameChange(value: String) = _state.update { it.copy(teamName = value, teamNameError = null) }
     fun onMeetingRoomChange(value: String) = _state.update {it.copy(meetingRoomLink = value, meetingRoomLinkError = null)}
     fun onDescriptionChange(value: String) = _state.update { it.copy(description = value, descriptionError = null) }
@@ -134,8 +121,6 @@ class TeamCreateViewModel(
     fun clearSubmitError() = _state.update { it.copy(submitError = null) }
 
     fun retry() = loadInitialData()
-
-    // ── Создание команды ───────────────────────────────────────────────────
 
     fun submit(onSuccess: () -> Unit) {
         if (!validate()) return
@@ -169,8 +154,6 @@ class TeamCreateViewModel(
                 }
         }
     }
-
-    // ── Валидация ──────────────────────────────────────────────────────────
 
     fun isLinkRegex(s: String): Boolean {
         val urlRegex = "^(https?|ftp)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]".toRegex()

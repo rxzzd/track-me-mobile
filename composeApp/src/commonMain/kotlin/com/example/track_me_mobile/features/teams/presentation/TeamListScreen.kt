@@ -1,6 +1,7 @@
 package com.example.track_me_mobile.features.teams.presentation
 
 import androidx.compose.foundation.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -19,6 +20,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -42,10 +44,6 @@ import org.koin.compose.koinInject
 import com.example.track_me_mobile.core.domain.UserInfoHolder
 import com.example.track_me_mobile.core.domain.models.Role
 
-// ─────────────────────────────────────────────
-// Цвета перенести в core/ui/theme/Color.kt !
-// Здесь оставлены временно, чтобы не сломать превью
-// ─────────────────────────────────────────────
 val PrimaryPurple     = Color(0xFF8338EB)
 val DarkPurple        = Color(0xFF44069A)
 val LightPurpleBg     = Color(0xFFF0E5FF)
@@ -55,7 +53,6 @@ val StatusGray        = Color(0xFF878685)
 val FilterModalBg     = Color(0xFFD7C7FF)
 val ProjectLabelColor = Color(0xFF8338EB)
 
-// TRL-опции для фильтра — оставляем локально, они не приходят с сервера
 data class TrlOption(val label: String, val range: IntRange)
 
 val trlOptions = listOf(
@@ -65,9 +62,6 @@ val trlOptions = listOf(
     TrlOption("9-10", 9..10)
 )
 
-// ─────────────────────────────────────────────
-// Screen — точка входа из навигации
-// ─────────────────────────────────────────────
 
 data class TeamListScreen(
     val streamId: String? = null
@@ -77,12 +71,8 @@ data class TeamListScreen(
         val viewModel = koinScreenModel<TeamListViewModel>()
         val navigator = LocalNavigator.currentOrThrow
 
-        // Первый запуск — устанавливает streamFilter
         LaunchedEffect(Unit) { viewModel.initialize(streamId) }
 
-        // Перезагружаем каждый раз когда экран становится верхним.
-        // isTopScreen = false когда открыт дочерний экран, true когда вернулись назад.
-        // LaunchedEffect(isTopScreen) перезапускается при смене false → true.
         val isTopScreen = navigator.lastItem == this
         LaunchedEffect(isTopScreen) {
             if (isTopScreen) viewModel.loadTeams()
@@ -99,9 +89,6 @@ data class TeamListScreen(
     }
 }
 
-// ─────────────────────────────────────────────
-// Главный composable
-// ─────────────────────────────────────────────
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -148,7 +135,6 @@ fun TeamListContent(
                     modifier = Modifier.padding(vertical = 16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Показываем стрелку только для ADMIN и SUPER_ADMIN
                     if (userRole == Role.ADMIN || userRole == Role.SUPER_ADMIN) {
                         Icon(
                             painter = painterResource(Res.drawable.arrowback),
@@ -171,7 +157,6 @@ fun TeamListContent(
                     )
                 }
 
-                // ── Строка поиска + фильтр + добавить ──
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
@@ -237,7 +222,6 @@ fun TeamListContent(
 
                     Spacer(Modifier.width(12.dp))
 
-                    // ── ПЛЮСИК → открывает экран создания команды ──
                     Icon(
                         painter = painterResource(Res.drawable.icon_plus),
                         contentDescription = "Создать команду",
@@ -250,7 +234,6 @@ fun TeamListContent(
 
                 Spacer(Modifier.height(20.dp))
 
-                // ── Тело — зависит от состояния ──
                 when (val s = state) {
 
                     is TeamListState.Loading -> {
@@ -286,7 +269,6 @@ fun TeamListContent(
         }
     }
 
-    // ── Диалог фильтров ──
     if (showFilters) {
         Dialog(onDismissRequest = { showFilters = false }) {
             Surface(
@@ -310,9 +292,6 @@ fun TeamListContent(
     }
 }
 
-// ─────────────────────────────────────────────
-// Диалог фильтров
-// ─────────────────────────────────────────────
 @Composable
 fun FilterDialogContent(
     selectedMarkets: SnapshotStateList<String>,
@@ -401,14 +380,15 @@ fun FilterDialogContent(
     }
 }
 
-// ─────────────────────────────────────────────
-// Карточка команды
-// ─────────────────────────────────────────────
-@Preview
 @Composable
 fun TeamCard(team: TeamCard) {
     val montserrat = MontserratFontFamily()
     val navigator  = LocalNavigator.currentOrThrow
+
+    var isExpanded by remember { mutableStateOf(false) }
+
+    val MAX_DESCRIPTION_LENGTH = 100
+    val needsExpansion = team.description.length > MAX_DESCRIPTION_LENGTH
 
     Box(
         modifier = Modifier
@@ -437,12 +417,11 @@ fun TeamCard(team: TeamCard) {
                     )
                 }
 
-                // Рейтинг в правом верхнем углу изображения
                 team.averageGrade?.let { avg ->
                     val gradeColor = when {
-                        avg >= 0.51 -> Color(0xB30DB862) // зелёный
-                        avg >= 0.26 -> Color(0xCCFFC411) // жёлтый
-                        avg >= 0.0  -> Color(0xCCFF1504) // красный
+                        avg >= 0.51 -> Color(0xB30DB862)
+                        avg >= 0.26 -> Color(0xCCFFC411)
+                        avg >= 0.0  -> Color(0xCCFF1504)
                         else -> Color(0xFF878685)
                     }
                     Box(
@@ -520,13 +499,38 @@ fun TeamCard(team: TeamCard) {
 
                 Spacer(Modifier.height(4.dp))
 
-                Text(
-                    text = team.description,
-                    fontFamily = montserrat,
-                    fontSize = 11.sp,
-                    lineHeight = 15.sp,
-                    color = Color.Black
-                )
+                Column {
+                    val displayText = if (needsExpansion && !isExpanded) {
+                        team.description.take(MAX_DESCRIPTION_LENGTH) + "..."
+                    } else {
+                        team.description
+                    }
+
+                    Text(
+                        text = displayText,
+                        fontFamily = montserrat,
+                        fontSize = 11.sp,
+                        lineHeight = 15.sp,
+                        color = Color.Black
+                    )
+
+                    if (needsExpansion) {
+                        Text(
+                            text = if (isExpanded) "Скрыть" else "Подробнее...",
+                            fontFamily = montserrat,
+                            fontSize = 11.sp,
+                            color = Color.Gray,
+                            textDecoration = TextDecoration.Underline,
+                            modifier = Modifier
+                                .padding(top = 4.dp)
+                                .clickable(
+                                    onClick = { isExpanded = !isExpanded },
+                                    indication = null,
+                                    interactionSource = remember { MutableInteractionSource() }
+                                )
+                        )
+                    }
+                }
 
                 Spacer(Modifier.height(12.dp))
 
@@ -545,9 +549,6 @@ fun TeamCard(team: TeamCard) {
     }
 }
 
-// ─────────────────────────────────────────────
-// Checkbox
-// ─────────────────────────────────────────────
 private fun Double.formatTwoDecimals(): String {
     val rounded = (this * 100.0).roundToInt() / 100.0
     val parts = rounded.toString().split('.')
@@ -583,4 +584,3 @@ fun CustomCheckbox(
         }
     }
 }
-
