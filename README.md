@@ -1,35 +1,25 @@
-This is a Kotlin Multiplatform project targeting Android, iOS.
+# TrackMe Mobile 🎯
 
-* [/composeApp](./composeApp/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - [commonMain](./composeApp/src/commonMain/kotlin) is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./composeApp/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./composeApp/src/jvmMain/kotlin)
-    folder is the appropriate location.
+Мобильное приложение для автоматизации и мониторинга работы проектных команд.
 
-* [/iosApp](./iosApp/iosApp) contains iOS applications. Even if you’re sharing your UI with Compose Multiplatform,
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
+## 📥 Установка
 
-### Build and Run Android Application
+**[Скачать последнюю версию APK](https://github.com/rxzzd/track-me-mobile/releases/latest)**
 
-To build and run the development version of the Android app, use the run configuration from the run widget
-in your IDE’s toolbar or build it directly from the terminal:
-- on macOS/Linux
-  ```shell
-  ./gradlew :composeApp:assembleDebug
-  ```
-- on Windows
-  ```shell
-  .\gradlew.bat :composeApp:assembleDebug
-  ```
+Или соберите из исходников:
+```bash
+git clone https://github.com/rxzzd/track-me-mobile.git
+cd track-me-mobile
+./gradlew assembleRelease
+```
+## Технологии
 
-### Build and Run iOS Application
+- Kotlin Multiplatform
+- Jetpack Compose
+- Voyager (навигация)
+- Koin (DI)
+- Ktor Client
 
-To build and run the development version of the iOS app, use the run configuration from the run widget
-in your IDE’s toolbar or open the [/iosApp](./iosApp) directory in Xcode and run it from there.
+## Лицензия
 
----
-
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+MIT License - [Смотреть лицензию](https://github.com/rxzzd/track-me-mobile/blob/develop/LICENSE)
