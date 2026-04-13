@@ -1,8 +1,8 @@
-# TrackMe Mobile 🎯
+# TrackMe Mobile
 
 Мобильное приложение для автоматизации и мониторинга работы проектных команд.
 
-## 📥 Установка
+## Установка
 
 **[Скачать последнюю версию APK](https://github.com/rxzzd/track-me-mobile/releases/latest)**
 
