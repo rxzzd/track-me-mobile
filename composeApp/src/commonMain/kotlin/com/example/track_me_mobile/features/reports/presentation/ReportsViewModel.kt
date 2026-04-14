@@ -116,7 +116,8 @@ class ReportsViewModel(
 
             repository.getReports(
                 trackerUsername = trackerFilter,
-                streamName = streamFilter
+                streamName = streamFilter,
+                showInactive = showInactive
             )
                 .onSuccess { reports ->
                     updateFilterOptions(reports)
@@ -141,7 +142,7 @@ class ReportsViewModel(
 
     fun toggleShowInactive() {
         showInactive = !showInactive
-        // TODO: Реализовать фильтрацию
+        loadReports()
     }
 
     private fun updateFilterOptions(reports: List<ReportItem>) {

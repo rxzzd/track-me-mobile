@@ -100,11 +100,20 @@ val appModule = module {
     single<com.example.track_me_mobile.features.reports.domain.ReportRepository> {
         com.example.track_me_mobile.features.reports.data.ReportRepositoryImpl(get())
     }
+    single<com.example.track_me_mobile.features.reports.domain.StreamMeetingReportRepository> {
+        com.example.track_me_mobile.features.reports.data.StreamMeetingReportRepositoryImpl(get())
+    }
     factory {
         com.example.track_me_mobile.features.reports.presentation.ReportsViewModel(
             repository = get(),
             userInfoHolder = get(),
             httpClient = get()
+        )
+    }
+    factory { (streamId: String) ->
+        com.example.track_me_mobile.features.reports.presentation.StreamMeetingReportViewModel(
+            get(),
+            streamId
         )
     }
     factory { TeamCreateViewModel(get(), get()) }

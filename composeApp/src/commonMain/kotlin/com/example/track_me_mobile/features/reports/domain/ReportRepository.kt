@@ -7,6 +7,7 @@ interface ReportRepository {
         trackerUsername: String? = null,
         streamName: String? = null,
         page: Int = 0,
-        size: Int = 100
+        size: Int = 100,
+        showInactive: Boolean = false
     ): Result<List<ReportItem>>
 }

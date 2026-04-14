@@ -5,9 +5,11 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ReportItemDto(
+    val streamId: String? = null,
     val streamName: String,
     val startDate: String,
     val endDate: String,
+    val teamId: String? = null,
     val teamCardName: String,
     val username: String,
     val averageTeamGrade: Double?,  // Nullable - может быть null
@@ -18,9 +20,11 @@ data class ReportItemDto(
     val readinessLevel: String
 ) {
     fun toDomain() = ReportItem(
+        streamId = streamId,
         streamName = streamName,
         startDate = startDate,
         endDate = endDate,
+        teamId = teamId,
         teamCardName = teamCardName,
         username = username,
         averageTeamGrade = averageTeamGrade ?: 0.0,  // Дефолт 0.0
