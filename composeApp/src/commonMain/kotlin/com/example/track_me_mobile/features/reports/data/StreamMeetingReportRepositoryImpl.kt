@@ -1,0 +1,86 @@
+package com.example.track_me_mobile.features.reports.data
+
+import com.example.track_me_mobile.core.network.ApiConstants
+import com.example.track_me_mobile.features.auth.data.model.CsrfResponse
+import com.example.track_me_mobile.features.reports.domain.StreamMeetingReportRepository
+import com.example.track_me_mobile.features.reports.domain.models.StreamMeetingReportItem
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.request.*
+import io.ktor.http.*
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class StreamMeetingReportItemDto(
+    val streamId: String? = null,
+    val streamName: String? = null,
+    val teamId: String? = null,
+    val teamName: String,
+    val startDate: String? = null,
+    val trackerName: String? = null,
+    val trackerFullName: String? = null,
+    val tasksNextMeeting: String? = null,
+    val tasksCurrentMeeting: String? = null,
+    val status: String? = null,
+    val teamStatus: String? = null
+) {
+    fun toDomain() = StreamMeetingReportItem(
+        streamId = streamId,
+        streamName = streamName,
+        teamId = teamId,
+        teamName = teamName,
+        startDate = startDate,
+        trackerName = trackerName,
+        trackerFullName = trackerFullName,
+        tasksNextMeeting = tasksNextMeeting,
+        tasksCurrentMeeting = tasksCurrentMeeting,
+        status = status,
+        teamStatus = teamStatus
+    )
+}
+
+@Serializable
+data class StreamMeetingReportsPageDto(
+    val content: List<StreamMeetingReportItemDto>
+)
+
+class StreamMeetingReportRepositoryImpl(
+    private val client: HttpClient
+) : StreamMeetingReportRepository {
+
+    override suspend fun getReportsByStream(
+        streamId: String,
+        page: Int,
+        size: Int,
+        sort: List<String>
+    ): Result<List<StreamMeetingReportItem>> {
+        return try {
+            val csrfResponse = client.get(ApiConstants.CSRF_ENDPOINT) {
+                header(HttpHeaders.Accept, "application/json")
+            }
+            val csrfData = csrfResponse.body<CsrfResponse>()
+
+            val response = client.post(ApiConstants.MEETING_REPORTS) {
+                parameter("streamId", streamId)
+                parameter("page", page)
+                parameter("size", size)
+                sort.forEach { parameter("sort", it) }
+                header(HttpHeaders.Accept, "application/json")
+                header(csrfData.headerName, csrfData.token)
+                contentType(ContentType.Application.Json)
+                setBody(ReportRequestBody(filters = emptyList()))
+            }
+
+            if (response.status != HttpStatusCode.OK) {
+                return Result.failure(Exception("Ошибка: ${response.status}"))
+            }
+
+            val dto = response.body<StreamMeetingReportsPageDto>()
+            Result.success(dto.content.map { it.toDomain() })
+        } catch (e: Exception) {
+            println("[StreamMeetingReport] Ошибка: ${e.message}")
+            e.printStackTrace()
+            Result.failure(e)
+        }
+    }
+}

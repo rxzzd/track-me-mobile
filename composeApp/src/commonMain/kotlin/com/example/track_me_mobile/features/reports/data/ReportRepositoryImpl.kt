@@ -9,6 +9,9 @@ import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -32,10 +35,11 @@ class ReportRepositoryImpl(
         trackerUsername: String?,
         streamName: String?,
         page: Int,
-        size: Int
+        size: Int,
+        showInactive: Boolean
     ): Result<List<ReportItem>> {
         return try {
-            println("[REPORTS] Загрузка отчётов: tracker=$trackerUsername, stream=$streamName")
+            println("[REPORTS] Загрузка отчётов: tracker=$trackerUsername, stream=$streamName, showInactive=$showInactive")
 
             // Получаем CSRF токен
             val csrfResponse = client.get(ApiConstants.CSRF_ENDPOINT) {
@@ -60,6 +64,24 @@ class ReportRepositoryImpl(
                     fieldName = "streams.name",
                     type = "EQ",
                     values = listOf(streamName)
+                ))
+            }
+
+            if (!showInactive) {
+                val today = Clock.System.now()
+                    .toLocalDateTime(TimeZone.currentSystemDefault())
+                    .date
+                    .toString()
+
+                filters.add(ReportFilterDto(
+                    fieldName = "streams.startDate",
+                    type = "LTE",
+                    values = listOf(today)
+                ))
+                filters.add(ReportFilterDto(
+                    fieldName = "streams.endDate",
+                    type = "GTE",
+                    values = listOf(today)
                 ))
             }
 

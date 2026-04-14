@@ -34,6 +34,7 @@ object ApiConstants {
     const val MEETING_BASE_URL = "https://api.trackme.test.startup-poligon.com/meeting/api/v1"
 
     const val MEETINGS_LIST = "$MEETING_BASE_URL/meetings"
+    const val MEETING_REPORTS = "$MEETING_BASE_URL/meetings/reports"
     const val CREATE_MEETING = "$MEETING_BASE_URL/create-meeting"
     fun updateMeeting(id: String) = "$MEETING_BASE_URL/update-meeting/$id"
 

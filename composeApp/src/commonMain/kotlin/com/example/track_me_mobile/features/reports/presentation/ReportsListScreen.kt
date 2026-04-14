@@ -13,16 +13,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.example.track_me_mobile.core.ui.components.MainTopHeader
 import com.example.track_me_mobile.core.ui.theme.TrackMePurple
 import com.example.track_me_mobile.features.reports.presentation.components.*
 import com.example.track_me_mobile.features.reports.domain.models.ReportItem
+import com.example.track_me_mobile.features.team_card.presentation.InfoTeamLevel
 
 class ReportsListScreen : Screen {
     @Composable
     override fun Content() {
         val viewModel = koinScreenModel<ReportsViewModel>()
 
+        val navigator = LocalNavigator.currentOrThrow
         ReportsListContent(
             state = viewModel.state,
             selectedTracker = viewModel.selectedTracker,
@@ -34,7 +38,17 @@ class ReportsListScreen : Screen {
             onStreamSelected = viewModel::setStreamFilter,
             onToggleInactive = viewModel::toggleShowInactive,
             onDownloadReport = viewModel::downloadReport,
-            onRetry = viewModel::loadReports
+            onRetry = viewModel::loadReports,
+            onStreamClick = { streamId ->
+                if (!streamId.isNullOrBlank()) {
+                    navigator.push(StreamMeetingReportScreen(streamId))
+                }
+            },
+            onTeamClick = { teamId ->
+                if (!teamId.isNullOrBlank()) {
+                    navigator.push(InfoTeamLevel(teamId))
+                }
+            }
         )
     }
 }
@@ -51,7 +65,9 @@ fun ReportsListContent(
     onStreamSelected: (String) -> Unit,
     onToggleInactive: () -> Unit,
     onDownloadReport: () -> Unit,
-    onRetry: () -> Unit
+    onRetry: () -> Unit,
+    onStreamClick: (String?) -> Unit,
+    onTeamClick: (String?) -> Unit
 ) {
     val vertState = rememberScrollState()
     val horizState = rememberScrollState()
@@ -236,9 +252,33 @@ fun ReportsListContent(
                                                 )
                                         ) {
                                             TableCell((index + 1).toString(), 50.dp)
-                                            TableCell(report.streamName, 180.dp)
+                                            Box(
+                                                modifier = Modifier.clickable(
+                                                    enabled = !report.streamId.isNullOrBlank()
+                                                ) {
+                                                    report.streamId?.let(onStreamClick)
+                                                }
+                                            ) {
+                                                TableCell(
+                                                    text = report.streamName,
+                                                    width = 180.dp,
+                                                    textColor = if (!report.streamId.isNullOrBlank()) TrackMePurple else Color.Black
+                                                )
+                                            }
                                             TableCell("${report.startDate} - ${report.endDate}", 160.dp)
-                                            TableCell(report.teamCardName, 200.dp)
+                                            Box(
+                                                modifier = Modifier.clickable(
+                                                    enabled = !report.teamId.isNullOrBlank()
+                                                ) {
+                                                    report.teamId?.let(onTeamClick)
+                                                }
+                                            ) {
+                                                TableCell(
+                                                    text = report.teamCardName,
+                                                    width = 200.dp,
+                                                    textColor = if (!report.teamId.isNullOrBlank()) TrackMePurple else Color.Black
+                                                )
+                                            }
 
                                             // ФИО трекера
                                             val trackerName = availableTrackers

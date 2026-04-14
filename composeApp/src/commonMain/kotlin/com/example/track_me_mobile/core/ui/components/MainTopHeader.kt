@@ -98,6 +98,13 @@ fun MainTopHeader(onBackClick: () -> Unit = {}) {
                 list.add(HeaderMenuItem("Все команды", currentScreen is TeamListScreen) {
                     navigate(TeamListScreen())
                 })
+                list.add(HeaderMenuItem(
+                    "Отчетность",
+                    currentScreen is ReportsListScreen  // ← Подсветка
+                ) {
+                    expanded = false
+                    navigator.push(ReportsListScreen())
+                })
             }
             Role.TRACKER -> {
                 list.add(HeaderMenuItem("Главный экран", currentScreen is TeamListScreen) {
