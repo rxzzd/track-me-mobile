@@ -9,4 +9,14 @@ interface StreamMeetingReportRepository {
         size: Int = 10000,
         sort: List<String> = listOf("teamName,asc", "startDate,desc")
     ): Result<List<StreamMeetingReportItem>>
+
+    suspend fun downloadReportsExcel(
+        streamId: String,
+        trackerFilter: String? = null,
+        teamFilter: String? = null,
+        statusFilter: String? = null,
+        page: Int = 0,
+        size: Int = 10000,
+        sort: List<String> = listOf("teamName,asc", "startDate,desc")
+    ): Result<ByteArray>
 }

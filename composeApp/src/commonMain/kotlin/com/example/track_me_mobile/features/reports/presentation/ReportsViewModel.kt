@@ -150,7 +150,18 @@ class ReportsViewModel(
         availableStreams = listOf("Все") + streams
     }
 
-    fun downloadReport() {
-        println("REPORTS_VM: Выгрузка отчёта...")
+    suspend fun prepareReportExcel(): Result<Pair<String, ByteArray>> {
+        val result = repository.downloadReportsExcel(
+            trackerUsername = if (selectedTracker == "Все") null else selectedTracker,
+            streamName = if (selectedStream == "Все") null else selectedStream,
+            page = 0,
+            size = 10000,
+            showInactive = showInactive
+        )
+
+        return result.mapCatching { bytes ->
+            val fileName = "Отчёт_команды_${selectedStream.takeIf { it != "Все" } ?: "все_потоки"}.xlsx"
+            fileName to bytes
+        }
     }
 }

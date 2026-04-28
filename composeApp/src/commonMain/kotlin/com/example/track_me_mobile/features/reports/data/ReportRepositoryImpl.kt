@@ -117,4 +117,86 @@ class ReportRepositoryImpl(
             Result.failure(e)
         }
     }
+
+    override suspend fun downloadReportsExcel(
+        trackerUsername: String?,
+        streamName: String?,
+        page: Int,
+        size: Int,
+        showInactive: Boolean
+    ): Result<ByteArray> {
+        return try {
+            println("[REPORTS] Выгрузка Excel: tracker=$trackerUsername, stream=$streamName, showInactive=$showInactive")
+
+            val csrfResponse = client.get(ApiConstants.CSRF_ENDPOINT) {
+                header(HttpHeaders.Accept, "application/json")
+            }
+            val csrfData = csrfResponse.body<CsrfResponse>()
+
+            val filters = mutableListOf<ReportFilterDto>()
+
+            if (trackerUsername != null && trackerUsername != "Все") {
+                filters.add(
+                    ReportFilterDto(
+                        fieldName = "username",
+                        type = "EQ",
+                        values = listOf(trackerUsername)
+                    )
+                )
+            }
+
+            if (streamName != null && streamName != "Все") {
+                filters.add(
+                    ReportFilterDto(
+                        fieldName = "streams.name",
+                        type = "EQ",
+                        values = listOf(streamName)
+                    )
+                )
+            }
+
+            if (!showInactive) {
+                val today = Clock.System.now()
+                    .toLocalDateTime(TimeZone.currentSystemDefault())
+                    .date
+                    .toString()
+
+                filters.add(
+                    ReportFilterDto(
+                        fieldName = "streams.startDate",
+                        type = "LTE",
+                        values = listOf(today)
+                    )
+                )
+                filters.add(
+                    ReportFilterDto(
+                        fieldName = "streams.endDate",
+                        type = "GTE",
+                        values = listOf(today)
+                    )
+                )
+            }
+
+            val requestBody = ReportRequestBody(filters = filters)
+            val endpoint = "${ApiConstants.BACKEND_BASE}/api/v1/team-cards/reports/excel?page=$page&size=$size"
+
+            val response = client.post(endpoint) {
+                header(HttpHeaders.Accept, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                header(csrfData.headerName, csrfData.token)
+                contentType(ContentType.Application.Json)
+                setBody(requestBody)
+            }
+
+            if (response.status != HttpStatusCode.OK) {
+                return Result.failure(Exception("Ошибка: ${response.status}"))
+            }
+
+            val bytes = response.body<ByteArray>()
+            Result.success(bytes)
+        } catch (e: Exception) {
+            println("[REPORTS] Excel выгрузка ошибка: ${e.message}")
+            e.printStackTrace()
+            Result.failure(e)
+        }
+    }
 }

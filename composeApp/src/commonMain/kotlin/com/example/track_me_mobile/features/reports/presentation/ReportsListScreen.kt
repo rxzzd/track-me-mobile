@@ -15,6 +15,8 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.example.track_me_mobile.core.files.saveExcelFile
+import kotlinx.coroutines.launch
 import com.example.track_me_mobile.core.ui.components.MainTopHeader
 import com.example.track_me_mobile.core.ui.theme.TrackMePurple
 import com.example.track_me_mobile.features.reports.presentation.components.*
@@ -25,6 +27,20 @@ class ReportsListScreen : Screen {
     @Composable
     override fun Content() {
         val viewModel = koinScreenModel<ReportsViewModel>()
+        val coroutineScope = rememberCoroutineScope()
+
+        val onDownload = {
+            coroutineScope.launch {
+                viewModel.prepareReportExcel()
+                    .onSuccess { (fileName, bytes) ->
+                        saveExcelFile(fileName, bytes)
+                    }
+                    .onFailure { error ->
+                        println("[REPORTS] Не удалось сохранить Excel: ${error.message}")
+                    }
+            }
+            Unit
+        }
 
         val navigator = LocalNavigator.currentOrThrow
         ReportsListContent(
@@ -37,7 +53,7 @@ class ReportsListScreen : Screen {
             onTrackerSelected = viewModel::setTrackerFilter,
             onStreamSelected = viewModel::setStreamFilter,
             onToggleInactive = viewModel::toggleShowInactive,
-            onDownloadReport = viewModel::downloadReport,
+            onDownloadReport = onDownload,
             onRetry = viewModel::loadReports,
             onStreamClick = { streamId ->
                 if (!streamId.isNullOrBlank()) {
