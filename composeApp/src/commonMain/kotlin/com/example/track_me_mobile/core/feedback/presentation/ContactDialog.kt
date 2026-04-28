@@ -6,6 +6,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Feedback
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -242,18 +245,21 @@ fun SuccessDialog(onDismiss: () -> Unit) {
 
 @Composable
 fun FeedbackFab(modifier: Modifier = Modifier) {
-    // Внедряем зависимость через Koin
     val viewModel = koinInject<FeedbackViewModel>()
     var showDialog by remember { mutableStateOf(false) }
 
-    ExtendedFloatingActionButton(
+    // Компактная круглая кнопка вместо ExtendedFAB
+    FloatingActionButton(
         onClick = { showDialog = true },
-        shape = RoundedCornerShape(50.dp),
         containerColor = Color(0xFF8B2FC9),
         contentColor = Color.White,
-        modifier = modifier
+        modifier = modifier.size(56.dp)  // Стандартный размер FAB
     ) {
-        Text(text = "Обратная связь", fontSize = 14.sp, fontWeight = FontWeight.Bold)
+        Icon(
+            imageVector = Icons.Default.Feedback,  // Или Icons.Default.Feedback, Icons.Default.Email
+            contentDescription = "Обратная связь",
+            modifier = Modifier.size(24.dp)
+        )
     }
 
     if (showDialog) {

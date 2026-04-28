@@ -121,4 +121,21 @@ class StreamMeetingReportViewModel(
 
         state = StreamMeetingReportState.Success(filtered)
     }
+
+    suspend fun prepareExcelReport(): Result<Pair<String, ByteArray>> {
+        val result = repository.downloadReportsExcel(
+            streamId = streamId,
+            trackerFilter = if (selectedTracker == "Все") null else selectedTracker,
+            teamFilter = if (selectedTeam == "Все") null else selectedTeam,
+            statusFilter = if (selectedStatus == "Все") null else selectedStatus,
+            page = 0,
+            size = 10000,
+            sort = listOf("teamName,asc", "startDate,desc")
+        )
+
+        return result.mapCatching { bytes ->
+            val fileName = "Отчёт_встречи_${streamId.take(8)}.xlsx"
+            fileName to bytes
+        }
+    }
 }

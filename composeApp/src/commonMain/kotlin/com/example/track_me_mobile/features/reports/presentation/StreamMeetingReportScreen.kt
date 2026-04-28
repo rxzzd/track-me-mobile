@@ -1,14 +1,18 @@
 package com.example.track_me_mobile.features.reports.presentation
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -18,14 +22,18 @@ import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.example.track_me_mobile.core.files.saveExcelFile
 import com.example.track_me_mobile.core.ui.components.MainTopHeader
 import com.example.track_me_mobile.core.ui.theme.TrackMePurple
+import com.example.track_me_mobile.features.reports.domain.models.StreamMeetingReportItem
 import com.example.track_me_mobile.features.reports.presentation.components.*
+import kotlinx.coroutines.launch
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.koin.core.component.KoinComponent
 import org.koin.core.parameter.parametersOf
-import com.example.track_me_mobile.features.reports.domain.models.StreamMeetingReportItem
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.verticalScroll
+
 class StreamMeetingReportScreen(
     private val streamId: String
 ) : Screen {
@@ -35,6 +43,20 @@ class StreamMeetingReportScreen(
         val navigator = LocalNavigator.currentOrThrow
         val viewModel = remember(streamId) {
             object : KoinComponent {}.getKoin().get<StreamMeetingReportViewModel> { parametersOf(streamId) }
+        }
+        val coroutineScope = rememberCoroutineScope()
+
+        val onExportExcel = {
+            coroutineScope.launch {
+                viewModel.prepareExcelReport()
+                    .onSuccess { (fileName, bytes) ->
+                        saveExcelFile(fileName, bytes)
+                    }
+                    .onFailure { error ->
+                        println("[STREAM_MEETING_REPORT] Excel export failed: ${error.message}")
+                    }
+            }
+            Unit
         }
 
         val vertState = rememberScrollState()
@@ -72,6 +94,21 @@ class StreamMeetingReportScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
+                OutlinedButton(
+                    onClick = onExportExcel,
+                    modifier = Modifier.fillMaxWidth().height(44.dp),
+                    border = BorderStroke(2.dp, TrackMePurple),
+                    shape = RoundedCornerShape(20.dp)
+                ) {
+                    Text(
+                        "Выгрузить отчет в Excel",
+                        color = TrackMePurple,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
                 ExpandableDropdown(
                     title = "Трекеры",
                     selectedItem = viewModel.selectedTracker,
@@ -203,7 +240,7 @@ class StreamMeetingReportScreen(
                                                             textColor = if (!item.teamId.isNullOrBlank()) TrackMePurple else Color.Black
                                                         )
                                                     }
-                                                    TableCell(item.startDate ?: "—", 110.dp)
+                                                    TableCell(formatReportDate(item.startDate), 110.dp)
                                                     TableCell(
                                                         item.trackerFullName ?: item.trackerName ?: "—",
                                                         180.dp
@@ -245,6 +282,19 @@ class StreamMeetingReportScreen(
     }
 }
 
+private fun formatReportDate(dateString: String?): String {
+    if (dateString.isNullOrBlank()) return "—"
+    return try {
+        val instant = Instant.parse(dateString)
+        val localDate = instant.toLocalDateTime(TimeZone.currentSystemDefault()).date
+        "${localDate.dayOfMonth.toString().padStart(2, '0')}." +
+            "${localDate.monthNumber.toString().padStart(2, '0')}." +
+            "${localDate.year}"
+    } catch (e: Exception) {
+        dateString
+    }
+}
+
 @Composable
 private fun MeetingRow(
     index: Int,
@@ -268,7 +318,7 @@ private fun MeetingRow(
             fontSize = 13.sp
         )
 
-        Text(text = item.startDate ?: "—", modifier = Modifier.weight(1.2f), fontSize = 13.sp)
+        Text(text = formatReportDate(item.startDate), modifier = Modifier.weight(1.2f), fontSize = 13.sp)
 
         Text(
             text = item.trackerFullName ?: item.trackerName ?: "—",

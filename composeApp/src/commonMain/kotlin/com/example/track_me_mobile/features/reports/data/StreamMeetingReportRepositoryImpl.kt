@@ -83,4 +83,78 @@ class StreamMeetingReportRepositoryImpl(
             Result.failure(e)
         }
     }
+
+    override suspend fun downloadReportsExcel(
+        streamId: String,
+        trackerFilter: String?,
+        teamFilter: String?,
+        statusFilter: String?,
+        page: Int,
+        size: Int,
+        sort: List<String>
+    ): Result<ByteArray> {
+        return try {
+            println("[StreamMeetingReport] Выгрузка Excel: streamId=$streamId, tracker=$trackerFilter, team=$teamFilter, status=$statusFilter")
+
+            val csrfResponse = client.get(ApiConstants.CSRF_ENDPOINT) {
+                header(HttpHeaders.Accept, "application/json")
+            }
+            val csrfData = csrfResponse.body<CsrfResponse>()
+
+            val filters = mutableListOf<ReportFilterDto>()
+
+            if (trackerFilter != null && trackerFilter != "Все") {
+                filters.add(
+                    ReportFilterDto(
+                        fieldName = "trackerFullName",
+                        type = "EQ",
+                        values = listOf(trackerFilter)
+                    )
+                )
+            }
+
+            if (teamFilter != null && teamFilter != "Все") {
+                filters.add(
+                    ReportFilterDto(
+                        fieldName = "teamName",
+                        type = "EQ",
+                        values = listOf(teamFilter)
+                    )
+                )
+            }
+
+            if (statusFilter != null && statusFilter != "Все") {
+                filters.add(
+                    ReportFilterDto(
+                        fieldName = "teamStatus",
+                        type = "EQ",
+                        values = listOf(statusFilter)
+                    )
+                )
+            }
+
+            val requestBody = ReportRequestBody(filters = filters)
+            val response = client.post("${ApiConstants.MEETING_REPORTS}/excel") {
+                parameter("streamId", streamId)
+                parameter("page", page)
+                parameter("size", size)
+                sort.forEach { parameter("sort", it) }
+                header(HttpHeaders.Accept, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                header(csrfData.headerName, csrfData.token)
+                contentType(ContentType.Application.Json)
+                setBody(requestBody)
+            }
+
+            if (response.status != HttpStatusCode.OK) {
+                return Result.failure(Exception("Ошибка: ${response.status}"))
+            }
+
+            val bytes = response.body<ByteArray>()
+            Result.success(bytes)
+        } catch (e: Exception) {
+            println("[StreamMeetingReport] Excel выгрузка ошибка: ${e.message}")
+            e.printStackTrace()
+            Result.failure(e)
+        }
+    }
 }

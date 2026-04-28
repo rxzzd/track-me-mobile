@@ -10,4 +10,12 @@ interface ReportRepository {
         size: Int = 100,
         showInactive: Boolean = false
     ): Result<List<ReportItem>>
+
+    suspend fun downloadReportsExcel(
+        trackerUsername: String? = null,
+        streamName: String? = null,
+        page: Int = 0,
+        size: Int = 10000,
+        showInactive: Boolean = false
+    ): Result<ByteArray>
 }
