@@ -7,6 +7,7 @@ import com.example.track_me_mobile.core.network.SessionStorage
 import com.example.track_me_mobile.features.auth.data.model.CsrfResponse
 import com.example.track_me_mobile.features.auth.data.model.UserInfoDto
 import com.example.track_me_mobile.features.auth.domain.AuthRepository
+import com.example.track_me_mobile.features.auth.domain.AuthSessionSaver
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -16,9 +17,9 @@ import io.ktor.http.*
 class AuthRepositoryImpl(
     private val client: HttpClient,
     private val sessionStorage: SessionStorage
-) : AuthRepository {
+) : AuthRepository, AuthSessionSaver {
 
-    suspend fun saveSession(cookieString: String) {
+    override suspend fun saveSession(cookieString: String) {
         val sessionValue = cookieString
             .split(";")
             .map { it.trim() }

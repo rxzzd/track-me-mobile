@@ -7,13 +7,13 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.example.track_me_mobile.core.domain.UserInfoHolder
 import com.example.track_me_mobile.core.domain.models.Role
-import com.example.track_me_mobile.features.auth.data.AuthRepositoryImpl
 import com.example.track_me_mobile.features.auth.domain.AuthRepository
+import com.example.track_me_mobile.features.auth.domain.AuthSessionSaver
 import kotlinx.coroutines.launch
 
 class LoginViewModel(
     private val repository: AuthRepository,
-    private val repositoryImpl: AuthRepositoryImpl,
+    private val authSessionSaver: AuthSessionSaver,
     private val userInfoHolder: UserInfoHolder
 ) : ScreenModel {
 
@@ -29,7 +29,7 @@ class LoginViewModel(
             errorMessage = null
 
             try {
-                repositoryImpl.saveSession(cookieString)
+                authSessionSaver.saveSession(cookieString)
 
                 repository.getUserInfo()
                     .onSuccess { userInfo ->

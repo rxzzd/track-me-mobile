@@ -6,6 +6,7 @@ import com.example.track_me_mobile.core.network.SessionStorage
 import com.example.track_me_mobile.core.ui.components.GlobalHeaderViewModel
 import com.example.track_me_mobile.features.auth.data.AuthRepositoryImpl
 import com.example.track_me_mobile.features.auth.domain.AuthRepository
+import com.example.track_me_mobile.features.auth.domain.AuthSessionSaver
 import com.example.track_me_mobile.features.auth.presentation.LoginViewModel
 import com.example.track_me_mobile.features.profile.data.ProfileRepositoryImpl
 import com.example.track_me_mobile.features.profile.domain.ProfileRepository
@@ -40,11 +41,11 @@ val appModule = module {
 
 
     single { PersistentStorage.create() }
-    single { SessionStorage(get()) }
+    single { SessionStorage(get<com.example.track_me_mobile.core.storage.PersistentStorage>()) }
 
     single {
         HttpClientFactory.create(
-            sessionStorage = get(),
+            sessionStorage = get<com.example.track_me_mobile.core.network.SessionStorage>(),
             onUnauthorized = {
                 println("[App] Unauthorized - session cleared")
             }
@@ -58,6 +59,7 @@ val appModule = module {
 
     single { AuthRepositoryImpl(get(), get()) }
     single<AuthRepository> { get<AuthRepositoryImpl>() }
+    single<AuthSessionSaver> { get<AuthRepositoryImpl>() }
     factory { LoginViewModel(get(), get(), get()) }
     factory { GlobalHeaderViewModel(get(), get()) }
 
@@ -73,7 +75,6 @@ val appModule = module {
     single<ProfileRepository> { ProfileRepositoryImpl(get()) }
     factory { ProfileViewModel(get()) }
     factory { (username: String) -> UserProfileViewModel(get(), username) }
-
 
     single<UsersRepository> { UsersRepositoryImpl(get()) }
     factory { TrackerListViewModel(get()) }
@@ -116,9 +117,6 @@ val appModule = module {
             streamId
         )
     }
-    factory { TeamCreateViewModel(get(), get()) }
-    factory { (teamId: String) -> TeamEditViewModel(teamId, get(), get()) }
-
 
     single<MeetingRepository> { MeetingRepositoryImpl(get()) }
 

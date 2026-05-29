@@ -7,13 +7,13 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.example.track_me_mobile.core.domain.UserInfoHolder
 import com.example.track_me_mobile.core.domain.models.Role
-import com.example.track_me_mobile.core.network.SessionStorage
+import com.example.track_me_mobile.core.network.SessionProvider
 import com.example.track_me_mobile.features.auth.domain.AuthRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class SplashViewModel(
-    private val sessionStorage: SessionStorage,
+    private val sessionStorage: SessionProvider,
     private val authRepository: AuthRepository,
     private val userInfoHolder: UserInfoHolder
 ) : ScreenModel {

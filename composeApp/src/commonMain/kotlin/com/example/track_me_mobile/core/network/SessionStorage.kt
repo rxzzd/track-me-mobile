@@ -7,7 +7,7 @@ import io.ktor.http.*
 class SessionStorage(
     private val persistentStorage: PersistentStorage,
     val cookieStorage: AcceptAllCookiesStorage = AcceptAllCookiesStorage()
-) {
+) : SessionProvider {
     private val gatewayUrl = Url("https://${ApiConstants.GATEWAY_HOST}")
 
     companion object {
@@ -32,7 +32,7 @@ class SessionStorage(
         )
     }
 
-    suspend fun get(): String? {
+    override suspend fun get(): String? {
         val memorySession = cookieStorage.get(gatewayUrl)
             .find { it.name == "SESSION" }?.value
 
@@ -65,7 +65,7 @@ class SessionStorage(
         return null
     }
 
-    suspend fun clear() {
+    override suspend fun clear() {
         println("[SessionStorage] Clearing SESSION")
 
         persistentStorage.remove(SESSION_KEY)

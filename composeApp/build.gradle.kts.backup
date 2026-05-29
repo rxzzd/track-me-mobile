@@ -1,3 +1,4 @@
+import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -6,8 +7,6 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     kotlin("plugin.serialization") version "2.0.0"
-    id("org.jetbrains.kotlinx.kover")
-
 }
 
 kotlin {
@@ -29,7 +28,6 @@ kotlin {
 
     sourceSets {
         androidMain.dependencies {
-
             val voyagerVersion = "1.1.0-beta02"
             implementation("androidx.activity:activity-compose:1.8.2")
             implementation("cafe.adriel.voyager:voyager-hilt:${voyagerVersion}")
@@ -82,8 +80,8 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+            implementation(kotlin("test")) // Добавьте эту строку
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
-            implementation("io.ktor:ktor-client-mock:${libs.versions.ktor.get()}")
         }
     }
 }
@@ -92,63 +90,34 @@ android {
     namespace = "com.example.track_me_mobile"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
-    buildToolsVersion = "36.1.0"
-
     defaultConfig {
         applicationId = "com.example.track_me_mobile"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
         manifestPlaceholders["appAuthRedirectScheme"] = "com.example.trackme"
     }
-
-    testOptions {
-        unitTests.isIncludeAndroidResources = true
-    }
-
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-
     buildTypes {
-        debug {
-            enableUnitTestCoverage = true
-            enableAndroidTestCoverage = true
-        }
         getByName("release") {
             isMinifyEnabled = false
         }
     }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    buildToolsVersion = "36.1.0 rc1"
 }
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.6.0")
     debugImplementation(libs.compose.uiTooling)
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.6.8")
-    debugImplementation("androidx.compose.ui:ui-test-manifest:1.6.8")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-}
-
-kover {
-    reports {
-        filters {
-            includes {
-                classes("com.example.track_me_mobile.features.*")
-            }
-        }
-    }
 }
 
 compose.resources {

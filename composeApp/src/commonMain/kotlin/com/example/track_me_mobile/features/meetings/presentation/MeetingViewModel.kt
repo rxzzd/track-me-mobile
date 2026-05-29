@@ -38,7 +38,6 @@ class MeetingViewModel(
 
     fun loadTeamCard(){
         screenModelScope.launch {
-            errorMessage = null
             teamCardRepository.getTeamById(teamCardId)
                 .onSuccess { teamCard ->
                     meetingRoomLink = teamCard.meetingRoomLink

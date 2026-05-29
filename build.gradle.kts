@@ -6,4 +6,9 @@ plugins {
     alias(libs.plugins.composeMultiplatform) apply false
     alias(libs.plugins.composeCompiler) apply false
     alias(libs.plugins.kotlinMultiplatform) apply false
+    id("org.jetbrains.kotlinx.kover") version "0.9.3" apply false
+
+}
+subprojects {
+    apply(plugin = "org.jetbrains.kotlinx.kover")
 }
