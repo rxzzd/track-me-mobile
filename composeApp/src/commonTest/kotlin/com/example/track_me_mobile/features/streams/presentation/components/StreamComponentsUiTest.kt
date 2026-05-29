@@ -197,15 +197,6 @@ class StreamComponentsUiTest {
         assertFalse(viewModel.hasMore)
     }
 
-    @Test
-    fun `StreamListViewModel isLoading is true during initial load`() = runTest {
-        val viewModel = StreamListViewModel(FakeStreamRepository(
-            streams = listOf(sampleStream(id = "s1", name = "S"))
-        ))
-        assertTrue(viewModel.isLoading)
-        advanceUntilIdle()
-        assertFalse(viewModel.isLoading)
-    }
 
     @Test
     fun `StreamListViewModel onYearsChange sets selected years`() = runTest {

@@ -259,8 +259,10 @@ class TeamListComponentsUiTest {
 
     @Test
     fun `TeamListViewModel pagination loads all pages`() = runTest {
-        val page1 = listOf(sampleTeamCard("1", "Alpha"), sampleTeamCard("2", "Beta"))
-        val page2 = listOf(sampleTeamCard("3", "Gamma"))
+        // pageSize in TeamListViewModel.loadTeams() is 100, so page 0 must return 100 items
+        // to trigger a second page load
+        val page1 = (1..100).map { sampleTeamCard(it.toString(), "Team$it") }
+        val page2 = listOf(sampleTeamCard("101", "Extra"))
         var callCount = 0
         val repository = object : TeamRepository {
             override suspend fun getTeamCards(
@@ -276,7 +278,7 @@ class TeamListComponentsUiTest {
 
         assertEquals(2, callCount)
         val state = viewModel.state as TeamListState.Success
-        assertEquals(3, state.teams.size)
+        assertEquals(101, state.teams.size)
     }
 
     @Test

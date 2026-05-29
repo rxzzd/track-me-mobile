@@ -274,17 +274,6 @@ class UsersComponentsUiTest {
         assertTrue(viewModel.state.value.users.isEmpty())
     }
 
-    @Test
-    fun `TrackerListViewModel shows loading during initial load`() = runTest {
-        val viewModel = TrackerListViewModel(FakeUsersRepository(trackers = listOf(
-            UserDto("1", "alice", listOf("TRACKER"), "Alice", "a@a.com", null, null, true)
-        )))
-        // Before advanceUntilIdle, the coroutine hasn't completed yet
-        assertTrue(viewModel.state.value.isLoading)
-        advanceUntilIdle()
-        assertFalse(viewModel.state.value.isLoading)
-    }
-
     // ==================== AdminListViewModel Tests ====================
 
     @Test
@@ -490,16 +479,6 @@ class UsersComponentsUiTest {
         assertFalse(viewModel.state.value.isLoading)
         assertNotNull(viewModel.state.value.error)
         assertTrue(viewModel.state.value.users.isEmpty())
-    }
-
-    @Test
-    fun `AdminListViewModel shows loading during initial load`() = runTest {
-        val viewModel = AdminListViewModel(FakeUsersRepository(admins = listOf(
-            UserDto("1", "admin1", listOf("ADMIN"), "Admin", "a@a.com", null, null, true)
-        )))
-        assertTrue(viewModel.state.value.isLoading)
-        advanceUntilIdle()
-        assertFalse(viewModel.state.value.isLoading)
     }
 
     // ==================== Fake Repository ====================

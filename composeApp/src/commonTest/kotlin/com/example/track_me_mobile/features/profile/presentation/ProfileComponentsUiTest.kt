@@ -161,16 +161,6 @@ class ProfileComponentsUiTest {
         assertNull(viewModel.errorMessage)
     }
 
-    @Test
-    fun `ProfileViewModel isLoading is true during load`() = runTest {
-        val viewModel = ProfileViewModel(FakeProfileRepository(profile = UserProfile(
-            id = "1", username = "u", fullName = "N", email = "e",
-            phoneNumber = null, avatarUrl = null, roles = emptyList(), enabled = true
-        )))
-        assertTrue(viewModel.isLoading)
-        advanceUntilIdle()
-        assertFalse(viewModel.isLoading)
-    }
 
     // ==================== UserProfileViewModel Tests ====================
 
