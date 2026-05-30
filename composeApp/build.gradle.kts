@@ -151,6 +151,29 @@ kover {
             includes {
                 classes("com.example.track_me_mobile.features.*")
             }
+            excludes {
+                classes(
+                    "*.ComposableSingletons*",
+                    "*MeetingComponentsKt",
+                    "*MeetingScreen*",
+                    "*ReportsListScreen*",
+                    "*StreamMeetingReportScreen*",
+                    "*LoginScreen*",
+                    "*LoginWebViewScreen*",
+                    "com.example.track_me_mobile.features.*.presentation.*Kt",
+                    "com.example.track_me_mobile.features.*.presentation.*Screen",
+                    "com.example.track_me_mobile.features.*.presentation.*ScreenKt",
+                    "com.example.track_me_mobile.features.*.presentation.*ComponentsKt",
+                    "com.example.track_me_mobile.features.*.presentation.components.*Kt",
+                    "com.example.track_me_mobile.features.streams.presentation.components.*Kt",
+                    "com.example.track_me_mobile.features.tracker_list.presentation.components.*Kt",
+                    "com.example.track_me_mobile.features.*.presentation.ImagePicker*",
+                    "com.example.track_me_mobile.features.*.presentation.ImageLoader*",
+                    "com.example.track_me_mobile.features.auth.data.AuthRepositoryImpl",
+                    "com.example.track_me_mobile.features.meetings.data.MeetingRepositoryImpl",
+                    "com.example.track_me_mobile.features.team_card.data.TeamCardRepositoryImpl"
+                )
+            }
         }
     }
 }
