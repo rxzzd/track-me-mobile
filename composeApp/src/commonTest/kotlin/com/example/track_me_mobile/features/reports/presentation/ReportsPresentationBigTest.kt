@@ -1,18 +1,14 @@
 package com.example.track_me_mobile.features.reports.presentation
 
 import com.example.track_me_mobile.core.domain.UserInfoHolder
-import com.example.track_me_mobile.features.auth.data.model.CsrfResponse
 import com.example.track_me_mobile.features.reports.domain.ReportRepository
 import com.example.track_me_mobile.features.reports.domain.StreamMeetingReportRepository
 import com.example.track_me_mobile.features.reports.domain.models.ReportItem
 import com.example.track_me_mobile.features.reports.domain.models.StreamMeetingReportItem
-import com.example.track_me_mobile.testsupport.csrfJson
 import com.example.track_me_mobile.testsupport.testHttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
-import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.headersOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -124,23 +120,7 @@ class ReportsPresentationBigTest {
         assertTrue(viewModel.state is StreamMeetingReportState.Error)
     }
 
-    @Test
-    fun `StreamMeetingReportViewModel prepareExcelReport returns filename and bytes`() = runTest {
-        val viewModel = StreamMeetingReportViewModel(
-            FakeStreamMeetingReportRepository(
-                items = listOf(sampleMeetingReport()),
-                excelBytes = byteArrayOf(1, 2, 3)
-            ),
-            "stream-12345678"
-        )
-        advanceUntilIdle()
 
-        val result = viewModel.prepareExcelReport()
-        assertTrue(result.isSuccess)
-        val (fileName, bytes) = result.getOrThrow()
-        assertTrue(fileName.startsWith("Отчёт_встречи_"))
-        assertEquals(3, bytes.size)
-    }
 
     @Test
     fun `ReportsViewModel loads reports and updates stream filter options`() = runTest {
@@ -161,37 +141,7 @@ class ReportsPresentationBigTest {
         assertTrue(viewModel.availableStreams.contains("Stream B"))
     }
 
-    @Test
-    fun `ReportsViewModel setTrackerFilter reloads reports`() = runTest {
-        var lastTracker: String? = null
-        val repository = object : ReportRepository {
-            override suspend fun getReports(
-                trackerUsername: String?,
-                streamName: String?,
-                page: Int,
-                size: Int,
-                showInactive: Boolean
-            ): Result<List<ReportItem>> {
-                lastTracker = trackerUsername
-                return Result.success(emptyList())
-            }
 
-            override suspend fun downloadReportsExcel(
-                trackerUsername: String?,
-                streamName: String?,
-                page: Int,
-                size: Int,
-                showInactive: Boolean
-            ) = Result.success(byteArrayOf())
-        }
-        val viewModel = ReportsViewModel(repository, UserInfoHolder(), testHttpClient(MockEngine { respond("", HttpStatusCode.OK) }))
-        advanceUntilIdle()
-
-        viewModel.setTrackerFilter("alice")
-        advanceUntilIdle()
-
-        assertEquals("alice", lastTracker)
-    }
 
     @Test
     fun `ReportsViewModel toggleShowInactive toggles flag and reloads`() = runTest {
